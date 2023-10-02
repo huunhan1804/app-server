@@ -44,20 +44,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain)
             throws IOException {
         final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String loginId;
         try {
-            if (authHeader == null || !authHeader.startsWith("Bearer")) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-            jwt = authHeader.substring(7);
-            loginId = jwtService.extractUsername(jwt);
-            Optional<AccessToken> accessToken = accessTokenRepository.findByToken(jwt);
-            if (loginId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(loginId);
-                if (accessToken.isPresent()) {
-                    if (jwtService.isAccessTokenValid(jwt, userDetails)) {
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                final String jwt = authHeader.substring(7);
+                final String loginId = jwtService.extractUsername(jwt);
+
+                if (loginId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(loginId);
+                    Optional<AccessToken> accessToken = accessTokenRepository.findByToken(jwt);
+
+                    if (accessToken.isPresent() && jwtService.isAccessTokenValid(accessToken.get(), userDetails)) {
                         logger.info(String.format(LogMessage.LOG_TOKEN_VALID, loginId));
                         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                                 userDetails,
@@ -70,53 +66,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         SecurityContextHolder.getContext().setAuthentication(authToken);
                         logger.info(String.format(LogMessage.LOG_EMAIL_ACTION_REQUEST, loginId));
                     } else {
-                        logger.warn(String.format(LogMessage.LOG_ACCESS_TOKEN_EXPIRED, loginId));
-                        ApiResponse apiResponse = ApiResponse.builder()
-                                .status(ErrorCode.UNAUTHORIZED)
-                                .message(Message.TOKEN_INVALID)
-                                .timestamp(new Date())
-                                .build();
-
-                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                        response.getWriter().write(convertObjectToJson(apiResponse));
+                        handleUnauthorized(response);
                         return;
                     }
-                } else {
-                    logger.warn(String.format(LogMessage.LOG_ACCESS_TOKEN_NOT_FOUND, loginId));
-                    ApiResponse apiResponse = ApiResponse.builder()
-                            .status(ErrorCode.UNAUTHORIZED)
-                            .message(Message.TOKEN_NOT_FOUND)
-                            .timestamp(new Date())
-                            .build();
-
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                    response.getWriter().write(convertObjectToJson(apiResponse));
-                    return;
                 }
-            } else {
-                logger.error(String.format(LogMessage.LOG_ERROR_EXTRACTING_USERNAME, jwt));
-
-                if (accessToken.isPresent()) {
-                    accessToken.ifPresent(accessTokenRepository::delete);
-                }
-
-                ApiResponse apiResponse = ApiResponse.builder()
-                        .status(ErrorCode.UNAUTHORIZED)
-                        .message(Message.TOKEN_INVALID)
-                        .timestamp(new Date())
-                        .build();
-
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                response.getWriter().write(convertObjectToJson(apiResponse));
-                return;
             }
             filterChain.doFilter(request, response);
         } catch (Exception e) {
             logger.error(String.format(LogMessage.LOG_ERROR_OCCURRED, e.getMessage()));
-            ApiResponse apiResponse = ApiResponse.builder()
+            ApiResponse<String> apiResponse = ApiResponse.<String>builder()
                     .status(ErrorCode.INTERNAL_SERVER_ERROR)
                     .message(e.getMessage())
                     .build();
@@ -127,6 +85,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
+    private void handleUnauthorized(HttpServletResponse response) throws IOException {
+        ApiResponse<String> apiResponse = ApiResponse.<String>builder()
+                .status(ErrorCode.UNAUTHORIZED)
+                .message(Message.TOKEN_INVALID)
+                .timestamp(new Date())
+                .build();
+
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter().write(convertObjectToJson(apiResponse));
+    }
 
     private String convertObjectToJson(Object object) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();

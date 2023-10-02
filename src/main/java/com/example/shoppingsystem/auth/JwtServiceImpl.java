@@ -1,10 +1,10 @@
 package com.example.shoppingsystem.auth;
 
-import com.example.shoppingsystem.auth.interfaces.AccessTokenService;
 import com.example.shoppingsystem.auth.interfaces.JwtService;
 import com.example.shoppingsystem.constants.LogMessage;
 import com.example.shoppingsystem.constants.Regex;
 import com.example.shoppingsystem.entities.AccessToken;
+import com.example.shoppingsystem.repositories.AccessTokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -22,14 +22,17 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 
 @Component
 public class JwtServiceImpl implements JwtService {
     private static final Logger logger = LogManager.getLogger(JwtServiceImpl.class);
+    private final AccessTokenRepository accessTokenRepository;
+
     @Autowired
-    private AccessTokenService accessTokenService;
+    public JwtServiceImpl(AccessTokenRepository accessTokenRepository) {
+        this.accessTokenRepository = accessTokenRepository;
+    }
 
     @Override
     public String extractUsername(String token) {
@@ -54,24 +57,18 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public boolean isAccessTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        Optional<AccessToken> accessToken = accessTokenService.findByToken(token);
-        if (accessToken.isPresent()) {
-            boolean isTokenExpired = isTokenExpired(accessToken.get());
-            if (isTokenExpired) {
-                accessTokenService.deleteToken(accessToken.get());
-                logger.info(String.format(LogMessage.LOG_ACCESS_TOKEN_EXPIRED, username));
-            }
-            boolean isValid = username.equals(userDetails.getUsername()) && !isTokenExpired;
-            if (!isValid) {
-                logger.info(String.format(LogMessage.LOG_ACCESS_TOKEN_INVALID, token));
-            }
-            return isValid;
-        } else {
-            logger.info(String.format(LogMessage.LOG_ACCESS_TOKEN_NOT_FOUND, username));
-            return false;
+    public boolean isAccessTokenValid(AccessToken accessToken, UserDetails userDetails) {
+        final String username = extractUsername(accessToken.getToken());
+        boolean isTokenExpired = isTokenExpired(accessToken);
+        if (isTokenExpired) {
+            accessTokenRepository.delete(accessToken);
+            logger.info(String.format(LogMessage.LOG_ACCESS_TOKEN_EXPIRED, username));
         }
+        boolean isValid = username.equals(userDetails.getUsername()) && !isTokenExpired;
+        if (!isValid) {
+            logger.info(String.format(LogMessage.LOG_ACCESS_TOKEN_INVALID, accessToken));
+        }
+        return isValid;
     }
 
     @Override
@@ -93,6 +90,7 @@ public class JwtServiceImpl implements JwtService {
 
         Date issuedAt = Date.from(now.atZone(ZoneId.systemDefault()).toInstant());
         Date expiration = Date.from(expirationTime.atZone(ZoneId.systemDefault()).toInstant());
+
         return Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())

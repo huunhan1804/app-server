@@ -12,6 +12,6 @@ public interface JwtService {
     String extractUsername(String token);
     <T> T extractClaim(String token, Function<Claims, T> claimsResolver);
     String generateAccessToken(UserDetails userDetails);
-    boolean isAccessTokenValid(String token, UserDetails userDetails);
+    boolean isAccessTokenValid(AccessToken token, UserDetails userDetails);
     boolean isTokenExpired(AccessToken accessToken);
 }
