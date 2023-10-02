@@ -1,0 +1,44 @@
+package com.example.shoppingsystem.constants;
+
+public class Message {
+    public static final String SEND_OTP_SUCCESS = "Send OTP to email %s successfully!";
+    public static final String SEND_OTP_FAILURE = "Failed to send OTP to email %s!";
+    public static final String SEND_PASSWORD_SUCCESS = "Send password to email %s successfully!";
+    public static final String SEND_PASSWORD_FAILURE = "Failed to send password to email %s!";
+    public static final String SEND_EMAIL_SUCCESS = "Send email done!";
+    public static final String FAILED_TO_SEND_EMAIL = "Failed to send email.";
+    public static final String INVALID_EMAIL = "Invalid email address!";
+    public static final String ACCOUNT_ALREADY_EXISTS = "Account already exists!";
+    public static final String ACCOUNT_NOT_FOUND = "Account not found!";
+    public static final String CURRENT_USER_NOT_FOUND = "Current account not found!";
+    public static final String INVALID_CREDENTIALS = "Invalid credentials!";
+    public static final String ACCOUNT_BANNED = "Account is banned!";
+    public static final String INVALID_OTP = "Invalid OTP.";
+    public static final String TOO_MANY_REQUESTS_ACCESS_TOKEN = "Too many requests for access token for this login session.";
+    public static final String INVALID_GOOGLE_TOKEN = "Invalid Google token. Unexpected HTTP response code: %d";
+    public static final String CHANGE_PASSWORD_SUCCESS = "Change Password Successfully";
+    public static final String CURRENT_PASSWORD_NOT_CORRECT = "Current Password is not Correct!";
+    public static final String OTP_ALREADY_SENT = "OTP already sent to this email!";
+    public static final String REGISTRATION_SUCCESS = "Registration successfully!";
+    public static final String LOGIN_GG_SUCCESS = "Login!";
+    public static final String REGISTER_GG_SUCCESS = "Register!";
+    public static final String NEW_ACCESS_TOKEN_CREATED = "New access token created successfully!";
+    public static final String REFRESH_TOKEN_EXPIRED = "Refresh Token has expired!";
+    public static final String REFRESH_TOKEN_INVALID = "Refresh Token is invalid!";
+    public static final String AUTHENTICATE_SUCCESS = "Authentication success!";
+    public static final String ERROR_TO_AUTHENTICATE_GG = "Error while processing Google authentication for token!";
+    public static final String ERROR_SYSTEM = "An error occurred!";
+    public static final String TOKEN_INVALID = "Token invalid or has expired!";
+    public static final String TOKEN_NOT_FOUND = "Token invalid or no longer valid";
+    public static final String GET_INFO_SUCCESS = "Get info success!";
+    public static final String REGISTRATION_FAILURE = "An error occurred when create a new account. Try again!";
+    public static final String SUCCESS = "Success!";
+    public static final String LOGIN_ID_IN_VALID = "Email or phone invalid!";
+    public static final String LOGIN_ID_EXIST = "Email or phone already exist on other account!";
+    public static final String NOT_FOUND = "Not found product";
+    public static final String CART_NOT_FOUND = "Not found cart of current user";
+    public static final String PRODUCT_NOT_FOUND = "Not found any product or product variant";
+    public static final String NOT_ENOUGH_QUANTITY = "Not enough quantity in stock";
+    public static final String CART_ITEM_NOT_FOUND = "Cart item does not already exist";
+    public static final String ADDRESS_NOT_FOUND = "Address not found or cannot set address of another account";
+}

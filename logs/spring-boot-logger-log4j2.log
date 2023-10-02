@@ -1,0 +1,77 @@
+2023-10-02T10:56:40.136+07:00  INFO 3212 --- [restartedMain] c.e.s.ShoppingSystemApplication          : Starting ShoppingSystemApplication using Java 20.0.1 with PID 3212 (D:\SU23\Project_BE\Fa_recruitment\ShoppingSystem\target\classes started by QuangQui in D:\SU23\Project_BE\Fa_recruitment\ShoppingSystem)
+2023-10-02T10:56:40.136+07:00  INFO 3212 --- [restartedMain] c.e.s.ShoppingSystemApplication          : No active profile set, falling back to 1 default profile: "default"
+2023-10-02T10:56:40.173+07:00  INFO 3212 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2023-10-02T10:56:40.173+07:00  INFO 3212 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2023-10-02T10:56:41.713+07:00  INFO 3212 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-10-02T10:56:41.791+07:00  INFO 3212 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 76 ms. Found 16 JPA repository interfaces.
+2023-10-02T10:56:42.323+07:00  INFO 3212 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2023-10-02T10:56:42.339+07:00  INFO 3212 --- [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2023-10-02T10:56:42.339+07:00  INFO 3212 --- [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.13]
+2023-10-02T10:56:42.395+07:00  INFO 3212 --- [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2023-10-02T10:56:42.395+07:00  INFO 3212 --- [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2222 ms
+2023-10-02T10:56:42.535+07:00  INFO 3212 --- [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2023-10-02T10:56:42.598+07:00  INFO 3212 --- [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.9.Final
+2023-10-02T10:56:42.598+07:00  INFO 3212 --- [restartedMain] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2023-10-02T10:56:42.738+07:00  INFO 3212 --- [restartedMain] o.h.b.i.BytecodeProviderInitiator        : HHH000021: Bytecode provider name : bytebuddy
+2023-10-02T10:56:42.816+07:00  INFO 3212 --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2023-10-02T10:56:42.832+07:00  INFO 3212 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2023-10-02T10:56:42.941+07:00  INFO 3212 --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@1289aec8
+2023-10-02T10:56:42.941+07:00  INFO 3212 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2023-10-02T10:56:42.973+07:00  WARN 3212 --- [restartedMain] org.hibernate.dialect.Dialect            : HHH000511: The 5.5.0 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 5.7.0. Check the community dialects project for available legacy versions.
+2023-10-02T10:56:43.207+07:00  INFO 3212 --- [restartedMain] o.h.b.i.BytecodeProviderInitiator        : HHH000021: Bytecode provider name : bytebuddy
+2023-10-02T10:56:43.816+07:00  INFO 3212 --- [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2023-10-02T10:56:43.816+07:00  INFO 3212 --- [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2023-10-02T10:56:44.297+07:00  INFO 3212 --- [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2023-10-02T10:56:44.938+07:00  WARN 3212 --- [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2023-10-02T10:56:45.590+07:00  INFO 3212 --- [restartedMain] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@2ff0cc8, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@4f8076f5, org.springframework.security.web.context.SecurityContextHolderFilter@26f1a7cb, org.springframework.security.web.header.HeaderWriterFilter@3f37c105, org.springframework.web.filter.CorsFilter@44471348, org.springframework.security.web.authentication.logout.LogoutFilter@1486100, com.example.shoppingsystem.config.JwtAuthenticationFilter@e3578cb, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@47d56920, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@15f4254f, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@4faaf659, org.springframework.security.web.session.SessionManagementFilter@50cd56a6, org.springframework.security.web.access.ExceptionTranslationFilter@4f877017, org.springframework.security.web.access.intercept.AuthorizationFilter@54d3d2ca]
+2023-10-02T10:56:45.825+07:00  INFO 3212 --- [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2023-10-02T10:56:45.856+07:00  INFO 3212 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
+2023-10-02T10:56:45.871+07:00  INFO 3212 --- [restartedMain] c.e.s.ShoppingSystemApplication          : Started ShoppingSystemApplication in 6.068 seconds (process running for 6.859)
+2023-10-02T10:56:45.871+07:00  INFO 3212 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2023-10-02T10:56:45.918+07:00  INFO 3212 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2023-10-02T18:38:12.257+07:00  INFO 8876 --- [restartedMain] c.e.s.ShoppingSystemApplication          : Starting ShoppingSystemApplication using Java 20.0.1 with PID 8876 (D:\SU23\Project_BE\Fa_recruitment\ShoppingSystem\target\classes started by QuangQui in D:\SU23\Project_BE\Fa_recruitment\ShoppingSystem)
+2023-10-02T18:38:12.257+07:00  INFO 8876 --- [restartedMain] c.e.s.ShoppingSystemApplication          : No active profile set, falling back to 1 default profile: "default"
+2023-10-02T18:38:12.294+07:00  INFO 8876 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2023-10-02T18:38:12.294+07:00  INFO 8876 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2023-10-02T18:38:13.821+07:00  INFO 8876 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-10-02T18:38:13.914+07:00  INFO 8876 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 79 ms. Found 16 JPA repository interfaces.
+2023-10-02T18:38:14.430+07:00  INFO 8876 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2023-10-02T18:38:14.446+07:00  INFO 8876 --- [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2023-10-02T18:38:14.446+07:00  INFO 8876 --- [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.13]
+2023-10-02T18:38:14.492+07:00  INFO 8876 --- [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2023-10-02T18:38:14.492+07:00  INFO 8876 --- [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2198 ms
+2023-10-02T18:38:14.633+07:00  INFO 8876 --- [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2023-10-02T18:38:14.696+07:00  INFO 8876 --- [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.9.Final
+2023-10-02T18:38:14.696+07:00  INFO 8876 --- [restartedMain] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2023-10-02T18:38:14.805+07:00  INFO 8876 --- [restartedMain] o.h.b.i.BytecodeProviderInitiator        : HHH000021: Bytecode provider name : bytebuddy
+2023-10-02T18:38:14.883+07:00  INFO 8876 --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2023-10-02T18:38:14.899+07:00  INFO 8876 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2023-10-02T18:38:16.870+07:00  INFO 8876 --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@421587e7
+2023-10-02T18:38:16.870+07:00  INFO 8876 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2023-10-02T18:38:17.464+07:00  INFO 8876 --- [restartedMain] o.h.b.i.BytecodeProviderInitiator        : HHH000021: Bytecode provider name : bytebuddy
+2023-10-02T18:38:18.058+07:00  INFO 8876 --- [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2023-10-02T18:38:18.074+07:00  INFO 8876 --- [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2023-10-02T18:38:18.525+07:00  INFO 8876 --- [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2023-10-02T18:38:19.025+07:00  WARN 8876 --- [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2023-10-02T18:38:19.640+07:00  INFO 8876 --- [restartedMain] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@a787d56, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@7fdc022b, org.springframework.security.web.context.SecurityContextHolderFilter@420332d0, org.springframework.security.web.header.HeaderWriterFilter@54ce96e5, org.springframework.web.filter.CorsFilter@62136de7, org.springframework.security.web.authentication.logout.LogoutFilter@26b4b163, com.example.shoppingsystem.config.JwtAuthenticationFilter@5fb5f674, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@6df0c3b6, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@8dc8f9f, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7de428fb, org.springframework.security.web.session.SessionManagementFilter@745a5023, org.springframework.security.web.access.ExceptionTranslationFilter@62fa902a, org.springframework.security.web.access.intercept.AuthorizationFilter@3ba25a38]
+2023-10-02T18:38:19.853+07:00  INFO 8876 --- [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2023-10-02T18:38:19.900+07:00  INFO 8876 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
+2023-10-02T18:38:19.900+07:00  INFO 8876 --- [restartedMain] c.e.s.ShoppingSystemApplication          : Started ShoppingSystemApplication in 7.985 seconds (process running for 8.877)
+2023-10-02T18:38:20.244+07:00  INFO 8876 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2023-10-02T18:38:20.497+07:00  INFO 8876 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2023-10-02T18:38:30.574+07:00  INFO 8876 --- [http-nio-8080-exec-1] o.apache.tomcat.util.http.parser.Cookie  : A cookie header was received [g_state={"i_l":1,"i_p":1696089301907}] that contained an invalid cookie. That cookie will be ignored.
+ Note: further occurrences of this error will be logged at DEBUG level.
+2023-10-02T18:38:30.574+07:00  INFO 8876 --- [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2023-10-02T18:38:30.574+07:00  INFO 8876 --- [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2023-10-02T18:38:30.589+07:00  INFO 8876 --- [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 15 ms
+2023-10-02T18:38:31.189+07:00  INFO 8876 --- [http-nio-8080-exec-7] o.springdoc.api.AbstractOpenApiResource  : Init duration for springdoc-openapi is: 311 ms
+2023-10-02T18:39:27.075+07:00  INFO 8876 --- [http-nio-8080-exec-1] c.e.s.api.AuthenticationController       : Received request to authenticate account with loginId: quitqce160195
+2023-10-02T18:39:27.075+07:00  INFO 8876 --- [http-nio-8080-exec-1] c.e.s.auth.AccessTokenServiceImpl        : Processing authentication for email: quitqce160195!
+2023-10-02T18:39:27.807+07:00  INFO 8876 --- [http-nio-8080-exec-1] c.e.s.a.interfaces.RefreshTokenService   : Processing create refresh token for account with ID: 4
+2023-10-02T18:39:28.689+07:00  INFO 8876 --- [http-nio-8080-exec-1] c.e.s.a.interfaces.RefreshTokenService   : Accept create refresh token for account with ID: 4
+2023-10-02T18:39:28.689+07:00  INFO 8876 --- [http-nio-8080-exec-1] c.e.s.auth.AccessTokenServiceImpl        : Processing create access token for account with ID: 4
+2023-10-02T18:39:29.557+07:00  INFO 8876 --- [http-nio-8080-exec-1] c.e.s.auth.AccessTokenServiceImpl        : New access token created for account with ID: 4
+2023-10-02T18:39:29.557+07:00  INFO 8876 --- [http-nio-8080-exec-1] c.e.s.auth.AccessTokenServiceImpl        : Authentication done for email: quitqce160195
+2023-10-02T18:39:29.557+07:00  INFO 8876 --- [http-nio-8080-exec-1] c.e.s.api.AuthenticationController       : Authentication successful for account with loginId: quitqce160195
+2023-10-02T18:39:44.172+07:00  INFO 8876 --- [http-nio-8080-exec-3] c.e.s.config.JwtAuthenticationFilter     : Access token is valid for email 'quitqce160195'. Proceeding with user authentication.
+2023-10-02T18:39:44.172+07:00  INFO 8876 --- [http-nio-8080-exec-3] c.e.s.config.JwtAuthenticationFilter     : Email 'quitqce160195' is performing the action.
