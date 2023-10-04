@@ -228,3 +228,45 @@
 2023-10-03T06:49:30.750+07:00  INFO 8816 --- [http-nio-8080-exec-1] c.e.s.config.JwtAuthenticationFilter     : Access token is valid for email 'quitqce160195'. Proceeding with user authentication.
 2023-10-03T06:49:30.750+07:00  INFO 8816 --- [http-nio-8080-exec-1] c.e.s.config.JwtAuthenticationFilter     : Email 'quitqce160195' is performing the action.
 2023-10-03T06:49:30.765+07:00  INFO 8816 --- [http-nio-8080-exec-1] c.e.s.api.AccountController              : Received request to get information of account.
+2023-10-03T06:52:29.350+07:00  INFO 18100 --- [restartedMain] c.e.s.ShoppingSystemApplication          : Starting ShoppingSystemApplication using Java 20.0.1 with PID 18100 (D:\SU23\Project_BE\Fa_recruitment\ShoppingSystem\target\classes started by QuangQui in D:\SU23\Project_BE\Fa_recruitment\ShoppingSystem)
+2023-10-03T06:52:29.350+07:00  INFO 18100 --- [restartedMain] c.e.s.ShoppingSystemApplication          : No active profile set, falling back to 1 default profile: "default"
+2023-10-03T06:52:29.384+07:00  INFO 18100 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2023-10-03T06:52:29.384+07:00  INFO 18100 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2023-10-03T06:52:29.916+07:00  INFO 18100 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-10-03T06:52:29.978+07:00  INFO 18100 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 65 ms. Found 16 JPA repository interfaces.
+2023-10-03T06:52:30.353+07:00  INFO 18100 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2023-10-03T06:52:30.369+07:00  INFO 18100 --- [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2023-10-03T06:52:30.369+07:00  INFO 18100 --- [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.13]
+2023-10-03T06:52:30.400+07:00  INFO 18100 --- [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2023-10-03T06:52:30.400+07:00  INFO 18100 --- [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1016 ms
+2023-10-03T06:52:30.494+07:00  INFO 18100 --- [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2023-10-03T06:52:30.525+07:00  INFO 18100 --- [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.9.Final
+2023-10-03T06:52:30.525+07:00  INFO 18100 --- [restartedMain] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2023-10-03T06:52:30.587+07:00  INFO 18100 --- [restartedMain] o.h.b.i.BytecodeProviderInitiator        : HHH000021: Bytecode provider name : bytebuddy
+2023-10-03T06:52:30.650+07:00  INFO 18100 --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2023-10-03T06:52:30.650+07:00  INFO 18100 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2023-10-03T06:52:32.479+07:00  INFO 18100 --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@693c0923
+2023-10-03T06:52:32.479+07:00  INFO 18100 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2023-10-03T06:52:33.025+07:00  INFO 18100 --- [restartedMain] o.h.b.i.BytecodeProviderInitiator        : HHH000021: Bytecode provider name : bytebuddy
+2023-10-03T06:52:33.541+07:00  INFO 18100 --- [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2023-10-03T06:52:33.541+07:00  INFO 18100 --- [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2023-10-03T06:52:33.963+07:00  INFO 18100 --- [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2023-10-03T06:52:34.354+07:00  WARN 18100 --- [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2023-10-03T06:52:34.922+07:00  INFO 18100 --- [restartedMain] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@487babb0, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@668fa93e, org.springframework.security.web.context.SecurityContextHolderFilter@56d1994e, org.springframework.security.web.header.HeaderWriterFilter@56527752, org.springframework.web.filter.CorsFilter@6c274a2, org.springframework.security.web.authentication.logout.LogoutFilter@7a9d2da7, com.example.shoppingsystem.config.JwtAuthenticationFilter@3723f7b4, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@1dd1dc52, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@56091935, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@5a72a52, org.springframework.security.web.session.SessionManagementFilter@5c2bf3ef, org.springframework.security.web.access.ExceptionTranslationFilter@7d8e2f20, org.springframework.security.web.access.intercept.AuthorizationFilter@40c7efb7]
+2023-10-03T06:52:35.125+07:00  INFO 18100 --- [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2023-10-03T06:52:35.156+07:00  INFO 18100 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
+2023-10-03T06:52:35.172+07:00  INFO 18100 --- [restartedMain] c.e.s.ShoppingSystemApplication          : Started ShoppingSystemApplication in 6.097 seconds (process running for 6.802)
+2023-10-03T06:52:35.505+07:00  INFO 18100 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2023-10-03T06:52:35.708+07:00  INFO 18100 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2023-10-03T06:52:44.600+07:00  INFO 18100 --- [http-nio-8080-exec-1] o.apache.tomcat.util.http.parser.Cookie  : A cookie header was received [g_state={"i_l":1,"i_p":1696089301907}] that contained an invalid cookie. That cookie will be ignored.
+ Note: further occurrences of this error will be logged at DEBUG level.
+2023-10-03T06:52:44.600+07:00  INFO 18100 --- [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2023-10-03T06:52:44.600+07:00  INFO 18100 --- [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2023-10-03T06:52:44.600+07:00  INFO 18100 --- [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
+2023-10-03T06:52:45.723+07:00  INFO 18100 --- [http-nio-8080-exec-1] c.e.s.config.JwtAuthenticationFilter     : Access token is valid for email 'quitqce160195'. Proceeding with user authentication.
+2023-10-03T06:52:45.723+07:00  INFO 18100 --- [http-nio-8080-exec-1] c.e.s.config.JwtAuthenticationFilter     : Email 'quitqce160195' is performing the action.
+2023-10-03T06:52:45.739+07:00  INFO 18100 --- [http-nio-8080-exec-1] c.e.s.api.AccountController              : Received request to get information of account.
+2023-10-03T06:57:35.520+07:00  INFO 18100 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2023-10-03T06:57:35.676+07:00  INFO 18100 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2023-10-03T07:02:35.516+07:00  INFO 18100 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2023-10-03T07:02:35.683+07:00  INFO 18100 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
