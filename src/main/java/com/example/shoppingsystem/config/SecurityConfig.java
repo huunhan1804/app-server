@@ -40,16 +40,10 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/**"
                         ).anonymous()
-
-                        .requestMatchers(
-                                ""
-                        ).hasAnyAuthority("")
-
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/api/product/all-by-parent-category",
-                                "/api/product/info/{productId}"
+                                "/api/product/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
