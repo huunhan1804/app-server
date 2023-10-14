@@ -14,6 +14,8 @@ import com.example.shoppingsystem.services.interfaces.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -26,14 +28,16 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
     private final FeedbackRepository feedbackRepository;
     private final MultimediaRepository multimediaRepository;
+    private final OrderDetailRepository orderDetailRepository;
 
     @Autowired
-    public ProductServiceImpl(ProductRepository productRepository, ProductVariantRepository productVariantRepository, CategoryRepository categoryRepository, FeedbackRepository feedbackRepository, MultimediaRepository multimediaRepository) {
+    public ProductServiceImpl(ProductRepository productRepository, ProductVariantRepository productVariantRepository, CategoryRepository categoryRepository, FeedbackRepository feedbackRepository, MultimediaRepository multimediaRepository, OrderDetailRepository orderDetailRepository) {
         this.productRepository = productRepository;
         this.productVariantRepository = productVariantRepository;
         this.categoryRepository = categoryRepository;
         this.feedbackRepository = feedbackRepository;
         this.multimediaRepository = multimediaRepository;
+        this.orderDetailRepository = orderDetailRepository;
     }
 
 
@@ -83,6 +87,42 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Optional<ProductVariant> getProductVariantByID(long productVariantId) {
         return productVariantRepository.findById(productVariantId);
+    }
+
+    @Override
+    public ApiResponse<List> getListBestSellerProduct() {
+        List<Product> productList = productRepository.findListBestSellerProduct();
+        List<ProductBasicDTO> productBasicDTOS = productList.stream()
+                .map(product -> convertToProductBasicDTO(product)).collect(Collectors.toList());
+
+        return ApiResponse.<List>builder()
+                .status(ErrorCode.SUCCESS)
+                .message(Message.SUCCESS)
+                .data(productBasicDTOS)
+                .timestamp(new java.util.Date())
+                .build();
+    }
+
+    @Override
+    public ApiResponse<List> getListBestOrderProduct() {
+        List<Object[]> results = orderDetailRepository.findBestOrderProducts();
+        List<Product> productList = new ArrayList<>();
+        for (Object[] result : results) {
+            Long productId = ((BigInteger) result[0])
+
+
+                    .longValue();
+            Optional<Product> product = productRepository.findById(productId);
+            product.ifPresent(productList::add);
+        }
+        List<ProductBasicDTO> productBasicDTOS = productList.stream()
+                .map(this::convertToProductBasicDTO).collect(Collectors.toList());
+        return ApiResponse.<List>builder()
+                .status(ErrorCode.SUCCESS)
+                .message(Message.SUCCESS)
+                .data(productBasicDTOS)
+                .timestamp(new java.util.Date())
+                .build();
     }
 
     private ProductInfoDTO convertToProductInfoDTO(Product product, List<ProductVariant> productVariants, List<Feedback> feedbacks, List<Multimedia> multimediaProduct) {

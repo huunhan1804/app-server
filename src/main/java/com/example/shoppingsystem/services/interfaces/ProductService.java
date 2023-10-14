@@ -19,4 +19,7 @@ public interface ProductService {
     ApiResponse<ProductInfoDTO> getInfoProduct(long productId);
     Optional<Product> getProductByID(long productId);
     Optional<ProductVariant> getProductVariantByID(long productVariantId);
+    ApiResponse<List> getListBestSellerProduct();
+
+    ApiResponse<List> getListBestOrderProduct();
 }

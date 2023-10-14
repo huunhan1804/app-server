@@ -37,4 +37,19 @@ public class ProductController {
         return ResponseEntity.status(apiResponse.getStatus()).body(apiResponse);
     }
 
+    @Operation(summary = "API info product by product-id", description = "This API get info of product by id.")
+    @GetMapping("/best-seller")
+    public ResponseEntity<ApiResponse<List>> getListBestSellerProduct() {
+        ApiResponse<List> apiResponse = productService.getListBestSellerProduct();
+        return ResponseEntity.status(apiResponse.getStatus()).body(apiResponse);
+    }
+
+    @Operation(summary = "API info product by product-id", description = "This API get info of product by id.")
+    @GetMapping("/best-order")
+    public ResponseEntity<ApiResponse<List>> getListBestOrderProduct() {
+        ApiResponse<List> apiResponse = productService.getListBestOrderProduct();
+        return ResponseEntity.status(apiResponse.getStatus()).body(apiResponse);
+    }
+
+
 }

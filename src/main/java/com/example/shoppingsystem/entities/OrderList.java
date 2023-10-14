@@ -24,10 +24,6 @@ public class OrderList extends BaseEntity{
     private Long orderId;
 
     @ManyToOne
-    @JoinColumn(name = "ADDRESS_ID", referencedColumnName = "ADDRESS_ID", nullable = false)
-    private Address address;
-
-    @ManyToOne
     @JoinColumn(name = "ACCOUNT_ID", referencedColumnName = "ACCOUNT_ID", nullable = false)
     private Account account;
 
@@ -40,6 +36,9 @@ public class OrderList extends BaseEntity{
     @Enumerated(EnumType.STRING)
     @Column(name = "ORDER_STATUS", nullable = false)
     private OrderStatus orderStatus;
+
+    @Column(name = "ADDRESS_DETAIL")
+    private String addressDetail;
 
     @ManyToMany
     @JoinTable(

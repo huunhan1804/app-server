@@ -35,6 +35,10 @@ public class Multimedia extends BaseEntity{
     @JoinColumn(name = "FEEDBACK_ID", referencedColumnName = "FEEDBACK_ID")
     private Feedback feedback;
 
+    @ManyToOne
+    @JoinColumn(name = "CATEGORY_ID", referencedColumnName = "CATEGORY_ID")
+    private Category category;
+
     @Column(name = "MULTIMEDIA_URL", nullable = false)
     private String multimediaUrl;
 
