@@ -75,12 +75,5 @@ public class OtpServiceImpl implements OtpService {
 
     private LocalDateTime calculateExpiryDate() {return LocalDateTime.now().plusMinutes(5);}
 
-    @Transactional
-    @Scheduled(fixedRate = 300_000)
-    public void cleanupExpiredOtps() {
-        logger.info("Starting OTP cleanup...");
-        LocalDateTime currentTime = LocalDateTime.now();
-        otpRepository.deleteAllByExpiryDate(currentTime);
-        logger.info("OTP cleanup completed.");
-    }
+
 }
