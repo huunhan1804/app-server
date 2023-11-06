@@ -1,17 +1,17 @@
 package com.example.shoppingsystem.services;
 
 import com.example.shoppingsystem.constants.*;
-import com.example.shoppingsystem.dtos.AccountInfoDTO;
-import com.example.shoppingsystem.dtos.AccountProfileDTO;
-import com.example.shoppingsystem.dtos.CartDTO;
-import com.example.shoppingsystem.dtos.CartItemDTO;
+import com.example.shoppingsystem.dtos.*;
 import com.example.shoppingsystem.entities.Account;
 import com.example.shoppingsystem.entities.Cart;
 import com.example.shoppingsystem.entities.CartItem;
 import com.example.shoppingsystem.entities.Multimedia;
 import com.example.shoppingsystem.enums.MultimediaType;
 import com.example.shoppingsystem.repositories.*;
-import com.example.shoppingsystem.requests.*;
+import com.example.shoppingsystem.requests.AddLoginIdRequest;
+import com.example.shoppingsystem.requests.ChangePasswordRequest;
+import com.example.shoppingsystem.requests.UpdateAccountRequest;
+import com.example.shoppingsystem.requests.UpdateAvatarRequest;
 import com.example.shoppingsystem.responses.ApiResponse;
 import com.example.shoppingsystem.services.interfaces.AccountService;
 import org.apache.logging.log4j.LogManager;
@@ -38,15 +38,17 @@ public class AccountServiceImpl implements AccountService {
     private final MultimediaRepository multimediaRepository;
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
+    private final ProductServiceImpl productService;
 
     @Autowired
-    public AccountServiceImpl(PasswordEncoder passwordEncoder, AccountRepository accountRepository, RoleRepository roleRepository, MultimediaRepository multimediaRepository, CartRepository cartRepository, CartItemRepository cartItemRepository) {
+    public AccountServiceImpl(PasswordEncoder passwordEncoder, AccountRepository accountRepository, RoleRepository roleRepository, MultimediaRepository multimediaRepository, CartRepository cartRepository, CartItemRepository cartItemRepository, ProductServiceImpl productService) {
         this.passwordEncoder = passwordEncoder;
         this.accountRepository = accountRepository;
         this.roleRepository = roleRepository;
         this.multimediaRepository = multimediaRepository;
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
+        this.productService = productService;
     }
 
     @Override
@@ -57,7 +59,7 @@ public class AccountServiceImpl implements AccountService {
             logger.error(String.format(LogMessage.LOG_INVALID_LOGIN_ID, email));
             return null;
         }
-        return createAccount(username,email,"", password, fullname, imageLink);
+        return createAccount(username, email, "", password, fullname, imageLink);
     }
 
 
@@ -148,10 +150,10 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public ApiResponse<AccountInfoDTO> addLoginId(AddLoginIdRequest request) {
         Optional<Account> existAccountContainLoginId = findAccountByLoginId(request.getLoginId());
-        if(existAccountContainLoginId.isEmpty()){
+        if (existAccountContainLoginId.isEmpty()) {
             Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
             if (account.isPresent()) {
-                if(Regex.isValidEmail(request.getLoginId())){
+                if (Regex.isValidEmail(request.getLoginId())) {
                     account.get().setEmail(request.getLoginId());
                     updateAccount(account.get());
                     AccountInfoDTO accountInfoDTO = getAccountInfoDTO(account.get());
@@ -163,7 +165,7 @@ public class AccountServiceImpl implements AccountService {
                                 .timestamp(new java.util.Date())
                                 .build();
                     }
-                } else if (Regex.isValidPhoneNumber(request.getLoginId())){
+                } else if (Regex.isValidPhoneNumber(request.getLoginId())) {
                     account.get().setPhone(request.getLoginId());
                     updateAccount(account.get());
                     AccountInfoDTO accountInfoDTO = getAccountInfoDTO(account.get());
@@ -200,7 +202,7 @@ public class AccountServiceImpl implements AccountService {
         Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         if (account.isPresent()) {
             Optional<Multimedia> multimedia = multimediaRepository.findByAccount(account.get());
-            if(multimedia.isPresent()){
+            if (multimedia.isPresent()) {
                 multimedia.get().setMultimediaUrl(request.getAvatar_url());
                 multimediaRepository.save(multimedia.get());
                 AccountInfoDTO accountInfoDTO = getAccountInfoDTO(account.get());
@@ -225,8 +227,8 @@ public class AccountServiceImpl implements AccountService {
     public ApiResponse<String> changePassword(ChangePasswordRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Optional<Account> currentUser = accountRepository.findByUsername(authentication.getName());
-        if(currentUser.isPresent()){
-            if(passwordEncoder.matches(request.getOld_password(), currentUser.get().getPassword())) {
+        if (currentUser.isPresent()) {
+            if (passwordEncoder.matches(request.getOld_password(), currentUser.get().getPassword())) {
                 currentUser.get().setPassword(passwordEncoder.encode(request.getNew_password()));
                 updateAccount(currentUser.get());
                 logger.info(String.format(LogMessage.LOG_CHANGE_PASSWORD_DONE, authentication.getName()));
@@ -238,7 +240,7 @@ public class AccountServiceImpl implements AccountService {
             } else {
                 logger.info(String.format(LogMessage.LOG_INCORRECT_CURRENT_PASSWORD, authentication.getName()));
                 return ApiResponse.<String>builder()
-                        .status(ErrorCode.UNAUTHORIZED)
+                        .status(ErrorCode.BAD_REQUEST)
                         .message(Message.CURRENT_PASSWORD_NOT_CORRECT)
                         .timestamp(new java.util.Date())
                         .build();
@@ -291,7 +293,7 @@ public class AccountServiceImpl implements AccountService {
         return null;
     }
 
-    private AccountInfoDTO changeToAccountDTO(Account account, Cart cart, Multimedia multimedia){
+    private AccountInfoDTO changeToAccountDTO(Account account, Cart cart, Multimedia multimedia) {
         return new AccountInfoDTO(
                 account.getAccountId(),
                 account.getUsername(),
@@ -323,13 +325,15 @@ public class AccountServiceImpl implements AccountService {
 
         return cartList.stream()
                 .map(cartItem -> {
-                    Long productId = cartItem.getProduct() != null ? cartItem.getProduct().getProductId() : null;
-                    Long productVariantId = cartItem.getProductVariant() != null ? cartItem.getProductVariant().getProductVariantId() : null;
-
+                    ProductInfoDTO productInfoDTO = productService.getProductInformation(cartItem.getProduct());
+                    Optional<ProductVariantDTO> matchingVariant = productInfoDTO.getProduct_variant_list()
+                            .stream()
+                            .filter(variant -> variant.getProduct_variant_id().equals(cartItem.getProductVariant().getProductVariantId()))
+                            .findFirst();
                     return new CartItemDTO(
                             cartItem.getCartItemId(),
-                            productId,
-                            productVariantId,
+                            productService.getProductInformation(cartItem.getProduct()),
+                            matchingVariant.get(),
                             cartItem.getQuantity(),
                             calculateSubTotal(cartItem)
                     );

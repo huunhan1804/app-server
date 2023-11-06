@@ -26,8 +26,6 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -381,5 +379,45 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     .timestamp(new Date())
                     .build();
         }
+    }
+
+    @Override
+    public ApiResponse<AuthenticationResponse> registrationWithPhone(RegistrationRequest request) {
+        String loginId = request.getLoginId();
+        logger.info(String.format(LogMessage.LOG_PROCESSING_REGISTER, loginId));
+
+        Optional<Account> existingAccount = accountService.findAccountByLoginId(loginId);
+
+        if (existingAccount.isPresent()) {
+            logger.info(String.format(LogMessage.LOG_ACCOUNT_EXISTS, loginId));
+            return ApiResponse.<AuthenticationResponse>builder()
+                    .status(ErrorCode.ACCOUNT_ALREADY_EXISTS)
+                    .message(Message.ACCOUNT_ALREADY_EXISTS)
+                    .timestamp(new Date())
+                    .build();
+        }
+
+        Account newAccount = accountService.createAccountWithPhone(loginId, request.getPassword(), request.getFullname());
+
+        if (newAccount != null) {
+            RefreshToken refreshToken = refreshTokenService.createToken(newAccount);
+            AccessToken accessToken = accessTokenService.createToken(newAccount, refreshToken);
+
+            if (accessToken != null) {
+                logger.info(String.format(LogMessage.LOG_REGISTER_SUCCESS, newAccount.getPhone()));
+                return ApiResponse.<AuthenticationResponse>builder()
+                        .status(ErrorCode.SUCCESS)
+                        .message(Message.REGISTRATION_SUCCESS)
+                        .data(new AuthenticationResponse(accessToken.getToken(), refreshToken.getToken()))
+                        .timestamp(new Date())
+                        .build();
+            }
+        }
+
+        return ApiResponse.<AuthenticationResponse>builder()
+                .status(ErrorCode.INTERNAL_SERVER_ERROR)
+                .message(Message.REGISTRATION_FAILURE)
+                .timestamp(new Date())
+                .build();
     }
 }

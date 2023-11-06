@@ -41,4 +41,6 @@ public class Message {
     public static final String NOT_ENOUGH_QUANTITY = "Not enough quantity in stock";
     public static final String CART_ITEM_NOT_FOUND = "Cart item does not already exist";
     public static final String ADDRESS_NOT_FOUND = "Address not found or cannot set address of another account";
+    public static final String NOT_FOUND_CATEGORY = "Not found category";
+    public static final String NOT_FOUND_ORDER = "Not found order";
 }

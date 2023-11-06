@@ -2,7 +2,10 @@ package com.example.shoppingsystem.api;
 
 import com.example.shoppingsystem.constants.LogMessage;
 import com.example.shoppingsystem.dtos.AccountInfoDTO;
-import com.example.shoppingsystem.requests.*;
+import com.example.shoppingsystem.requests.AddLoginIdRequest;
+import com.example.shoppingsystem.requests.ChangePasswordRequest;
+import com.example.shoppingsystem.requests.UpdateAccountRequest;
+import com.example.shoppingsystem.requests.UpdateAvatarRequest;
 import com.example.shoppingsystem.responses.ApiResponse;
 import com.example.shoppingsystem.services.interfaces.AccountService;
 import io.swagger.v3.oas.annotations.Operation;

@@ -15,4 +15,6 @@ public interface AuthenticationService {
     ApiResponse<String> sendOtpForgotPassword(SendOTPRequest sendOTPRequest);
     ApiResponse<String> forgotPassword(ForgotPasswordRequest request);
     ApiResponse<AuthenticationResponse> getAccessTokenFromRefreshToken(RefreshTokenRequest request);
+
+    ApiResponse<AuthenticationResponse> registrationWithPhone(RegistrationRequest request);
 }

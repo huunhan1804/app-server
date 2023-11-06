@@ -62,6 +62,15 @@ public class AuthenticationController {
         return ResponseEntity.status(apiResponse.getStatus()).body(apiResponse);
     }
 
+    @Operation(summary = "API for register", description = "This API will register a new account base on OTP into database with email and password.")
+    @PostMapping("/registration-with-phone")
+    public ResponseEntity<ApiResponse<AuthenticationResponse>> registrationWithPhone(@RequestBody RegistrationRequest request) {
+        logger.info(String.format(LogMessage.LOG_RECEIVED_REGISTER_REQUEST, request.getLoginId()));
+        ApiResponse<AuthenticationResponse> apiResponse = authenticationService.registrationWithPhone(request);
+        logger.info(String.format(LogMessage.LOG_REGISTRATION_SUCCESSFUL, request.getLoginId()));
+        return ResponseEntity.status(apiResponse.getStatus()).body(apiResponse);
+    }
+
     @Operation(summary = "API for send OTP to forgot password function", description = "This API will send a OTP to email, and use this otp to API forgot password")
     @PostMapping("/send-otp-forgot-password")
     public ResponseEntity<ApiResponse<String>> sendOTPForgotPassword(@RequestBody SendOTPRequest request) {

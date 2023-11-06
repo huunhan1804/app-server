@@ -129,7 +129,7 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public ApiResponse<AddressInfoDTO> updateAddressInfo(UpdateAddressRequest request) {
+    public ApiResponse<List<AddressInfoDTO>> updateAddressInfo(UpdateAddressRequest request) {
         Optional<Account> account = accountService.findCurrentUserInfo();
         if (account.isPresent()) {
             Optional<Address> address = addressRepository.findByAccount_AccountIdAndAddressId(account.get().getAccountId(), request.getAddress_id());
@@ -138,14 +138,9 @@ public class AddressServiceImpl implements AddressService {
                 address.get().setPhone(request.getPhone());
                 address.get().setAddressDetail(request.getAddress_detail());
                 addressRepository.save(address.get());
-                return ApiResponse.<AddressInfoDTO>builder()
-                        .status(ErrorCode.SUCCESS)
-                        .message(Message.SUCCESS)
-                        .data(convertToAddressInfoDTO(address.get()))
-                        .timestamp(new java.util.Date())
-                        .build();
+                return getAllAddress();
             } else {
-                return ApiResponse.<AddressInfoDTO>builder()
+                return ApiResponse.<List<AddressInfoDTO>>builder()
                         .status(ErrorCode.NOT_FOUND)
                         .message(Message.ADDRESS_NOT_FOUND)
                         .timestamp(new java.util.Date())
@@ -153,7 +148,7 @@ public class AddressServiceImpl implements AddressService {
             }
         }
 
-        return ApiResponse.<AddressInfoDTO>builder()
+        return ApiResponse.<List<AddressInfoDTO>>builder()
                 .status(ErrorCode.FORBIDDEN)
                 .message(Message.ACCOUNT_NOT_FOUND)
                 .timestamp(new java.util.Date())

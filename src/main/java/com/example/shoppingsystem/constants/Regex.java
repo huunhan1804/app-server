@@ -1,10 +1,15 @@
 package com.example.shoppingsystem.constants;
 
+import com.example.shoppingsystem.dtos.AddressInfoDTO;
+
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.Date;
 import java.util.Locale;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 public class Regex {
     public static final String SECRET_KEY = "68576D5A7134743777217A25432A462D4A614E645267556A586E327235753878";
@@ -35,4 +40,38 @@ public class Regex {
         NumberFormat numberFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
         return numberFormat.format(price);
     }
+
+    public static BigDecimal parseVNDToBigDecimal(String price) {
+        try {
+            String normalized = price.replaceAll("[^\\d]", ""); // Remove all non-digit characters
+            return new BigDecimal(normalized);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid VND format");
+        }
+    }
+
+
+    public static Date convertLocalDateTimeToDate(LocalDateTime localDateTime) {
+        return Timestamp.valueOf(localDateTime);
+    }
+
+    public static AddressInfoDTO parseShippingInfo(String shippingInfo) {
+        AddressInfoDTO addressInfoDTO = new AddressInfoDTO();
+        String[] lines = shippingInfo.split("\n");
+        for (String line : lines) {
+            if (line.startsWith("Name: ")) {
+                addressInfoDTO.setFullname(line.replace("Name: ", "").trim());
+            } else if (line.startsWith("Phone: ")) {
+                addressInfoDTO.setPhone(line.replace("Phone: ", "").trim());
+            } else if (line.startsWith("Address: ")) {
+                addressInfoDTO.setAddress_detail(line.replace("Address: ", "").trim());
+            }
+        }
+        addressInfoDTO.setAddress_id(0L);
+        addressInfoDTO.set_default(false);
+        return addressInfoDTO;
+    }
+
+
+
 }

@@ -2,9 +2,7 @@ package com.example.shoppingsystem.services;
 
 import com.example.shoppingsystem.constants.ErrorCode;
 import com.example.shoppingsystem.constants.Message;
-import com.example.shoppingsystem.constants.Regex;
 import com.example.shoppingsystem.dtos.AccountInfoDTO;
-import com.example.shoppingsystem.dtos.CartItemDTO;
 import com.example.shoppingsystem.entities.*;
 import com.example.shoppingsystem.repositories.CartItemRepository;
 import com.example.shoppingsystem.repositories.CartRepository;
@@ -16,11 +14,9 @@ import com.example.shoppingsystem.services.interfaces.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Component
 public class CartServiceImpl implements CartService {
@@ -54,11 +50,13 @@ public class CartServiceImpl implements CartService {
 
                 if (request.getProduct_id() != 0) {
                     product = productService.getProductByID(request.getProduct_id());
-                } else if (request.getProduct_variant_id() != 0) {
+                }
+
+                if (request.getProduct_variant_id() != 0) {
                     productVariant = productService.getProductVariantByID(request.getProduct_variant_id());
                 }
 
-                if (product.isEmpty() && productVariant.isEmpty()) {
+                if (product.isEmpty() || productVariant.isEmpty()) {
                     response = createErrorResponse(ErrorCode.NOT_FOUND, Message.PRODUCT_NOT_FOUND);
                 } else {
                     response = processCartUpdate(cart.get(), product, productVariant, request.getQuantity());
@@ -78,7 +76,7 @@ public class CartServiceImpl implements CartService {
     }
 
     private ApiResponse<AccountInfoDTO> processCartUpdate(Cart cart, Optional<Product> product, Optional<ProductVariant> productVariant, int quantity) {
-        int desiredQuantity = product.isPresent() ? product.get().getDesiredQuantity() : productVariant.get().getDesiredQuantity();
+        int desiredQuantity = productVariant.isPresent() ? productVariant.get().getDesiredQuantity() : product.get().getDesiredQuantity();
 
         if (desiredQuantity != 0 && quantity <= desiredQuantity) {
             Optional<CartItem> existingCartItem = findCartItemInCart(cart, product, productVariant);
@@ -89,8 +87,13 @@ public class CartServiceImpl implements CartService {
                 if (newQuantity <= 0) {
                     cartItemRepository.delete(cartItemToUpdate);
                 } else {
-                    cartItemToUpdate.setQuantity(newQuantity);
-                    cartItemRepository.save(cartItemToUpdate);
+                    if (newQuantity <= desiredQuantity) {
+                        cartItemToUpdate.setQuantity(newQuantity);
+                        cartItemRepository.save(cartItemToUpdate);
+                    } else {
+                        return createErrorResponse(ErrorCode.BAD_REQUEST, Message.NOT_ENOUGH_QUANTITY);
+                    }
+
                 }
             } else {
                 if (quantity > 0) {
@@ -116,10 +119,8 @@ public class CartServiceImpl implements CartService {
     }
 
     private Optional<CartItem> findCartItemInCart(Cart cart, Optional<Product> product, Optional<ProductVariant> productVariant) {
-        if (product.isPresent()) {
-            return cartItemRepository.findByCartAndProduct(cart, product.get());
-        } else if (productVariant.isPresent()) {
-            return cartItemRepository.findByCartAndProductVariant(cart, productVariant.get());
+        if (product.isPresent() && productVariant.isPresent()) {
+            return cartItemRepository.findByCartAndProductAndProductVariant(cart, product.get(), productVariant.get());
         }
         return Optional.empty();
     }
@@ -143,7 +144,9 @@ public class CartServiceImpl implements CartService {
 
         if (request.getProduct_id() != 0) {
             product = productService.getProductByID(request.getProduct_id());
-        } else if (request.getProduct_variant_id() != 0) {
+        }
+
+        if (request.getProduct_variant_id() != 0) {
             productVariant = productService.getProductVariantByID(request.getProduct_variant_id());
         }
 
@@ -151,7 +154,7 @@ public class CartServiceImpl implements CartService {
             return createErrorResponse(ErrorCode.NOT_FOUND, Message.PRODUCT_NOT_FOUND);
         }
 
-        int desiredQuantity = product.isPresent() ? product.get().getDesiredQuantity() : productVariant.get().getDesiredQuantity();
+        int desiredQuantity = productVariant.isPresent() ? productVariant.get().getDesiredQuantity() : product.get().getDesiredQuantity();
 
         if (desiredQuantity == 0 || request.getQuantity() > desiredQuantity) {
             return createErrorResponse(ErrorCode.BAD_REQUEST, Message.NOT_ENOUGH_QUANTITY);
@@ -181,7 +184,9 @@ public class CartServiceImpl implements CartService {
 
         if (request.getProduct_id() != 0) {
             product = productService.getProductByID(request.getProduct_id());
-        } else if (request.getProduct_variant_id() != 0) {
+        }
+
+        if (request.getProduct_variant_id() != 0) {
             productVariant = productService.getProductVariantByID(request.getProduct_variant_id());
         }
 
@@ -189,7 +194,7 @@ public class CartServiceImpl implements CartService {
             return createErrorResponse(ErrorCode.NOT_FOUND, Message.PRODUCT_NOT_FOUND);
         }
 
-        int desiredQuantity = product.isPresent() ? product.get().getDesiredQuantity() : productVariant.get().getDesiredQuantity();
+        int desiredQuantity = productVariant.isPresent() ? productVariant.get().getDesiredQuantity() : product.get().getDesiredQuantity();
 
         if (desiredQuantity == 0) {
             return createErrorResponse(ErrorCode.BAD_REQUEST, Message.NOT_ENOUGH_QUANTITY);
@@ -215,10 +220,6 @@ public class CartServiceImpl implements CartService {
         }
         return accountService.getCurrentUserInfo();
     }
-
-
-
-
 
 
 }

@@ -13,5 +13,5 @@ public interface AddressService {
     ApiResponse<List<AddressInfoDTO>> getAllAddress();
     ApiResponse<List<AddressInfoDTO>> setDefaultAddress(Long addressId);
     ApiResponse<AddressInfoDTO> getAddressInfo(Long addressId);
-    ApiResponse<AddressInfoDTO> updateAddressInfo(UpdateAddressRequest request);
+    ApiResponse<List<AddressInfoDTO>> updateAddressInfo(UpdateAddressRequest request);
 }

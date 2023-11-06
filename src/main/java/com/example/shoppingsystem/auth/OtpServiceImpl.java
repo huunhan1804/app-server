@@ -1,11 +1,11 @@
 package com.example.shoppingsystem.auth;
 
+import com.example.shoppingsystem.auth.interfaces.OtpService;
 import com.example.shoppingsystem.constants.Regex;
 import com.example.shoppingsystem.entities.Otp;
 import com.example.shoppingsystem.enums.OtpPurpose;
 import com.example.shoppingsystem.extensions.OTPUtil;
 import com.example.shoppingsystem.repositories.OtpRepository;
-import com.example.shoppingsystem.auth.interfaces.OtpService;
 import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -75,5 +75,13 @@ public class OtpServiceImpl implements OtpService {
 
     private LocalDateTime calculateExpiryDate() {return LocalDateTime.now().plusMinutes(5);}
 
+    @Transactional
+    @Scheduled(fixedRate = 300_000)
+    public void cleanupExpiredOtps() {
+        logger.info("Starting OTP cleanup...");
+        LocalDateTime currentTime = LocalDateTime.now();
+        otpRepository.deleteAllByExpiryDate(currentTime);
+        logger.info("OTP cleanup completed.");
+    }
 
 }

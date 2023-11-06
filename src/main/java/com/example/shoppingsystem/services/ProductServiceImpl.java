@@ -60,14 +60,10 @@ public class ProductServiceImpl implements ProductService {
     public ApiResponse<ProductInfoDTO> getInfoProduct(long productId) {
         Optional<Product> product = productRepository.findById(productId);
         if(product.isPresent()){
-            List<ProductVariant> productVariants = productVariantRepository.findAllByProduct_ProductId(product.get().getProductId());
-            List<Feedback> feedbacks = feedbackRepository.findByProduct_ProductId(product.get().getProductId());
-            List<Multimedia> multimediaProduct = multimediaRepository.findAllByProduct_ProductId(product.get().getProductId());
-            ProductInfoDTO productInfoDTO = convertToProductInfoDTO(product.get(), productVariants, feedbacks, multimediaProduct);
             return ApiResponse.<ProductInfoDTO>builder()
                     .status(ErrorCode.SUCCESS)
                     .message(Message.SUCCESS)
-                    .data(productInfoDTO)
+                    .data(getProductInformation(product.get()))
                     .timestamp(new java.util.Date())
                     .build();
         } else {
@@ -77,6 +73,13 @@ public class ProductServiceImpl implements ProductService {
                     .timestamp(new java.util.Date())
                     .build();
         }
+    }
+
+    public ProductInfoDTO getProductInformation(Product product){
+        List<ProductVariant> productVariants = productVariantRepository.findAllByProduct_ProductId(product.getProductId());
+        List<Feedback> feedbacks = feedbackRepository.findByProduct_ProductId(product.getProductId());
+        List<Multimedia> multimediaProduct = multimediaRepository.findAllByProduct_ProductId(product.getProductId());
+        return convertToProductInfoDTO(product, productVariants, feedbacks, multimediaProduct);
     }
 
     @Override
@@ -108,10 +111,7 @@ public class ProductServiceImpl implements ProductService {
         List<Object[]> results = orderDetailRepository.findBestOrderProducts();
         List<Product> productList = new ArrayList<>();
         for (Object[] result : results) {
-            Long productId = ((BigInteger) result[0])
-
-
-                    .longValue();
+            Long productId = (Long) result[0];
             Optional<Product> product = productRepository.findById(productId);
             product.ifPresent(productList::add);
         }
@@ -125,10 +125,81 @@ public class ProductServiceImpl implements ProductService {
                 .build();
     }
 
+    @Override
+    public ApiResponse<List<ProductBasicDTO>> getListRelatedProduct(long productId) {
+        Optional<Product> productOpt = productRepository.findById(productId);
+        if(productOpt.isPresent()) {
+            Product product = productOpt.get();
+            Category productCategory = product.getCategory();
+            List<Product> relatedProducts = productRepository.findByCategoryAndProductIdNot(productCategory, productId);
+            List<ProductBasicDTO> productBasicDTOS = relatedProducts.stream()
+                    .map(this::convertToProductBasicDTO).collect(Collectors.toList());
+            return ApiResponse.<List<ProductBasicDTO>>builder()
+                    .status(ErrorCode.SUCCESS)
+                    .message(Message.SUCCESS)
+                    .data(productBasicDTOS)
+                    .timestamp(new java.util.Date())
+                    .build();
+        }
+        return ApiResponse.<List<ProductBasicDTO>>builder()
+                .status(ErrorCode.NOT_FOUND)
+                .message(Message.NOT_FOUND)
+                .data(null)
+                .timestamp(new java.util.Date())
+                .build();
+    }
+
+    @Override
+    public ApiResponse<List<ProductBasicDTO>> searchProductsByKeyword(String keyword) {
+        List<Product> products = productRepository.findByProductNameContainingIgnoreCase(keyword);
+
+        if (products.isEmpty()) {
+            return ApiResponse.<List<ProductBasicDTO>>builder()
+                    .status(ErrorCode.NOT_FOUND)
+                    .message(Message.NOT_FOUND)
+                    .data(new ArrayList<>())
+                    .timestamp(new java.util.Date())
+                    .build();
+        }
+
+        List<ProductBasicDTO> productBasicDTOs = products.stream()
+                .map(this::convertToProductBasicDTO)
+                .collect(Collectors.toList());
+
+        return ApiResponse.<List<ProductBasicDTO>>builder()
+                .status(ErrorCode.SUCCESS)
+                .message(Message.SUCCESS)
+                .data(productBasicDTOs)
+                .timestamp(new java.util.Date())
+                .build();
+    }
+
+    @Override
+    public ApiResponse<List> getListProductByCategory(Long categoryId) {
+        Optional<Category> category = categoryRepository.findById(categoryId);
+        if(category.isPresent()){
+            return ApiResponse.<List>builder()
+                    .status(ErrorCode.SUCCESS)
+                    .message(Message.SUCCESS)
+                    .data(getProductBasicDTOsByCategory(category.get()).toList())
+                    .timestamp(new java.util.Date())
+                    .build();
+        } else {
+            return ApiResponse.<List>builder()
+                    .status(ErrorCode.BAD_REQUEST)
+                    .message(Message.NOT_FOUND_CATEGORY)
+                    .timestamp(new java.util.Date())
+                    .build();
+        }
+    }
+
+
     private ProductInfoDTO convertToProductInfoDTO(Product product, List<ProductVariant> productVariants, List<Feedback> feedbacks, List<Multimedia> multimediaProduct) {
         ProductInfoDTO productInfoDTO = new ProductInfoDTO();
         productInfoDTO.setProduct_id(product.getProductId());
         productInfoDTO.setProduct_name(product.getProductName());
+        productInfoDTO.setProduct_price(Regex.formatPriceToVND(product.getSalePrice()));
+        productInfoDTO.setRating(calculateAverageRating(product));
         productInfoDTO.setProduct_description(product.getProductDescription());
         productInfoDTO.setQuantity_in_stock(product.getDesiredQuantity());
 
@@ -199,12 +270,12 @@ public class ProductServiceImpl implements ProductService {
         return (double) sumRatings / feedbacks.size();
     }
 
-    private String findImageProduct(Product product) {
+    public String findImageProduct(Product product) {
         Optional<Multimedia> multimedia = multimediaRepository.findByProduct_ProductId(product.getProductId());
         return multimedia.map(Multimedia::getMultimediaUrl).orElse(null);
     }
 
-    private String findImageProductVariant(ProductVariant productVariant) {
+    public String findImageProductVariant(ProductVariant productVariant) {
         Optional<Multimedia> multimedia = multimediaRepository.findAllByProductVariant_ProductVariantId(productVariant.getProductVariantId());
         return multimedia.map(Multimedia::getMultimediaUrl).orElse(null);
     }

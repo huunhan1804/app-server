@@ -37,11 +37,11 @@ public class CategoryServiceImpl implements CategoryService {
     public ApiResponse<List<CategoryResponse>> getListCategory(long parentCategoryId) {
         List<Category> categoryList = categoryRepository.findAllByParentCategory_ParentCategoryId(parentCategoryId);
         List<CategoryResponse> categoryResponses = new ArrayList<>();
-        categoryResponses.add(new CategoryResponse("all", "https://dl.dropbox.com/scl/fi/esvpgf0fxgsijlhls9uli/image-5.png?rlkey=6civ8b4oi9175l9p7g6ljh5bh&dl=0"));
+        categoryResponses.add(new CategoryResponse(0L,"All", "https://dl.dropbox.com/scl/fi/esvpgf0fxgsijlhls9uli/image-5.png?rlkey=6civ8b4oi9175l9p7g6ljh5bh&dl=0"));
         for (Category category : categoryList){
             Optional<Multimedia> multimedia = multimediaRepository.findByCategory_CategoryId(category.getCategoryId());
             if(multimedia.isPresent()){
-                categoryResponses.add(new CategoryResponse(category.getCategoryName(), multimedia.get().getMultimediaUrl()));
+                categoryResponses.add(new CategoryResponse(category.getCategoryId() ,category.getCategoryName(), multimedia.get().getMultimediaUrl()));
             }
         }
 

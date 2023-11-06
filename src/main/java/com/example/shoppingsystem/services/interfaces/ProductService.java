@@ -22,4 +22,10 @@ public interface ProductService {
     ApiResponse<List> getListBestSellerProduct();
 
     ApiResponse<List> getListBestOrderProduct();
+
+    ApiResponse<List<ProductBasicDTO>> getListRelatedProduct(long productId);
+
+    ApiResponse<List<ProductBasicDTO>> searchProductsByKeyword(String keyword);
+
+    ApiResponse<List> getListProductByCategory(Long categoryId);
 }

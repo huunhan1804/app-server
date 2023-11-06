@@ -1,5 +1,6 @@
 package com.example.shoppingsystem.auth;
 
+import com.example.shoppingsystem.auth.interfaces.AccessTokenService;
 import com.example.shoppingsystem.auth.interfaces.JwtService;
 import com.example.shoppingsystem.constants.LogMessage;
 import com.example.shoppingsystem.constants.Regex;
@@ -7,7 +8,6 @@ import com.example.shoppingsystem.entities.AccessToken;
 import com.example.shoppingsystem.entities.Account;
 import com.example.shoppingsystem.entities.RefreshToken;
 import com.example.shoppingsystem.repositories.AccessTokenRepository;
-import com.example.shoppingsystem.auth.interfaces.AccessTokenService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

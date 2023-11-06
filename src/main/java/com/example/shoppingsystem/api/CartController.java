@@ -17,6 +17,10 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Cart")
 public class CartController {
     private final CartService cartService;
+//
+//    @Operation(summary = "", description = "")
+//    @GetMapping("all")
+//    public ResponseEntity<ApiResponse<>>
 
     @Operation(
             summary = "Add to Cart",

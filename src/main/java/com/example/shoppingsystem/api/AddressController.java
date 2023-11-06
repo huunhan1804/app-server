@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -20,7 +21,7 @@ public class AddressController {
     private final AddressService addressService;
 
     @Operation(summary = "API get info address", description = "This API will get info of address for account.")
-    @PostMapping("/info/{addressId}")
+    @GetMapping("/info/{addressId}")
     public ResponseEntity<ApiResponse<AddressInfoDTO>> getAddressInfo(@PathVariable long addressId) {
         ApiResponse<AddressInfoDTO> apiResponse = addressService.getAddressInfo(addressId);
         return ResponseEntity.status(apiResponse.getStatus()).body(apiResponse);
@@ -47,9 +48,9 @@ public class AddressController {
         return ResponseEntity.status(apiResponse.getStatus()).body(apiResponse);
     }
     @Operation(summary = "API update address", description = "This API update address of current account.")
-    @GetMapping("/update")
-    public ResponseEntity<ApiResponse<AddressInfoDTO>> updateAddress(@RequestBody UpdateAddressRequest addressId) {
-        ApiResponse<AddressInfoDTO> apiResponse = addressService.updateAddressInfo(addressId);
+    @PostMapping("/update")
+    public ResponseEntity<ApiResponse<List<AddressInfoDTO>>> updateAddress(@RequestBody UpdateAddressRequest addressId) {
+        ApiResponse<List<AddressInfoDTO>> apiResponse = addressService.updateAddressInfo(addressId);
         return ResponseEntity.status(apiResponse.getStatus()).body(apiResponse);
     }
 }
