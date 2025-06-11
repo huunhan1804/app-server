@@ -26,4 +26,4 @@ EXPOSE 8080
 
 # Run the application
 RUN ls -la target/
-CMD ["java", "-jar", "target/shoppingsystem-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-jar", "target/ShoppingSystem-0.0.1-SNAPSHOT.jar"]
