@@ -1,6 +1,8 @@
 package com.example.shoppingsystem.repositories;
 
 import com.example.shoppingsystem.entities.Account;
+import com.example.shoppingsystem.entities.ApprovalStatus;
+import com.example.shoppingsystem.entities.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -18,5 +20,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     List<Account> findByRoleRoleId(Long roleId);
     Page<Account> findAll(Specification<Account> specificationAccount, Pageable pageable);
     Account findByAccountId(Long accountId);
-    Optional<Account> findByAccountIdAndIsBannedFalse(Long accountId);
+  //  Optional<Account> findByAccountIdAndIsBannedFalse(Long accountId);
+    Optional<Account> findByApprovalStatus_StatusCode(String approvalStatus);
 }

@@ -14,7 +14,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableJpaAuditing
 @EnableScheduling
 @EnableAsync
-public class ShoppingSystemApplication {
+public class  ShoppingSystemApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(ShoppingSystemApplication.class, args);

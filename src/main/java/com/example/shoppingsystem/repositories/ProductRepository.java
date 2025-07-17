@@ -1,5 +1,6 @@
 package com.example.shoppingsystem.repositories;
 
+import com.example.shoppingsystem.entities.Account;
 import com.example.shoppingsystem.entities.Category;
 import com.example.shoppingsystem.entities.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,4 +20,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByCategoryAndProductIdNot(Category productCategory, long productId);
 
     List<Product> findByProductNameContainingIgnoreCase(String keyword);
+    List<Product> findByApprovalStatus_StatusCode(String statusCode);
+    List<Product> findProductByAccountAndProductId(Account account, long productId);
+    List<Product> findByAccount(Account account);
 }

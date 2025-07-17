@@ -78,7 +78,7 @@ public class ProductServiceImpl implements ProductService {
     public ProductInfoDTO getProductInformation(Product product){
         List<ProductVariant> productVariants = productVariantRepository.findAllByProduct_ProductId(product.getProductId());
         List<Feedback> feedbacks = feedbackRepository.findByProduct_ProductId(product.getProductId());
-        List<Multimedia> multimediaProduct = multimediaRepository.findAllByProduct_ProductId(product.getProductId());
+        List<Multimedia> multimediaProduct = multimediaRepository.  findAllByProduct_ProductId(product.getProductId());
         return convertToProductInfoDTO(product, productVariants, feedbacks, multimediaProduct);
     }
 

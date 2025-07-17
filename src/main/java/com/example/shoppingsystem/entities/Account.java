@@ -51,6 +51,10 @@ public class Account extends BaseEntity implements UserDetails {
     @JoinColumn(name = "ROLE_ID", nullable = false)
     private Role role;
 
+    @ManyToOne
+    @JoinColumn(name = "STATUS_ID")
+    private ApprovalStatus approvalStatus;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

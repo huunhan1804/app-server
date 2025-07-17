@@ -2,6 +2,7 @@ package com.example.shoppingsystem.services.interfaces;
 
 import com.example.shoppingsystem.dtos.AccountInfoDTO;
 import com.example.shoppingsystem.entities.Account;
+import com.example.shoppingsystem.entities.AgencyInfo;
 import com.example.shoppingsystem.requests.*;
 import com.example.shoppingsystem.responses.ApiResponse;
 import org.springframework.scheduling.annotation.Async;
@@ -23,4 +24,6 @@ public interface AccountService {
     ApiResponse<AccountInfoDTO> addLoginId(AddLoginIdRequest request);
     ApiResponse<AccountInfoDTO> updateAvatar(UpdateAvatarRequest request);
     ApiResponse<String> changePassword(ChangePasswordRequest request);
+    AgencyInfo registerAgency(String shopName, String shopAddress, String shopEmail, String shopPhone, String taxCode, String idCardNumber, String frontIdCardImageUrl, String backIdCardImageUrl, String professionalCertUrl, String businessLicenseUrl);
+
 }

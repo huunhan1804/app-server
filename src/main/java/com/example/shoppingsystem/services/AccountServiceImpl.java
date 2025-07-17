@@ -2,10 +2,7 @@ package com.example.shoppingsystem.services;
 
 import com.example.shoppingsystem.constants.*;
 import com.example.shoppingsystem.dtos.*;
-import com.example.shoppingsystem.entities.Account;
-import com.example.shoppingsystem.entities.Cart;
-import com.example.shoppingsystem.entities.CartItem;
-import com.example.shoppingsystem.entities.Multimedia;
+import com.example.shoppingsystem.entities.*;
 import com.example.shoppingsystem.enums.MultimediaType;
 import com.example.shoppingsystem.repositories.*;
 import com.example.shoppingsystem.requests.AddLoginIdRequest;
@@ -39,9 +36,11 @@ public class AccountServiceImpl implements AccountService {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final ProductServiceImpl productService;
+    private final AgencyInfoRepository agencyInfoRepository;
+    private final ApprovalStatusRepository approvalStatusRepository;
 
     @Autowired
-    public AccountServiceImpl(PasswordEncoder passwordEncoder, AccountRepository accountRepository, RoleRepository roleRepository, MultimediaRepository multimediaRepository, CartRepository cartRepository, CartItemRepository cartItemRepository, ProductServiceImpl productService) {
+    public AccountServiceImpl(PasswordEncoder passwordEncoder, AccountRepository accountRepository, RoleRepository roleRepository, MultimediaRepository multimediaRepository, CartRepository cartRepository, CartItemRepository cartItemRepository, ProductServiceImpl productService, AgencyInfoRepository agencyInfoRepository, ApprovalStatusRepository approvalStatusRepository) {
         this.passwordEncoder = passwordEncoder;
         this.accountRepository = accountRepository;
         this.roleRepository = roleRepository;
@@ -49,6 +48,8 @@ public class AccountServiceImpl implements AccountService {
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
         this.productService = productService;
+        this.agencyInfoRepository = agencyInfoRepository;
+        this.approvalStatusRepository = approvalStatusRepository;
     }
 
     @Override
@@ -93,6 +94,15 @@ public class AccountServiceImpl implements AccountService {
         }
 
         return createAccount(username, "", phone, password, fullname, Regex.URL_IMAGE_DEFAULT);
+    }
+
+    @Override
+    public AgencyInfo registerAgency(String shopName, String shopAddress, String shopEmail, String shopPhone, String taxCode, String idCardNumber, String frontIdCardImageUrl, String backIdCardImageUrl, String professionalCertUrl, String businessLicenseUrl){
+        if(agencyInfoRepository.findByIdCardNumber(idCardNumber).isPresent()){
+            logger.error(String.format(LogMessage.LOG_AGENCY_EXIST_ID_NUMBER, idCardNumber));
+            return null;
+        }
+        return regiesterAgencyInfo(shopName, shopAddress, shopEmail, shopPhone, taxCode, idCardNumber, frontIdCardImageUrl, backIdCardImageUrl, professionalCertUrl, businessLicenseUrl);
     }
 
     @Async
@@ -265,6 +275,27 @@ public class AccountServiceImpl implements AccountService {
         multimediaRepository.save(Multimedia.builder().multimediaUrl(imageLink).account(savedAccount).multimediaType(MultimediaType.IMAGE).build());
         cartRepository.save(Cart.builder().account(savedAccount).totalItem(0).build());
         return savedAccount;
+    }
+
+    private AgencyInfo regiesterAgencyInfo(String shopName, String shopAddress, String shopEmail, String shopPhone, String taxCode, String idCardNumber, String frontIdCardImageUrl, String backIdCardImageUrl, String professionalCertUrl, String businessLicenseUrl) {
+        Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        AgencyInfo saveAgencyInfo = agencyInfoRepository.save(AgencyInfo.builder()
+                .account(account.get())
+                .shopName(shopName)
+                .shopEmail(shopEmail)
+                .shopPhone(shopPhone)
+                .shopAddressDetail(shopAddress)
+                .taxNumber(taxCode)
+                .idCardNumber(idCardNumber)
+                .idCardBackImageUrl(backIdCardImageUrl)
+                .idCardFrontImageUrl(frontIdCardImageUrl)
+                .businessLicenseUrls(businessLicenseUrl)
+                .professionalCertUrls(professionalCertUrl)
+                .genderApplicant(account.get().getGender())
+                .submittedDate(new java.util.Date())
+                .approvalStatus(approvalStatusRepository.findApprovalStatusByStatusCode(StatusCode.STATUS_PENDING))
+                .build());
+        return saveAgencyInfo;
     }
 
     private String generateUsername(String loginId) {
