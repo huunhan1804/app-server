@@ -13,7 +13,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Multimedia extends BaseEntity{
+public class Multimedia extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "MULTIMEDIA_ID")
@@ -46,4 +47,9 @@ public class Multimedia extends BaseEntity{
     @Column(name = "MULTIMEDIA_TYPE", nullable = false)
     private MultimediaType multimediaType;
 
+    @Column(name = "IS_PRIMARY")
+    private Boolean isPrimary;
+
+    @Column(name = "DISPLAY_ORDER")
+    private Integer displayOrder;
 }

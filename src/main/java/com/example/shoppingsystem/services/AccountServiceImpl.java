@@ -18,7 +18,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -26,9 +26,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Component
+@Service
 public class AccountServiceImpl implements AccountService {
+
     private static final Logger logger = LogManager.getLogger(AccountServiceImpl.class);
+
     private final PasswordEncoder passwordEncoder;
     private final AccountRepository accountRepository;
     private final RoleRepository roleRepository;
@@ -40,7 +42,15 @@ public class AccountServiceImpl implements AccountService {
     private final ApprovalStatusRepository approvalStatusRepository;
 
     @Autowired
-    public AccountServiceImpl(PasswordEncoder passwordEncoder, AccountRepository accountRepository, RoleRepository roleRepository, MultimediaRepository multimediaRepository, CartRepository cartRepository, CartItemRepository cartItemRepository, ProductServiceImpl productService, AgencyInfoRepository agencyInfoRepository, ApprovalStatusRepository approvalStatusRepository) {
+    public AccountServiceImpl(PasswordEncoder passwordEncoder,
+                              AccountRepository accountRepository,
+                              RoleRepository roleRepository,
+                              MultimediaRepository multimediaRepository,
+                              CartRepository cartRepository,
+                              CartItemRepository cartItemRepository,
+                              ProductServiceImpl productService,
+                              AgencyInfoRepository agencyInfoRepository,
+                              ApprovalStatusRepository approvalStatusRepository) {
         this.passwordEncoder = passwordEncoder;
         this.accountRepository = accountRepository;
         this.roleRepository = roleRepository;
@@ -53,6 +63,23 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public Optional<Account> findAccountByLoginId(String loginId) {
+        if (Regex.isValidEmail(loginId)) {
+            return accountRepository.findByEmail(loginId);
+        } else if (Regex.isValidPhoneNumber(loginId)) {
+            return accountRepository.findByPhone(loginId);
+        } else {
+            return accountRepository.findByUsername(loginId);
+        }
+    }
+
+    @Override
+    public Optional<Account> findCurrentUserInfo() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return accountRepository.findByUsername(authentication.getName());
+    }
+
+    @Override
     public Account createAccountWithSocialLogin(String email, String password, String fullname, String imageLink) {
         logger.info(String.format(LogMessage.LOG_PROCESSING_CREATE_NEW_ACCOUNT, email));
         String username = generateUsername(email);
@@ -62,7 +89,6 @@ public class AccountServiceImpl implements AccountService {
         }
         return createAccount(username, email, "", password, fullname, imageLink);
     }
-
 
     @Override
     public Account createAccountWithEmail(String email, String password, String fullname) {
@@ -97,12 +123,15 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public AgencyInfo registerAgency(String shopName, String shopAddress, String shopEmail, String shopPhone, String taxCode, String idCardNumber, String frontIdCardImageUrl, String backIdCardImageUrl, String professionalCertUrl, String businessLicenseUrl){
+    public AgencyInfo registerAgency(String shopName, String shopAddress, String shopEmail, String shopPhone,
+                                     String taxCode, String idCardNumber, String frontIdCardImageUrl,
+                                     String backIdCardImageUrl, String professionalCertUrl, String businessLicenseUrl) {
         if(agencyInfoRepository.findByIdCardNumber(idCardNumber).isPresent()){
             logger.error(String.format(LogMessage.LOG_AGENCY_EXIST_ID_NUMBER, idCardNumber));
             return null;
         }
-        return regiesterAgencyInfo(shopName, shopAddress, shopEmail, shopPhone, taxCode, idCardNumber, frontIdCardImageUrl, backIdCardImageUrl, professionalCertUrl, businessLicenseUrl);
+        return registerAgencyInfo(shopName, shopAddress, shopEmail, shopPhone, taxCode, idCardNumber,
+                frontIdCardImageUrl, backIdCardImageUrl, professionalCertUrl, businessLicenseUrl);
     }
 
     @Async
@@ -254,12 +283,12 @@ public class AccountServiceImpl implements AccountService {
                         .message(Message.CURRENT_PASSWORD_NOT_CORRECT)
                         .timestamp(new java.util.Date())
                         .build();
-
             }
         }
         return null;
     }
 
+    // Private helper methods
     private Account createAccount(String username, String email, String phone, String password, String fullname, String imageLink) {
         Account savedAccount = accountRepository.save(Account.builder()
                 .username(username)
@@ -277,7 +306,9 @@ public class AccountServiceImpl implements AccountService {
         return savedAccount;
     }
 
-    private AgencyInfo regiesterAgencyInfo(String shopName, String shopAddress, String shopEmail, String shopPhone, String taxCode, String idCardNumber, String frontIdCardImageUrl, String backIdCardImageUrl, String professionalCertUrl, String businessLicenseUrl) {
+    private AgencyInfo registerAgencyInfo(String shopName, String shopAddress, String shopEmail, String shopPhone,
+                                          String taxCode, String idCardNumber, String frontIdCardImageUrl,
+                                          String backIdCardImageUrl, String professionalCertUrl, String businessLicenseUrl) {
         Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         AgencyInfo saveAgencyInfo = agencyInfoRepository.save(AgencyInfo.builder()
                 .account(account.get())
@@ -335,22 +366,6 @@ public class AccountServiceImpl implements AccountService {
         );
     }
 
-    public Optional<Account> findAccountByLoginId(String loginId) {
-        if (Regex.isValidEmail(loginId)) {
-            return accountRepository.findByEmail(loginId);
-        } else if (Regex.isValidPhoneNumber(loginId)) {
-            return accountRepository.findByPhone(loginId);
-        } else {
-            return accountRepository.findByUsername(loginId);
-        }
-    }
-
-    @Override
-    public Optional<Account> findCurrentUserInfo() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return accountRepository.findByUsername(authentication.getName());
-    }
-
     public List<CartItemDTO> getCartItemList(Long cartId) {
         List<CartItem> cartList = cartItemRepository.findAllByCart_CartId(cartId);
 
@@ -384,6 +399,4 @@ public class AccountServiceImpl implements AccountService {
         BigDecimal subTotal = price.multiply(BigDecimal.valueOf(cartItem.getQuantity()));
         return Regex.formatPriceToVND(subTotal);
     }
-
-
 }

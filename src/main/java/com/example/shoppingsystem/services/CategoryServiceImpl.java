@@ -2,7 +2,6 @@ package com.example.shoppingsystem.services;
 
 import com.example.shoppingsystem.constants.ErrorCode;
 import com.example.shoppingsystem.constants.Message;
-import com.example.shoppingsystem.dtos.AccountInfoDTO;
 import com.example.shoppingsystem.entities.Category;
 import com.example.shoppingsystem.entities.Multimedia;
 import com.example.shoppingsystem.repositories.CategoryRepository;

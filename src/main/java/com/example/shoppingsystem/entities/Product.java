@@ -1,10 +1,9 @@
 package com.example.shoppingsystem.entities;
 
+import com.example.shoppingsystem.enums.ApprovalStatusEnum;
+import com.example.shoppingsystem.enums.ProductStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -15,7 +14,8 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 @Table(name = "product")
-public class Product extends BaseEntity{
+public class Product extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PRODUCT_ID")
@@ -58,6 +58,13 @@ public class Product extends BaseEntity{
 
     @ManyToOne
     @JoinColumn(name = "STATUS_ID", referencedColumnName = "STATUS_ID", nullable = false)
-    private ApprovalStatus approvalStatus;
+    private ApprovalStatus status; // ✅ Tên đã sửa
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "PRODUCT_STATUS")
+    private ProductStatus productStatus;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "APPROVAL_STATUS")
+    private ApprovalStatusEnum approvalStatus; // ✅ Enum trạng thái duyệt
 }
