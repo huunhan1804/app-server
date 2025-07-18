@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Repository
 public interface MultimediaRepository extends JpaRepository<Multimedia, Long> {
@@ -26,4 +27,8 @@ public interface MultimediaRepository extends JpaRepository<Multimedia, Long> {
     List<Multimedia> findByProduct_ProductIdAndMultimediaType(Long productId, MultimediaType type);
 
     List<Multimedia> findByAccount_AccountId(Long accountId);
+    @Query("SELECT m FROM Multimedia m WHERE m.account.accountId = :accountId AND m.multimediaType = :type")
+    Optional<Multimedia> findByAccount(@Param("accountId") Long accountId);
+
+    List<Multimedia> findByProduct_ProductId(Long productId);
 }

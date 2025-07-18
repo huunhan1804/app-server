@@ -4,10 +4,12 @@ import com.example.shoppingsystem.entities.Product;
 import com.example.shoppingsystem.entities.Category;
 import com.example.shoppingsystem.entities.Account;
 import com.example.shoppingsystem.entities.ApprovalStatus;
+import com.example.shoppingsystem.enums.ProductStatus;
 import com.example.shoppingsystem.repositories.ProductRepository;
 import com.example.shoppingsystem.repositories.CategoryRepository;
 import com.example.shoppingsystem.repositories.AccountRepository;
 import com.example.shoppingsystem.repositories.MultimediaRepository;
+import com.example.shoppingsystem.repositories.ApprovalStatusRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +35,9 @@ public class ProductManagementService {
     @Autowired
     private MultimediaRepository multimediaRepository;
 
+    @Autowired
+    private ApprovalStatusRepository approvalStatusRepository;
+
     public Map<String, Object> getAllProducts(Pageable pageable, String search, String status,
                                               Long categoryId, Long agencyId) {
         Specification<Product> spec = createProductSpecification(search, status, categoryId, agencyId);
@@ -44,7 +49,12 @@ public class ProductManagementService {
             Map<String, Object> productData = new HashMap<>();
             productData.put("productId", product.getProductId());
             productData.put("productName", product.getProductName());
-            productData.put("shortDescription", product.getShortDescription());
+            productData.put("shortDescription",
+                    product.getProductDescription() != null ?
+                            (product.getProductDescription().length() > 100 ?
+                                    product.getProductDescription().substring(0, 100) + "..." :
+                                    product.getProductDescription()) :
+                            "");
             productData.put("listPrice", product.getListPrice());
             productData.put("salePrice", product.getSalePrice());
             productData.put("inventoryQuantity", product.getInventoryQuantity());
@@ -84,7 +94,6 @@ public class ProductManagementService {
     }
 
     public Map<String, Object> getPendingProducts() {
-        // 🔁 Sửa lại cho đúng nếu không có enum ApprovalStatusCode
         List<Product> pendingProducts = productRepository.findByApprovalStatus_StatusCode("PROCESSING");
 
         List<Map<String, Object>> productList = new ArrayList<>();
@@ -109,13 +118,15 @@ public class ProductManagementService {
 
         Product product = productOpt.get();
 
-        // Gán trạng thái duyệt APPROVED – bạn phải lấy từ DB hoặc Enum String (ví dụ)
-        ApprovalStatus approvedStatus = new ApprovalStatus();
-        approvedStatus.setStatusCode("APPROVED");
+        // Sửa lỗi: Lấy ApprovalStatus từ database thay vì tạo mới
+        ApprovalStatus approvedStatus = approvalStatusRepository.findApprovalStatusByStatusCode("APPROVED");
+        if (approvedStatus == null) {
+            throw new RuntimeException("ApprovalStatus 'APPROVED' not found in database");
+        }
         product.setApprovalStatus(approvedStatus);
 
-        // Gán trạng thái hoạt động nếu có enum ProductStatus
-        product.setProductStatus("ACTIVE"); // String hoặc enum tuỳ thiết kế
+        // Sửa lỗi: Sử dụng enum ProductStatus
+        product.setProductStatus(ProductStatus.ACTIVE);
         product.setUpdatedDate(LocalDateTime.now());
 
         productRepository.save(product);
@@ -137,8 +148,11 @@ public class ProductManagementService {
 
         Product product = productOpt.get();
 
-        ApprovalStatus declinedStatus = new ApprovalStatus();
-        declinedStatus.setStatusCode("DECLINED");
+        // Sửa lỗi: Lấy ApprovalStatus từ database thay vì tạo mới
+        ApprovalStatus declinedStatus = approvalStatusRepository.findApprovalStatusByStatusCode("DECLINED");
+        if (declinedStatus == null) {
+            throw new RuntimeException("ApprovalStatus 'DECLINED' not found in database");
+        }
         product.setApprovalStatus(declinedStatus);
 
         product.setRejectionReason(reason);
@@ -179,7 +193,8 @@ public class ProductManagementService {
 
         Product product = productOpt.get();
 
-        product.setProductStatus("INACTIVE");
+        // Sửa lỗi: Sử dụng enum ProductStatus
+        product.setProductStatus(ProductStatus.INACTIVE);
         product.setUpdatedDate(LocalDateTime.now());
 
         productRepository.save(product);
@@ -205,11 +220,11 @@ public class ProductManagementService {
 
             if (status != null && !status.isEmpty()) {
                 if (status.equalsIgnoreCase("active")) {
-                    predicates.add(criteriaBuilder.equal(root.get("productStatus"), "ACTIVE"));
+                    predicates.add(criteriaBuilder.equal(root.get("productStatus"), ProductStatus.ACTIVE));
                 } else if (status.equalsIgnoreCase("pending")) {
-                    predicates.add(criteriaBuilder.equal(root.get("approvalStatus").get("statusCode"), "PROCESSING"));
+                    predicates.add(criteriaBuilder.equal(root.get("status").get("statusCode"), "PROCESSING"));
                 } else if (status.equalsIgnoreCase("rejected")) {
-                    predicates.add(criteriaBuilder.equal(root.get("approvalStatus").get("statusCode"), "DECLINED"));
+                    predicates.add(criteriaBuilder.equal(root.get("status").get("statusCode"), "DECLINED"));
                 }
             }
 
@@ -263,7 +278,11 @@ public class ProductManagementService {
         productData.put("totalReviews", product.getTotalReviews());
         productData.put("rejectionReason", product.getRejectionReason());
 
-        List<Map<String, Object>> images = multimediaRepository.findImagesByProductId(product.getProductId());
+        // Lấy danh sách images từ MultimediaRepository
+        List<Map<String, Object>> images = multimediaRepository.findImagesByProductId(
+                product.getProductId(),
+                com.example.shoppingsystem.enums.MultimediaType.IMAGE
+        );
         productData.put("images", images);
 
         return productData;

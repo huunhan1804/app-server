@@ -1,6 +1,5 @@
 package com.example.shoppingsystem.entities;
 
-import com.example.shoppingsystem.enums.ApprovalStatusEnum;
 import com.example.shoppingsystem.enums.ProductStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -56,15 +55,53 @@ public class Product extends BaseEntity {
     @Column(name = "IS_SALE")
     private Boolean isSale;
 
+    // Sửa lỗi: Sử dụng đúng relationship với ApprovalStatus
     @ManyToOne
     @JoinColumn(name = "STATUS_ID", referencedColumnName = "STATUS_ID", nullable = false)
-    private ApprovalStatus status; // ✅ Tên đã sửa
+    private ApprovalStatus status;
 
+    // Sửa lỗi: Sử dụng enum ProductStatus
     @Enumerated(EnumType.STRING)
     @Column(name = "PRODUCT_STATUS")
     private ProductStatus productStatus;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "APPROVAL_STATUS")
-    private ApprovalStatusEnum approvalStatus; // ✅ Enum trạng thái duyệt
+    // Thêm các field còn thiếu cho ProductManagementService
+    @Column(name = "SHORT_DESCRIPTION", columnDefinition = "TEXT")
+    private String shortDescription;
+
+    @Column(name = "INGREDIENTS", columnDefinition = "TEXT")
+    private String ingredients;
+
+    @Column(name = "USAGE_INSTRUCTIONS", columnDefinition = "TEXT")
+    private String usageInstructions;
+
+    @Column(name = "CONTRAINDICATIONS", columnDefinition = "TEXT")
+    private String contraindications;
+
+    @Column(name = "ORIGIN")
+    private String origin;
+
+    @Column(name = "MANUFACTURER")
+    private String manufacturer;
+
+    @Column(name = "EXPIRY_MONTHS")
+    private Integer expiryMonths;
+
+    @Column(name = "AVERAGE_RATING")
+    private Double averageRating;
+
+    @Column(name = "TOTAL_REVIEWS")
+    private Integer totalReviews;
+
+    @Column(name = "REJECTION_REASON", columnDefinition = "TEXT")
+    private String rejectionReason;
+
+    // Getter method cho ApprovalStatus
+    public ApprovalStatus getApprovalStatus() {
+        return this.status;
+    }
+
+    public void setApprovalStatus(ApprovalStatus approvalStatus) {
+        this.status = approvalStatus;
+    }
 }
