@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Controller
@@ -18,11 +19,28 @@ public class DashboardController {
 
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
+        // Load dữ liệu cho dashboard
         model.addAttribute("revenueData", adminDashboardService.getRevenueLast30Days());
         model.addAttribute("categoryStats", adminDashboardService.getCategoryStatistics());
         model.addAttribute("recentOrders", adminDashboardService.getRecentOrders());
         model.addAttribute("newUsers", adminDashboardService.getNewUsers());
         return "admin/dashboard";
+    }
+
+    // API endpoints cho AJAX calls
+    @GetMapping("/api/pending-counts")
+    @ResponseBody
+    public Map<String, Integer> getPendingCounts() {
+        Map<String, Integer> counts = new HashMap<>();
+        counts.put("pendingProducts", adminDashboardService.getPendingProductsCount());
+        counts.put("pendingApplications", adminDashboardService.getPendingApplicationsCount());
+        return counts;
+    }
+
+    @GetMapping("/api/dashboard-stats")
+    @ResponseBody
+    public Map<String, Object> getDashboardStats() {
+        return adminDashboardService.getDashboardStats();
     }
 
     @GetMapping("/revenue-chart")
@@ -35,5 +53,21 @@ public class DashboardController {
     @ResponseBody
     public Map<String, Object> getCategoryChart() {
         return adminDashboardService.getCategoryChartData();
+    }
+
+    @GetMapping("/api/recent-orders")
+    @ResponseBody
+    public Map<String, Object> getRecentOrders() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("orders", adminDashboardService.getRecentOrders());
+        return response;
+    }
+
+    @GetMapping("/api/new-users")
+    @ResponseBody
+    public Map<String, Object> getNewUsers() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("users", adminDashboardService.getNewUsers());
+        return response;
     }
 }

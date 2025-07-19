@@ -151,4 +151,40 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
         if (price == null) return "0 VND";
         return String.format("%,.0f VND", price);
     }
+
+    // Thêm vào AdminDashboardServiceImpl.java
+    @Override
+    public Map<String, Object> getDashboardStats() {
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("totalProducts", getTotalProducts());
+        stats.put("totalOrders", getTotalOrders());
+        stats.put("totalUsers", getTotalUsers());
+        stats.put("totalRevenue", getTotalRevenue());
+        return stats;
+    }
+
+    @Override
+    public int getTotalProducts() {
+        return (int) productRepository.count();
+    }
+
+    @Override
+    public int getTotalOrders() {
+        return (int) orderRepository.count();
+    }
+
+    @Override
+    public int getTotalUsers() {
+        return (int) accountRepository.count();
+    }
+
+    @Override
+    public String getTotalRevenue() {
+        List<OrderList> orders = orderRepository.findAll();
+        BigDecimal total = orders.stream()
+                .filter(order -> "DELIVERED".equals(order.getOrderStatus().toString()))
+                .map(OrderList::getTotalPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return formatPrice(total);
+    }
 }

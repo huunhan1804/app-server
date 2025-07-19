@@ -19,4 +19,11 @@ public interface AdminDashboardService {
     // Admin specific methods
     int getPendingProductsCount();
     int getPendingApplicationsCount();
+
+    // New methods for dashboard stats
+    Map<String, Object> getDashboardStats();
+    int getTotalProducts();
+    int getTotalOrders();
+    int getTotalUsers();
+    String getTotalRevenue();
 }
