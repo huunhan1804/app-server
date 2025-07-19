@@ -67,17 +67,19 @@ public class SecurityConfig {
     public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {
         return http
                 .securityMatcher("/admin/**")
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.disable()) // Tắt CSRF cho admin
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/admin/login",
+                                "/admin/perform-login",
                                 "/admin/css/**",
                                 "/admin/js/**",
                                 "/admin/images/**",
-                                "/admin/static/**"
+                                "/admin/static/**",
+                                "/admin/webjars/**"
                         ).permitAll()
-                        .anyRequest().hasRole("admin") // Yêu cầu role ADMIN cho tất cả admin routes
+                        .anyRequest().hasAuthority("admin") // Yêu cầu quyền admin
                 )
                 .formLogin(form -> form
                         .loginPage("/admin/login")
@@ -93,12 +95,19 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/admin/login?logout=true")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
+                        .clearAuthentication(true)
                         .permitAll()
                 )
                 .sessionManagement(sess -> sess
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                         .maximumSessions(1)
                         .maxSessionsPreventsLogin(false)
+                )
+                .exceptionHandling(ex -> ex
+                        .accessDeniedPage("/admin/login?error=access_denied")
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.sendRedirect("/admin/login");
+                        })
                 )
                 .build();
     }
@@ -136,9 +145,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Collections.singletonList("*"));
-        configuration.addAllowedMethod("*");
-        configuration.addAllowedHeader("*");
+        configuration.addAllowedOrigin("http://localhost:3000");
+        configuration.addAllowedOrigin("http://localhost:8080");
+        configuration.setAllowedMethods(Collections.singletonList("*"));
+        configuration.setAllowedHeaders(Collections.singletonList("*"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

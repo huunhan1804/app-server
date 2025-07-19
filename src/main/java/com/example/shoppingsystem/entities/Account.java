@@ -1,4 +1,3 @@
-// Account.java
 package com.example.shoppingsystem.entities;
 
 import jakarta.persistence.*;
@@ -56,11 +55,11 @@ public class Account extends BaseEntity implements UserDetails {
     @Column(name = "ACCOUNT_STATUS")
     private AccountStatus accountStatus = AccountStatus.PENDING;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER) // Đảm bảo role được load ngay
     @JoinColumn(name = "ROLE_ID", nullable = false)
     private Role role;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER) // Đảm bảo approvalStatus được load ngay
     @JoinColumn(name = "STATUS_ID")
     private ApprovalStatus approvalStatus;
 
@@ -91,7 +90,9 @@ public class Account extends BaseEntity implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority(role.getRoleCode()));
+        if (role != null && role.getRoleCode() != null) {
+            authorities.add(new SimpleGrantedAuthority(role.getRoleCode()));
+        }
         return authorities;
     }
 
@@ -125,7 +126,8 @@ public class Account extends BaseEntity implements UserDetails {
         return accountStatus == AccountStatus.ACTIVE && !isBanned;
     }
 
-    @ManyToMany
+    // Tránh lỗi lazy loading bằng cách chỉ khởi tạo khi cần thiết
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "account_coupon",
             joinColumns = @JoinColumn(name = "ACCOUNT_ID"),
@@ -133,5 +135,32 @@ public class Account extends BaseEntity implements UserDetails {
     private Set<Coupon> coupons = new HashSet<>();
 
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Address> addresses;
+    private List<Address> addresses = new ArrayList<>();
+
+    // Override toString để tránh lỗi lazy loading khi debug
+    @Override
+    public String toString() {
+        return "Account{" +
+                "accountId=" + accountId +
+                ", username='" + username + '\'' +
+                ", email='" + email + '\'' +
+                ", fullname='" + fullname + '\'' +
+                ", accountStatus=" + accountStatus +
+                ", isBanned=" + isBanned +
+                '}';
+    }
+
+    // Override equals và hashCode để tránh vấn đề với lazy loading
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Account account = (Account) o;
+        return Objects.equals(accountId, account.accountId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(accountId);
+    }
 }

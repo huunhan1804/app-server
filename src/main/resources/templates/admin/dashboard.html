@@ -1,6 +1,5 @@
-<!-- src/main/resources/templates/admin/dashboard.html -->
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,6 +30,13 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
+        .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2) !important;
+            border-radius: 8px;
+        }
+        .dropdown-menu {
+            background-color: rgba(255, 255, 255, 0.95);
+        }
     </style>
 </head>
 <body>
@@ -45,7 +51,6 @@
                     </h4>
                 </div>
 
-                <!-- Cập nhật sidebar trong dashboard.html -->
                 <ul class="nav flex-column">
                     <li class="nav-item">
                         <a class="nav-link text-white active" href="/admin/dashboard">
@@ -90,71 +95,152 @@
                         </a>
                     </li>
                 </ul>
-            </div>
-            <!-- Trong phần header/navbar -->
-            <div class="d-flex align-items-center">
-            <span class="me-3">
-                <i class="fas fa-user-circle"></i>
-                <span th:text="${#authentication.name}">Admin</span>
-            </span>
-                        <form th:action="@{/admin/logout}" method="post" style="display: inline;">
-                            <button type="submit" class="btn btn-outline-danger btn-sm">
-                                <i class="fas fa-sign-out-alt"></i> Đăng xuất
-                            </button>
-                        </form>
+
+                <!-- Admin User Info -->
+                <div class="mt-auto pt-3 border-top border-light">
+                    <div class="dropdown">
+                        <a class="nav-link dropdown-toggle text-white d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-2"></i>
+                            <span sec:authentication="name">Admin</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">
+                                <i class="fas fa-user"></i> Thông tin tài khoản
+                            </a></li>
+                            <li><a class="dropdown-item" href="#">
+                                <i class="fas fa-cog"></i> Cài đặt
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form th:action="@{/admin/logout}" method="post" style="display: inline;">
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
                     </div>
+                </div>
+            </div>
         </nav>
 
-        <!-- Main content -->
+        <!-- Main Content -->
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+            <!-- Header -->
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 class="h2">
-                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                    <i class="fas fa-tachometer-alt text-primary"></i> Dashboard
                 </h1>
                 <div class="btn-toolbar mb-2 mb-md-0">
-                    <button type="button" class="btn btn-sm btn-outline-secondary">
-                        <i class="fas fa-sync-alt"></i> Làm mới
+                    <div class="btn-group me-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="fas fa-calendar"></i> This week
                     </button>
                 </div>
             </div>
 
-            <!-- Revenue Chart -->
+            <!-- Stats Cards -->
             <div class="row mb-4">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0">
-                                <i class="fas fa-chart-line"></i> Doanh thu 30 ngày qua
-                            </h5>
-                        </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card stats-card mb-4">
                         <div class="card-body">
-                            <canvas id="revenueChart" width="400" height="100"></canvas>
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title text-white-50">TỔNG SẢN PHẨM</h6>
+                                    <h2 class="text-white" id="totalProducts">0</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-box fa-2x text-white-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card stats-card mb-4">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title text-white-50">TỔNG ĐƠN HÀNG</h6>
+                                    <h2 class="text-white" id="totalOrders">0</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-shopping-cart fa-2x text-white-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card stats-card mb-4">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title text-white-50">TỔNG NGƯỜI DÙNG</h6>
+                                    <h2 class="text-white" id="totalUsers">0</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-users fa-2x text-white-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card stats-card mb-4">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title text-white-50">DOANH THU</h6>
+                                    <h2 class="text-white" id="totalRevenue">0 VND</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-dollar-sign fa-2x text-white-50"></i>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="row">
-                <!-- Category Stats -->
-                <div class="col-md-6 mb-4">
+            <!-- Charts Row -->
+            <div class="row mb-4">
+                <div class="col-lg-8">
                     <div class="card">
-                        <div class="card-header bg-success text-white">
-                            <h5 class="mb-0">
-                                <i class="fas fa-chart-pie"></i> Phân bố danh mục
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-chart-line text-primary"></i> Doanh thu 30 ngày qua
                             </h5>
                         </div>
                         <div class="card-body">
-                            <canvas id="categoryChart" width="400" height="300"></canvas>
+                            <canvas id="revenueChart" height="100"></canvas>
                         </div>
                     </div>
                 </div>
-
-                <!-- Recent Orders -->
-                <div class="col-md-6 mb-4">
+                <div class="col-lg-4">
                     <div class="card">
-                        <div class="card-header bg-warning text-dark">
-                            <h5 class="mb-0">
-                                <i class="fas fa-clock"></i> Đơn hàng gần đây
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-chart-pie text-success"></i> Thống kê danh mục
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="categoryChart" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activities -->
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-clock text-info"></i> Đơn hàng gần đây
                             </h5>
                         </div>
                         <div class="card-body">
@@ -164,39 +250,28 @@
                                     <tr>
                                         <th>Mã đơn</th>
                                         <th>Khách hàng</th>
-                                        <th>Giá trị</th>
+                                        <th>Tổng tiền</th>
                                         <th>Trạng thái</th>
                                     </tr>
                                     </thead>
-                                    <tbody>
-                                    <tr th:each="order : ${recentOrders}">
-                                        <td th:text="${order.orderId}"></td>
-                                        <td th:text="${order.customerName}"></td>
-                                        <td th:text="${order.totalAmount}"></td>
-                                        <td>
-                                            <span class="badge bg-secondary" th:text="${order.status}"></span>
-                                        </td>
-                                    </tr>
+                                    <tbody id="recentOrdersTable">
+                                    <!-- Data will be loaded here -->
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- New Users -->
-            <div class="row mb-4">
-                <div class="col-12">
+                <div class="col-lg-6">
                     <div class="card">
-                        <div class="card-header bg-info text-white">
-                            <h5 class="mb-0">
-                                <i class="fas fa-user-plus"></i> Người dùng mới
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-user-plus text-warning"></i> Người dùng mới
                             </h5>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table">
+                                <table class="table table-sm">
                                     <thead>
                                     <tr>
                                         <th>Tên</th>
@@ -205,13 +280,8 @@
                                         <th>Ngày đăng ký</th>
                                     </tr>
                                     </thead>
-                                    <tbody>
-                                    <tr th:each="user : ${newUsers}">
-                                        <td th:text="${user.fullName}"></td>
-                                        <td th:text="${user.email}"></td>
-                                        <td th:text="${user.role}"></td>
-                                        <td th:text="${#temporals.format(user.joinDate, 'dd/MM/yyyy HH:mm')}"></td>
-                                    </tr>
+                                    <tbody id="newUsersTable">
+                                    <!-- Data will be loaded here -->
                                     </tbody>
                                 </table>
                             </div>
@@ -226,109 +296,103 @@
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<script th:inline="javascript">
-    // Revenue Chart
-    fetch('/admin/revenue-chart')
-        .then(response => response.json())
-        .then(data => {
-            const ctx = document.getElementById('revenueChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: data.labels,
-                    datasets: [{
-                        label: 'Doanh thu',
-                        data: data.data,
-                        borderColor: 'rgb(75, 192, 192)',
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        tension: 0.1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Doanh thu theo ngày'
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        });
-
-    // Category Chart
-    fetch('/admin/category-chart')
-        .then(response => response.json())
-        .then(data => {
-            const ctx = document.getElementById('categoryChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: data.labels,
-                    datasets: [{
-                        data: data.data,
-                        backgroundColor: [
-                            '#FF6384',
-                            '#36A2EB',
-                            '#FFCE56',
-                            '#4BC0C0',
-                            '#9966FF',
-                            '#FF9F40'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Phân bố sản phẩm theo danh mục'
-                        }
-                    }
-                }
-            });
-        });
-</script>
+<!-- Dashboard Scripts -->
 <script>
-    // Auto-update pending counts
-    function updatePendingCounts() {
-        fetch('/api/admin/pending-counts')
+    // Initialize dashboard when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        loadDashboardData();
+        initializeCharts();
+    });
+
+    // Load dashboard data
+    function loadDashboardData() {
+        // Load pending counts
+        fetch('/admin/api/pending-counts')
             .then(response => response.json())
             .then(data => {
-                const pendingProductElement = document.getElementById('pendingProductCount');
-                const pendingApplicationElement = document.getElementById('pendingApplicationCount');
-
-                if (pendingProductElement) {
-                    pendingProductElement.textContent = data.pendingProducts;
-                    if (data.pendingProducts > 0) {
-                        pendingProductElement.style.display = 'inline';
-                    } else {
-                        pendingProductElement.style.display = 'none';
-                    }
-                }
-
-                if (pendingApplicationElement) {
-                    pendingApplicationElement.textContent = data.pendingApplications;
-                    if (data.pendingApplications > 0) {
-                        pendingApplicationElement.style.display = 'inline';
-                    } else {
-                        pendingApplicationElement.style.display = 'none';
-                    }
-                }
+                document.getElementById('pendingProductCount').textContent = data.pendingProducts || 0;
+                document.getElementById('pendingApplicationCount').textContent = data.pendingApplications || 0;
             })
-            .catch(error => console.error('Error fetching pending counts:', error));
+            .catch(error => console.error('Error loading pending counts:', error));
     }
 
-    // Update counts on page load
-    document.addEventListener('DOMContentLoaded', updatePendingCounts);
+    // Initialize charts
+    function initializeCharts() {
+        // Revenue Chart
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        const revenueChart = new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Doanh thu (VND)',
+                    data: [],
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
 
-    // Update counts every 30 seconds
-    setInterval(updatePendingCounts, 30000);
+        // Category Chart
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        const categoryChart = new Chart(categoryCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [],
+                datasets: [{
+                    data: [],
+                    backgroundColor: [
+                        '#FF6384',
+                        '#36A2EB',
+                        '#FFCE56',
+                        '#4BC0C0',
+                        '#9966FF',
+                        '#FF9F40'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        // Load chart data
+        loadChartData(revenueChart, categoryChart);
+    }
+
+    // Load chart data from server
+    function loadChartData(revenueChart, categoryChart) {
+        // Load revenue data
+        fetch('/admin/revenue-chart')
+            .then(response => response.json())
+            .then(data => {
+                revenueChart.data.labels = data.labels || [];
+                revenueChart.data.datasets[0].data = data.data || [];
+                revenueChart.update();
+            })
+            .catch(error => console.error('Error loading revenue chart:', error));
+
+        // Load category data
+        fetch('/admin/category-chart')
+            .then(response => response.json())
+            .then(data => {
+                categoryChart.data.labels = data.labels || [];
+                categoryChart.data.datasets[0].data = data.data || [];
+                categoryChart.update();
+            })
+            .catch(error => console.error('Error loading category chart:', error));
+    }
 </script>
 </body>
 </html>
