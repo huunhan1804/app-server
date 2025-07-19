@@ -161,6 +161,6 @@ public class Account extends BaseEntity implements UserDetails {
 
     @Override
     public int hashCode() {
-        return Objects.hash(accountId);
+        return Objects.hash(accountId);  // CHỈ dùng accountId, không dùng collections
     }
 }
