@@ -25,5 +25,4 @@ public interface AccountService {
     ApiResponse<AccountInfoDTO> updateAvatar(UpdateAvatarRequest request);
     ApiResponse<String> changePassword(ChangePasswordRequest request);
     AgencyInfo registerAgency(String shopName, String shopAddress, String shopEmail, String shopPhone, String taxCode, String idCardNumber, String frontIdCardImageUrl, String backIdCardImageUrl, String professionalCertUrl, String businessLicenseUrl);
-    ApiResponse<>
 }

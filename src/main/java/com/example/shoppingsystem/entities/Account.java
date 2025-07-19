@@ -1,3 +1,4 @@
+// Account.java
 package com.example.shoppingsystem.entities;
 
 import jakarta.persistence.*;
@@ -9,6 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Builder
@@ -47,6 +49,13 @@ public class Account extends BaseEntity implements UserDetails {
     @Column(name = "IS_BANNED")
     private boolean isBanned;
 
+    @Column(name = "LAST_LOGIN")
+    private LocalDateTime lastLogin;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ACCOUNT_STATUS")
+    private AccountStatus accountStatus = AccountStatus.PENDING;
+
     @ManyToOne
     @JoinColumn(name = "ROLE_ID", nullable = false)
     private Role role;
@@ -55,6 +64,29 @@ public class Account extends BaseEntity implements UserDetails {
     @JoinColumn(name = "STATUS_ID")
     private ApprovalStatus approvalStatus;
 
+    // Account Status Enum
+    public enum AccountStatus {
+        ACTIVE, INACTIVE, PENDING, SUSPENDED
+    }
+
+    // Custom setter for isBanned (để tương thích với code cũ)
+    public void setIsBanned(boolean banned) {
+        this.isBanned = banned;
+    }
+
+    // Custom getter cho isBanned (để tương thích với code cũ)
+    public boolean isIsBanned() {
+        return this.isBanned;
+    }
+
+    // Lombok sẽ tự động tạo isBanned() method, nhưng chúng ta cần đảm bảo tương thích
+    public boolean isBanned() {
+        return this.isBanned;
+    }
+
+    public void setBanned(boolean banned) {
+        this.isBanned = banned;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -80,7 +112,7 @@ public class Account extends BaseEntity implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return !isBanned;
     }
 
     @Override
@@ -90,7 +122,7 @@ public class Account extends BaseEntity implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return accountStatus == AccountStatus.ACTIVE && !isBanned;
     }
 
     @ManyToMany
@@ -102,5 +134,4 @@ public class Account extends BaseEntity implements UserDetails {
 
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Address> addresses;
-
 }
