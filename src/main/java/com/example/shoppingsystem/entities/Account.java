@@ -131,7 +131,8 @@ public class Account extends BaseEntity implements UserDetails {
     @JoinTable(
             name = "account_coupon",
             joinColumns = @JoinColumn(name = "ACCOUNT_ID"),
-            inverseJoinColumns = @JoinColumn(name = "COUPON_ID"))
+            inverseJoinColumns = @JoinColumn(name = "COUPON_ID")
+    )
     private Set<Coupon> coupons = new HashSet<>();
 
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
