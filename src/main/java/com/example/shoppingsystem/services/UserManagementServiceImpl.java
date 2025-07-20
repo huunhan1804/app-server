@@ -6,8 +6,10 @@ import com.example.shoppingsystem.dtos.AgencyApplicationDetailDTO;
 import com.example.shoppingsystem.dtos.UserManagementDTO;
 import com.example.shoppingsystem.entities.*;
 import com.example.shoppingsystem.repositories.*;
+import com.example.shoppingsystem.services.interfaces.NotificationService;
 import com.example.shoppingsystem.services.interfaces.UserManagementService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +36,8 @@ public class UserManagementServiceImpl implements UserManagementService {
     private final ApprovalStatusRepository approvalStatusRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     public Page<UserManagementDTO> getAllCustomers(Pageable pageable, String status, String membershipLevel, String keyword) {
@@ -364,13 +368,11 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     private void sendNotificationToAgency(Account agency, String title, String message) {
-        // TODO: Implement notification service
-        System.out.println("Notification sent to Agency: " + agency.getFullname() + " - " + title + ": " + message);
+        notificationService.sendNotificationToAgency(agency, title, message);
     }
 
     private void sendNotificationToUser(Account user, String title, String message) {
-        // TODO: Implement notification service
-        System.out.println("Notification sent to User: " + user.getFullname() + " - " + title + ": " + message);
+        notificationService.sendNotificationToUser(user, title, message);
     }
 
     @Override

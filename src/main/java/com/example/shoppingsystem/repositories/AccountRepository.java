@@ -1,8 +1,6 @@
 package com.example.shoppingsystem.repositories;
 
 import com.example.shoppingsystem.entities.Account;
-import com.example.shoppingsystem.entities.ApprovalStatus;
-import com.example.shoppingsystem.entities.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -28,4 +26,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     boolean existsByUsername(String admin);
 
     Long countByCreatedDateBetween(LocalDateTime localDateTime, LocalDateTime localDateTime1);
+
+    List<Account> findByRole_RoleCode(String admin);
 }

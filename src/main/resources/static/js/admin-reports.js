@@ -501,6 +501,10 @@ class ReportManager {
 
     async exportReport() {
         try {
+            const exportBtn = document.querySelector('button[onclick="exportReport()"]');
+            const originalText = exportBtn.innerHTML;
+
+            // Validation
             const requestData = {
                 reportType: document.getElementById('report-period').value,
                 startDate: document.getElementById('report-date-from').value,
@@ -512,27 +516,34 @@ class ReportManager {
                 return;
             }
 
-            this.showLoading();
+            // Show loading state cho button
+            exportBtn.disabled = true;
+            exportBtn.innerHTML = `
+            <i class="fas fa-spinner fa-spin"></i> Đang xuất...
+        `;
 
             let exportUrl = '/admin/reports/api/export/';
-            if (this.currentReportType === 'revenue') {
-                exportUrl += 'revenue';
-            } else {
-                exportUrl += 'user-analytics';
-            }
+            exportUrl += this.currentReportType === 'revenue' ? 'revenue' : 'user-analytics';
+
+            // Thêm timeout 30 giây
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000);
 
             const response = await fetch(exportUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(requestData)
+                body: JSON.stringify(requestData),
+                signal: controller.signal
             });
 
-            this.hideLoading();
+            clearTimeout(timeoutId);
 
             if (response.ok) {
                 const blob = await response.blob();
+
+                // Download file
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.style.display = 'none';
@@ -540,24 +551,38 @@ class ReportManager {
 
                 const contentDisposition = response.headers.get('content-disposition');
                 const filename = contentDisposition
-                    ? contentDisposition.split('filename=')[1]
-                    : `report_${this.currentReportType}_${Date.now()}.xlsx`;
+                    ? contentDisposition.split('filename=')[1].replace(/"/g, '')
+                    : `bao_cao_${this.currentReportType}_${new Date().toISOString().split('T')[0]}.xlsx`;
 
                 a.download = filename;
                 document.body.appendChild(a);
                 a.click();
+
+                // Cleanup
                 window.URL.revokeObjectURL(url);
                 document.body.removeChild(a);
 
-                this.showSuccess('Xuất báo cáo thành công');
+                this.showSuccess('Xuất báo cáo thành công!');
             } else {
-                throw new Error('Export failed');
+                const errorData = await response.text();
+                throw new Error(`Export failed: ${response.status} - ${errorData}`);
             }
 
         } catch (error) {
-            this.hideLoading();
-            console.error('Error exporting report:', error);
-            this.showError('Không thể xuất báo cáo');
+            if (error.name === 'AbortError') {
+                this.showError('Xuất báo cáo bị timeout. Vui lòng thử lại!');
+            } else {
+                console.error('Error exporting report:', error);
+                this.showError('Không thể xuất báo cáo. Vui lòng thử lại!');
+            }
+        } finally {
+            // Restore button state
+            const exportBtn = document.querySelector('button[onclick="exportReport()"]');
+            exportBtn.disabled = false;
+            exportBtn.innerHTML = `
+            <i class="fas fa-download"></i> Xuất Excel
+        `;
+
         }
     }
 

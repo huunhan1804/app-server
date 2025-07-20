@@ -2,12 +2,17 @@ package com.example.shoppingsystem.services;
 
 import com.example.shoppingsystem.constants.StatusCode;
 import com.example.shoppingsystem.dtos.ProductManagementDTO;
-import com.example.shoppingsystem.entities.*;
+import com.example.shoppingsystem.entities.Account;
+import com.example.shoppingsystem.entities.ApprovalStatus;
+import com.example.shoppingsystem.entities.Multimedia;
+import com.example.shoppingsystem.entities.Product;
 import com.example.shoppingsystem.repositories.*;
 import com.example.shoppingsystem.responses.AgencyResponse;
 import com.example.shoppingsystem.responses.CategoryResponse;
+import com.example.shoppingsystem.services.interfaces.NotificationService;
 import com.example.shoppingsystem.services.interfaces.ProductManagementService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -15,7 +20,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +33,8 @@ public class ProductManagementServiceImpl implements ProductManagementService {
     private final ApprovalStatusRepository approvalStatusRepository;
     private final MultimediaRepository multimediaRepository;
     private final AgencyInfoRepository agencyInfoRepository;
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     public Page<ProductManagementDTO> getAllProducts(Pageable pageable, String status, String category, String agency, String keyword) {
@@ -94,9 +100,10 @@ public class ProductManagementServiceImpl implements ProductManagementService {
         product.setApprovalStatus(approvedStatus);
         productRepository.save(product);
 
-        // Gửi thông báo đến Agency
-        sendNotificationToAgency(product.getAccount(), "Sản phẩm được phê duyệt",
-                "Sản phẩm '" + product.getProductName() + "' đã được phê duyệt và có thể bán công khai.");
+        notificationService.sendProductNotification(product.getAccount(), product.getProductName(),
+                "Sản phẩm được phê duyệt",
+                "Chúc mừng! Sản phẩm '" + product.getProductName() + "' đã được phê duyệt và có thể bán trên hệ thống.");
+
     }
 
     @Override
@@ -109,9 +116,11 @@ public class ProductManagementServiceImpl implements ProductManagementService {
         product.setApprovalStatus(rejectedStatus);
         productRepository.save(product);
 
-        // Gửi thông báo đến Agency
-        sendNotificationToAgency(product.getAccount(), "Sản phẩm bị từ chối",
-                "Sản phẩm '" + product.getProductName() + "' đã bị từ chối. Lý do: " + rejectionReason);
+        notificationService.sendProductNotification(product.getAccount(), product.getProductName(),
+                "Sản phẩm bị từ chối",
+                "Sản phẩm '" + product.getProductName() + "' đã bị từ chối. Lý do: " + rejectionReason +
+                        ". Vui lòng chỉnh sửa sản phẩm theo yêu cầu và gửi lại để được duyệt.");
+
     }
 
     @Override
@@ -121,8 +130,11 @@ public class ProductManagementServiceImpl implements ProductManagementService {
                 .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
 
         // Gửi thông báo yêu cầu chỉnh sửa đến Agency
-        sendNotificationToAgency(product.getAccount(), "Yêu cầu chỉnh sửa sản phẩm",
-                "Sản phẩm '" + product.getProductName() + "' cần chỉnh sửa. Ghi chú: " + editNotes);
+        notificationService.sendProductNotification(product.getAccount(), product.getProductName(),
+                "Yêu cầu chỉnh sửa sản phẩm",
+                "Sản phẩm '" + product.getProductName() + "' cần được chỉnh sửa. Ghi chú từ admin: " + editNotes +
+                        ". Vui lòng cập nhật sản phẩm theo yêu cầu.");
+
     }
 
     @Override
@@ -146,8 +158,11 @@ public class ProductManagementServiceImpl implements ProductManagementService {
                 .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
 
         // Gửi cảnh báo đến Agency
-        sendNotificationToAgency(product.getAccount(), "Cảnh báo vi phạm",
-                "Cảnh báo về sản phẩm '" + product.getProductName() + "': " + warningMessage);
+        notificationService.sendProductNotification(product.getAccount(), product.getProductName(),
+                "Cảnh báo vi phạm",
+                "Cảnh báo về sản phẩm '" + product.getProductName() + "': " + warningMessage +
+                        ". Vui lòng tuân thủ các quy định của hệ thống để tránh bị khóa tài khoản.");
+
     }
 
     @Override
@@ -205,8 +220,7 @@ public class ProductManagementServiceImpl implements ProductManagementService {
     }
 
     private void sendNotificationToAgency(Account agency, String title, String message) {
-        // TODO: Implement notification service
-        // notificationService.sendNotification(agency, title, message);
-        System.out.println("Notification sent to: " + agency.getFullname() + " - " + title + ": " + message);
+        notificationService.sendNotificationToAgency(agency, title, message);
     }
+
 }

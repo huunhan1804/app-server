@@ -89,7 +89,29 @@
                             </a></li>
                         </ul>
                     </li>
-
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-shield-alt"></i> QUẢN LÝ BẢO HIỂM
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/admin/insurance">
+                                <i class="fas fa-list"></i> Tất cả yêu cầu
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/insurance?status=SUBMITTED">
+                                <i class="fas fa-clock"></i> Chờ xử lý
+                                <span class="badge bg-warning ms-2" id="pendingClaimCount">0</span>
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/insurance?status=UNDER_REVIEW">
+                                <i class="fas fa-search"></i> Đang xem xét
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/insurance?status=APPROVED">
+                                <i class="fas fa-check"></i> Đã duyệt
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/insurance?status=REJECTED">
+                                <i class="fas fa-times"></i> Từ chối
+                            </a></li>
+                        </ul>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link text-white active" href="/admin/reports">
                             <i class="fas fa-chart-bar"></i> BÁO CÁO VÀ PHÂN TÍCH
