@@ -26,4 +26,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     List<Account> findByCreatedDateAfter(LocalDateTime date);
 
     boolean existsByUsername(String admin);
+
+    Long countByCreatedDateBetween(LocalDateTime localDateTime, LocalDateTime localDateTime1);
 }

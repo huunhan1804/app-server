@@ -1,6 +1,8 @@
 package com.example.shoppingsystem.repositories;
 
 import com.example.shoppingsystem.entities.OrderList;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,5 +22,7 @@ public interface OrderRepository extends JpaRepository<OrderList, Long> {
     );
 
     List<OrderList> findTop10ByOrderByOrderDateDesc();
-    List<OrderList> findAllByAgency_AccountId(Long agencyId);
+
+    @Query("SELECT o FROM OrderList o ORDER BY o.orderDate DESC")
+    Page<OrderList> findTop10ByOrderByOrderDateDesc(Pageable pageable);
 }
