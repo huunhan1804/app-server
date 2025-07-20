@@ -10,4 +10,5 @@ import java.util.List;
 public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
 
     List<Feedback> findByProduct_ProductId(Long productId);
+    List<Feedback> findByAccount_AccountId(Long accountId);
 }

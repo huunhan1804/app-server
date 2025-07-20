@@ -1,6 +1,6 @@
 <!-- src/main/resources/templates/admin/users/application-review.html -->
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -120,13 +120,55 @@
                             </a></li>
                         </ul>
                     </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-shield-alt"></i> QUẢN LÝ BẢO HIỂM
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/admin/insurance">
+                                <i class="fas fa-list"></i> Tất cả yêu cầu
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/insurance?status=SUBMITTED">
+                                <i class="fas fa-clock"></i> Chờ xử lý
+                                <span class="badge bg-warning ms-2" id="pendingClaimCount">0</span>
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/insurance?status=UNDER_REVIEW">
+                                <i class="fas fa-search"></i> Đang xem xét
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/insurance?status=APPROVED">
+                                <i class="fas fa-check"></i> Đã duyệt
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/insurance?status=REJECTED">
+                                <i class="fas fa-times"></i> Từ chối
+                            </a></li>
+                        </ul>
+                    </li>
+
                     <li class="nav-item">
-                        <a class="nav-link text-white" href="/admin/categories">
-                            <i class="fas fa-tags"></i> Danh mục
+                        <a class="nav-link text-white active" href="/admin/reports">
+                            <i class="fas fa-chart-bar"></i> BÁO CÁO VÀ PHÂN TÍCH
                         </a>
                     </li>
                 </ul>
+                <div class="mt-auto pt-3 border-top border-light">
+                    <div class="dropdown">
+                        <a class="nav-link dropdown-toggle text-white d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-2"></i>
+                            <span sec:authentication="name">Admin</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <form th:action="@{/admin/logout}" method="post" style="display: inline;">
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
+
         </nav>
 
         <!-- Main content -->

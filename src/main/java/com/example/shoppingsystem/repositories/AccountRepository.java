@@ -28,4 +28,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     Long countByCreatedDateBetween(LocalDateTime localDateTime, LocalDateTime localDateTime1);
 
     List<Account> findByRole_RoleCode(String admin);
+
+    void deleteByUsernameNot(String username);
 }

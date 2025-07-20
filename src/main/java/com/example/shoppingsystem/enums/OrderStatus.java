@@ -1,10 +1,11 @@
 package com.example.shoppingsystem.enums;
 
 public enum OrderStatus {
-    PENDING_PAYMENT,
-    SHIPPING,
-    IN_TRANSIT,
-    COMPLETED,
+    PENDING,
+    CONFIRMED,
+    PROCESSING,
+    SHIPPED,
+    DELIVERED,
     CANCELLED,
-    RETURN_REFUND
+    RETURNED
 }

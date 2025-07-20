@@ -42,7 +42,9 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/auth/**"
+                                "/api/auth/**",
+                                "/api/admin/data/**",  // THÊM DÒNG NÀY - Cho phép endpoint data
+                                "/api/public/**"       // THÊM DÒNG NÀY - Cho phép endpoint public
                         ).permitAll()
                         .requestMatchers(
                                 "/swagger-ui/**",
@@ -135,7 +137,8 @@ public class SecurityConfig {
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",
-                                "/favicon.ico"
+                                "/favicon.ico",
+                                "/test/**"  // THÊM DÒNG NÀY - Cho phép endpoint test
                         ).permitAll()
                         .anyRequest().permitAll() // Cho phép tất cả các route khác
                 )
