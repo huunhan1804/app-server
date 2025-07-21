@@ -49,4 +49,8 @@ public class OrderList extends BaseEntity{
 
     @OneToMany(mappedBy = "orderList", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<OrderDetail> orderDetails = new HashSet<>();
+
+    @ManyToOne
+    @JoinColumn(name = "AGENCY_ID", referencedColumnName = "ACCOUNT_ID")
+    private Account agency;
 }

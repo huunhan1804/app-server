@@ -1,0 +1,524 @@
+<!-- src/main/resources/templates/admin/users/customers.html -->
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Khách hàng - CTU Shop Admin</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .main-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            border: none;
+        }
+        .status-badge {
+            font-size: 0.8em;
+        }
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .membership-badge {
+            font-size: 0.75em;
+            padding: 4px 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+            <div class="position-sticky pt-3">
+                <div class="text-center mb-4">
+                    <h4 class="text-white">
+                        <i class="fas fa-store"></i> CTU Shop Admin
+                    </h4>
+                </div>
+
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link text-white active" href="/admin/dashboard">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-box"></i> QUẢN LÝ SẢN PHẨM VÀ KIỂM DUYỆT
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/admin/products">
+                                <i class="fas fa-list"></i> Tất cả sản phẩm
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/products/pending">
+                                <i class="fas fa-clock"></i> Chờ duyệt
+                                <span class="badge bg-warning ms-2" id="pendingProductCount">0</span>
+                            </a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-users"></i> QUẢN LÝ TÀI KHOẢN
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/admin/users/customers">
+                                <i class="fas fa-user"></i> Khách hàng
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/users/agencies">
+                                <i class="fas fa-store"></i> Agency
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/admin/users/agencies/applications">
+                                <i class="fas fa-file-alt"></i> Đơn đăng ký Agency
+                                <span class="badge bg-warning ms-2" id="pendingApplicationCount">0</span>
+                            </a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-shield-alt"></i> QUẢN LÝ BẢO HIỂM
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/admin/insurance">
+                                <i class="fas fa-list"></i> Tất cả yêu cầu
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/insurance?status=SUBMITTED">
+                                <i class="fas fa-clock"></i> Chờ xử lý
+                                <span class="badge bg-warning ms-2" id="pendingClaimCount">0</span>
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/insurance?status=UNDER_REVIEW">
+                                <i class="fas fa-search"></i> Đang xem xét
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/insurance?status=APPROVED">
+                                <i class="fas fa-check"></i> Đã duyệt
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/insurance?status=REJECTED">
+                                <i class="fas fa-times"></i> Từ chối
+                            </a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white active" href="/admin/reports">
+                            <i class="fas fa-chart-bar"></i> BÁO CÁO VÀ PHÂN TÍCH
+                        </a>
+                    </li>
+                </ul>
+                <div class="mt-auto pt-3 border-top border-light">
+                    <div class="dropdown">
+                        <a class="nav-link dropdown-toggle text-white d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-2"></i>
+                            <span sec:authentication="name">Admin</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <form th:action="@{/admin/logout}" method="post" style="display: inline;">
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-user"></i> Quản lý Khách hàng
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="/admin/users/agencies" class="btn btn-sm btn-outline-primary me-2">
+                        <i class="fas fa-store"></i> Quản lý Agency
+                    </a>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="location.reload();">
+                        <i class="fas fa-sync-alt"></i> Làm mới
+                    </button>
+                </div>
+            </div>
+
+            <!-- Alerts -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle"></i>
+                <span th:text="${success}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <form method="get" th:action="@{/admin/users/customers}">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="form-label">Trạng thái tài khoản</label>
+                            <select name="status" class="form-select">
+                                <option value="">Tất cả</option>
+                                <option th:each="status : ${accountStatuses}"
+                                        th:value="${status}"
+                                        th:text="${status}"
+                                        th:selected="${status == param.status}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Cấp độ thành viên</label>
+                            <select name="membershipLevel" class="form-select">
+                                <option value="">Tất cả</option>
+                                <option th:each="level : ${membershipLevels}"
+                                        th:value="${level}"
+                                        th:text="${level}"
+                                        th:selected="${level == param.membershipLevel}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tìm kiếm</label>
+                            <input type="text" name="keyword" class="form-control"
+                                   th:value="${param.keyword}" placeholder="Tên, email, username...">
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Tìm kiếm
+                            </button>
+                            <a href="/admin/users/customers" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Xóa bộ lọc
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Customers Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list"></i> Danh sách khách hàng
+                        <span class="badge bg-primary ms-2" th:text="${totalElements}"></span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th>Tài khoản</th>
+                                <th>Thông tin liên hệ</th>
+                                <th>Cấp độ</th>
+                                <th>Thống kê đơn hàng</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày đăng ký</th>
+                                <th>Thao tác</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="customer : ${customers.content}">
+                                <td>
+                                    <strong th:text="${customer.username}"></strong>
+                                    <br>
+                                    <span th:text="${customer.fullname}"></span>
+                                </td>
+                                <td>
+                                    <i class="fas fa-envelope"></i> <span th:text="${customer.email}"></span>
+                                    <br>
+                                    <i class="fas fa-phone"></i> <span th:text="${customer.phone ?: 'Chưa cập nhật'}"></span>
+                                </td>
+                                <td>
+                                    <span th:switch="${customer.membershipLevel}">
+                                        <span th:case="'BRONZE'" class="badge bg-warning membership-badge">
+                                            <i class="fas fa-medal"></i> BRONZE
+                                        </span>
+                                        <span th:case="'SILVER'" class="badge bg-secondary membership-badge">
+                                            <i class="fas fa-medal"></i> SILVER
+                                        </span>
+                                        <span th:case="'GOLD'" class="badge bg-warning membership-badge">
+                                            <i class="fas fa-crown"></i> GOLD
+                                        </span>
+                                        <span th:case="'DIAMOND'" class="badge bg-primary membership-badge">
+                                            <i class="fas fa-gem"></i> DIAMOND
+                                        </span>
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="small">
+                                        <strong th:text="${#numbers.formatDecimal(customer.totalOrderValue, 0, 'COMMA', 0, 'POINT')} + ' VND'"></strong>
+                                        <br>
+                                        <span class="text-muted" th:text="${customer.totalOrders} + ' đơn hàng'"></span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span th:switch="${customer.accountStatus}">
+                                        <span th:case="'ACTIVE'" class="badge bg-success status-badge">
+                                            <i class="fas fa-check-circle"></i> Hoạt động
+                                        </span>
+                                        <span th:case="'SUSPENDED'" class="badge bg-danger status-badge">
+                                            <i class="fas fa-ban"></i> Tạm khóa
+                                        </span>
+                                        <span th:case="'INACTIVE'" class="badge bg-secondary status-badge">
+                                            <i class="fas fa-pause-circle"></i> Không hoạt động
+                                        </span>
+                                        <span th:case="*" class="badge bg-warning status-badge" th:text="${customer.accountStatus}"></span>
+                                    </span>
+                                    <br>
+                                    <small th:if="${customer.isBanned}" class="text-danger">
+                                        <i class="fas fa-exclamation-triangle"></i> Đã bị khóa
+                                    </small>
+                                </td>
+                                <td>
+                                    <span th:text="${#temporals.format(customer.createdDate, 'dd/MM/yyyy')}"></span>
+                                    <br>
+                                    <small class="text-muted" th:text="${#temporals.format(customer.createdDate, 'HH:mm')}"></small>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle"
+                                                data-bs-toggle="dropdown">
+                                            <i class="fas fa-cog"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a class="dropdown-item" href="#"
+                                                   data-bs-toggle="modal"
+                                                   th:data-bs-target="'#viewModal' + ${customer.accountId}">
+                                                    <i class="fas fa-eye"></i> Xem chi tiết
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li th:if="${!customer.isBanned}">
+                                                <a class="dropdown-item text-warning" href="#"
+                                                   data-bs-toggle="modal"
+                                                   th:data-bs-target="'#suspendModal' + ${customer.accountId}">
+                                                    <i class="fas fa-ban"></i> Tạm khóa
+                                                </a>
+                                            </li>
+                                            <li th:if="${customer.isBanned}">
+                                                <form th:action="@{/admin/users/customers/{id}/activate(id=${customer.accountId})}"
+                                                      method="post" style="display: inline;">
+                                                    <button type="submit" class="dropdown-item text-success">
+                                                        <i class="fas fa-check"></i> Kích hoạt
+                                                    </button>
+                                                </form>
+                                            </li>
+                                            <li>
+                                                <form th:action="@{/admin/users/customers/{id}/reset-password(id=${customer.accountId})}"
+                                                      method="post" style="display: inline;"
+                                                      onsubmit="return confirm('Reset mật khẩu cho tài khoản này?')">
+                                                    <button type="submit" class="dropdown-item text-info">
+                                                        <i class="fas fa-key"></i> Reset mật khẩu
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(customers.content)}">
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    <i class="fas fa-user-slash fa-2x mb-2"></i>
+                                    <br>Không có khách hàng nào
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <nav th:if="${totalPages > 1}">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                <a class="page-link" th:href="@{/admin/users/customers(page=${currentPage - 1}, size=${size}, status=${param.status}, membershipLevel=${param.membershipLevel}, keyword=${param.keyword})}">
+                                    Trước
+                                </a>
+                            </li>
+
+                            <li th:each="page : ${#numbers.sequence(0, totalPages - 1)}"
+                                class="page-item"
+                                th:classappend="${page == currentPage} ? 'active'">
+                                <a class="page-link"
+                                   th:href="@{/admin/users/customers(page=${page}, size=${size}, status=${param.status}, membershipLevel=${param.membershipLevel}, keyword=${param.keyword})}"
+                                   th:text="${page + 1}"></a>
+                            </li>
+
+                            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                <a class="page-link" th:href="@{/admin/users/customers(page=${currentPage + 1}, size=${size}, status=${param.status}, membershipLevel=${param.membershipLevel}, keyword=${param.keyword})}">
+                                    Sau
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Modals for each customer -->
+            <div th:each="customer : ${customers.content}">
+                <!-- Suspend Modal -->
+                <div class="modal fade" th:id="'suspendModal' + ${customer.accountId}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form th:action="@{/admin/users/customers/{id}/suspend(id=${customer.accountId})}" method="post">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Tạm khóa tài khoản</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Bạn có chắc muốn tạm khóa tài khoản: <strong th:text="${customer.fullname}"></strong>?</p>
+                                    <div class="mb-3">
+                                        <label class="form-label">Lý do tạm khóa:</label>
+                                        <textarea class="form-control" name="reason" rows="3" required
+                                                  placeholder="Nhập lý do tạm khóa tài khoản..."></textarea>
+                                    </div>
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <strong>Lưu ý:</strong> Khách hàng sẽ không thể đăng nhập và sử dụng dịch vụ khi bị tạm khóa.
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                    <button type="submit" class="btn btn-warning">Tạm khóa</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- View Details Modal -->
+                <div class="modal fade" th:id="'viewModal' + ${customer.accountId}" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Chi tiết khách hàng</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="fw-bold">Thông tin cơ bản</h6>
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <td>Username:</td>
+                                                <td th:text="${customer.username}"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Họ tên:</td>
+                                                <td th:text="${customer.fullname}"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Email:</td>
+                                                <td th:text="${customer.email}"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Số điện thoại:</td>
+                                                <td th:text="${customer.phone ?: 'Chưa cập nhật'}"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Ngày đăng ký:</td>
+                                                <td th:text="${#temporals.format(customer.createdDate, 'dd/MM/yyyy HH:mm')}"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Lần đăng nhập cuối:</td>
+                                                <td th:text="${customer.lastLogin != null ? #temporals.format(customer.lastLogin, 'dd/MM/yyyy HH:mm') : 'Chưa có'}"></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="fw-bold">Thống kê mua hàng</h6>
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <td>Cấp độ thành viên:</td>
+                                                <td>
+                                                    <span th:text="${customer.membershipLevel}" class="badge bg-primary"></span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Tổng số đơn hàng:</td>
+                                                <td th:text="${customer.totalOrders}"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Tổng giá trị đơn hàng:</td>
+                                                <td class="fw-bold text-success" th:text="${#numbers.formatDecimal(customer.totalOrderValue, 0, 'COMMA', 0, 'POINT')} + ' VND'"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Trạng thái tài khoản:</td>
+                                                <td>
+                                                    <span th:text="${customer.accountStatus}" class="badge bg-info"></span>
+                                                    <span th:if="${customer.isBanned}" class="badge bg-danger ms-1">Bị khóa</span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Auto-update pending counts
+    function updatePendingCounts() {
+        fetch('/api/admin/pending-counts')
+            .then(response => response.json())
+            .then(data => {
+                const pendingProductElement = document.getElementById('pendingProductCount');
+                const pendingApplicationElement = document.getElementById('pendingApplicationCount');
+
+                if (pendingProductElement) {
+                    pendingProductElement.textContent = data.pendingProducts;
+                    if (data.pendingProducts > 0) {
+                        pendingProductElement.style.display = 'inline';
+                    } else {
+                        pendingProductElement.style.display = 'none';
+                    }
+                }
+
+                if (pendingApplicationElement) {
+                    pendingApplicationElement.textContent = data.pendingApplications;
+                    if (data.pendingApplications > 0) {
+                        pendingApplicationElement.style.display = 'inline';
+                    } else {
+                        pendingApplicationElement.style.display = 'none';
+                    }
+                }
+            })
+            .catch(error => console.error('Error fetching pending counts:', error));
+    }
+
+    // Update counts on page load
+    document.addEventListener('DOMContentLoaded', updatePendingCounts);
+
+    // Update counts every 30 seconds
+    setInterval(updatePendingCounts, 30000);
+</script>
+</body>
+</html>

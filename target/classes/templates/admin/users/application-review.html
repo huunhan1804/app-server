@@ -1,0 +1,695 @@
+<!-- src/main/resources/templates/admin/users/application-review.html -->
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xét duyệt đơn đăng ký Agency - CTU Shop Admin</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .main-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            border: none;
+        }
+        .document-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 2px solid #dee2e6;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .document-image:hover {
+            transform: scale(1.02);
+            border-color: #007bff;
+        }
+        .review-checklist {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .checklist-item {
+            border-bottom: 1px solid #dee2e6;
+            padding: 10px 0;
+        }
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+        .action-buttons {
+            position: sticky;
+            bottom: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+        .verification-status {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-pending { background-color: #ffc107; }
+        .status-verified { background-color: #28a745; }
+        .status-rejected { background-color: #dc3545; }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+            <div class="position-sticky pt-3">
+                <div class="text-center mb-4">
+                    <h4 class="text-white">
+                        <i class="fas fa-store"></i> CTU Shop Admin
+                    </h4>
+                </div>
+
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link text-white active" href="/admin/dashboard">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-box"></i> QUẢN LÝ SẢN PHẨM VÀ KIỂM DUYỆT
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/admin/products">
+                                <i class="fas fa-list"></i> Tất cả sản phẩm
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/products/pending">
+                                <i class="fas fa-clock"></i> Chờ duyệt
+                                <span class="badge bg-warning ms-2" id="pendingProductCount">0</span>
+                            </a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-users"></i> QUẢN LÝ TÀI KHOẢN
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/admin/users/customers">
+                                <i class="fas fa-user"></i> Khách hàng
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/users/agencies">
+                                <i class="fas fa-store"></i> Agency
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/admin/users/agencies/applications">
+                                <i class="fas fa-file-alt"></i> Đơn đăng ký Agency
+                                <span class="badge bg-warning ms-2" id="pendingApplicationCount">0</span>
+                            </a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/admin/categories">
+                            <i class="fas fa-tags"></i> Danh mục
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-search"></i> Xét duyệt đơn đăng ký Agency
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="/admin/users/agencies/applications" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Quay lại danh sách
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Application Information -->
+                <div class="col-lg-8">
+                    <!-- Basic Information -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-info-circle"></i> Thông tin cơ bản
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold text-primary">Thông tin tài khoản</h6>
+                                    <table class="table table-sm table-borderless">
+                                        <tr>
+                                            <td class="fw-bold">Username:</td>
+                                            <td th:text="${application.username}"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Họ tên:</td>
+                                            <td th:text="${application.fullname}"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Email:</td>
+                                            <td th:text="${application.email}"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Số điện thoại:</td>
+                                            <td th:text="${application.phone}"></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold text-success">Thông tin Shop</h6>
+                                    <table class="table table-sm table-borderless">
+                                        <tr>
+                                            <td class="fw-bold">Tên shop:</td>
+                                            <td th:text="${application.shopName}"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Email shop:</td>
+                                            <td th:text="${application.shopEmail}"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Số điện thoại shop:</td>
+                                            <td th:text="${application.shopPhone}"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Mã số thuế:</td>
+                                            <td th:text="${application.taxNumber}"></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="mt-3">
+                                <h6 class="fw-bold text-info">Địa chỉ kinh doanh</h6>
+                                <p th:text="${application.shopAddressDetail}"></p>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold text-warning">Thông tin người đại diện</h6>
+                                    <table class="table table-sm table-borderless">
+                                        <tr>
+                                            <td class="fw-bold">Họ tên:</td>
+                                            <td th:text="${application.fullNameApplicant}"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Ngày sinh:</td>
+                                            <td th:text="${#dates.format(application.birthdateApplicant, 'dd/MM/yyyy')}"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Giới tính:</td>
+                                            <td th:text="${application.genderApplicant}"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Số CCCD:</td>
+                                            <td th:text="${application.idCardNumber}"></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold text-secondary">Thông tin đơn đăng ký</h6>
+                                    <table class="table table-sm table-borderless">
+                                        <tr>
+                                            <td class="fw-bold">Ngày nộp:</td>
+                                            <td th:text="${#temporals.format(application.submittedDate, 'dd/MM/yyyy HH:mm')}"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Trạng thái:</td>
+                                            <td>
+                                                <span class="badge bg-warning" th:text="${application.statusName}"></span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Documents Section -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-file-alt"></i> Giấy tờ đính kèm
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- CCCD -->
+                            <div class="mb-4">
+                                <h6 class="fw-bold">
+                                    <span class="verification-status status-pending" id="cccd-status"></span>
+                                    <i class="fas fa-id-card"></i> Chứng minh nhân dân / Căn cước công dân
+                                </h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6" th:if="${application.idCardFrontImageUrl}">
+                                        <p class="small text-muted mb-2">Mặt trước</p>
+                                        <img th:src="${application.idCardFrontImageUrl}"
+                                             class="document-image"
+                                             alt="CCCD mặt trước"
+                                             onclick="showImageModal(this)">
+                                    </div>
+                                    <div class="col-md-6" th:if="${application.idCardBackImageUrl}">
+                                        <p class="small text-muted mb-2">Mặt sau</p>
+                                        <img th:src="${application.idCardBackImageUrl}"
+                                             class="document-image"
+                                             alt="CCCD mặt sau"
+                                             onclick="showImageModal(this)">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Business License -->
+                            <div class="mb-4" th:if="${application.businessLicenseUrls}">
+                                <h6 class="fw-bold">
+                                    <span class="verification-status status-pending" id="license-status"></span>
+                                    <i class="fas fa-certificate"></i> Giấy phép kinh doanh
+                                </h6>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-file-pdf fa-3x text-danger me-3"></i>
+                                    <div>
+                                        <a th:href="${application.businessLicenseUrls}"
+                                           target="_blank"
+                                           class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-external-link-alt"></i> Xem giấy phép kinh doanh
+                                        </a>
+                                        <p class="small text-muted mb-0 mt-1">Click để xem chi tiết giấy phép</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Professional Certificates -->
+                            <div class="mb-4" th:if="${application.professionalCertUrls}">
+                                <h6 class="fw-bold">
+                                    <span class="verification-status status-pending" id="cert-status"></span>
+                                    <i class="fas fa-user-md"></i> Chứng chỉ hành nghề y dược
+                                </h6>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-file-pdf fa-3x text-success me-3"></i>
+                                    <div>
+                                        <a th:href="${application.professionalCertUrls}"
+                                           target="_blank"
+                                           class="btn btn-outline-success btn-sm">
+                                            <i class="fas fa-external-link-alt"></i> Xem chứng chỉ hành nghề
+                                        </a>
+                                        <p class="small text-muted mb-0 mt-1">Click để xem chi tiết chứng chỉ</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Review Checklist -->
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-clipboard-list"></i> Danh sách kiểm tra
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="review-checklist">
+                                <h6 class="fw-bold text-primary">
+                                    <i class="fas fa-id-card"></i> Kiểm tra CCCD
+                                </h6>
+
+                                <div class="checklist-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="cccd1" data-category="cccd">
+                                        <label class="form-check-label" for="cccd1">
+                                            Hình ảnh rõ nét, không bị mờ
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="checklist-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="cccd2" data-category="cccd">
+                                        <label class="form-check-label" for="cccd2">
+                                            Thông tin đầy đủ và trùng khớp
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="checklist-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="cccd3" data-category="cccd">
+                                        <label class="form-check-label" for="cccd3">
+                                            CCCD còn hiệu lực (chưa hết hạn)
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <h6 class="fw-bold text-success mt-4">
+                                    <i class="fas fa-certificate"></i> Kiểm tra giấy phép KD
+                                </h6>
+
+                                <div class="checklist-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="license1" data-category="license">
+                                        <label class="form-check-label" for="license1">
+                                            Giấy phép còn hiệu lực
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="checklist-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="license2" data-category="license">
+                                        <label class="form-check-label" for="license2">
+                                            Phạm vi KD phù hợp với ngành dược
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="checklist-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="license3" data-category="license">
+                                        <label class="form-check-label" for="license3">
+                                            Thông tin đúng với đăng ký
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <h6 class="fw-bold text-warning mt-4">
+                                    <i class="fas fa-user-md"></i> Kiểm tra chứng chỉ y dược
+                                </h6>
+
+                                <div class="checklist-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="cert1" data-category="cert">
+                                        <label class="form-check-label" for="cert1">
+                                            Chứng chỉ do cơ quan có thẩm quyền cấp
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="checklist-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="cert2" data-category="cert">
+                                        <label class="form-check-label" for="cert2">
+                                            Chứng chỉ còn hiệu lực
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="checklist-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="cert3" data-category="cert">
+                                        <label class="form-check-label" for="cert3">
+                                            Phù hợp với việc bán TPCN
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Progress indicator -->
+                            <div class="mt-3">
+                                <div class="progress mb-2">
+                                    <div class="progress-bar" role="progressbar" style="width: 0%" id="progressBar">
+                                        <span id="progressText">0/9</span>
+                                    </div>
+                                </div>
+                                <small class="text-muted">Tiến độ xét duyệt</small>
+
+                                <div class="mt-2">
+                                    <small class="d-block">
+                                        <span class="verification-status status-pending"></span> Chờ kiểm tra
+                                    </small>
+                                    <small class="d-block">
+                                        <span class="verification-status status-verified"></span> Đã xác minh
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <div class="row">
+                    <div class="col-md-6">
+                        <form th:action="@{/admin/users/agencies/applications/{id}/approve(id=${application.applicationId})}" method="post">
+                            <button type="submit" class="btn btn-success w-100" id="approveBtn" disabled
+                                    onclick="return confirm('Phê duyệt đơn đăng ký này?')">
+                                <i class="fas fa-check"></i> Phê duyệt đơn đăng ký
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="col-md-6">
+                        <button type="button" class="btn btn-danger w-100"
+                                data-bs-toggle="modal" data-bs-target="#declineModal">
+                            <i class="fas fa-times"></i> Từ chối đơn đăng ký
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Decline Modal -->
+            <div class="modal fade" id="declineModal" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <form th:action="@{/admin/users/agencies/applications/{id}/decline(id=${application.applicationId})}" method="post">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Từ chối đơn đăng ký</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <strong>Lưu ý:</strong> Đơn đăng ký sẽ bị từ chối và Agency sẽ nhận được thông báo.
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Lý do từ chối:</label>
+                                    <textarea class="form-control" name="reason" rows="4" required
+                                              placeholder="Mô tả chi tiết lý do từ chối đơn đăng ký..."></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Các lỗi phổ biến:</label>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="cccd-invalid" id="cccdInvalid">
+                                                <label class="form-check-label" for="cccdInvalid">
+                                                    CCCD không hợp lệ hoặc hết hạn
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="license-invalid" id="licenseInvalid">
+                                                <label class="form-check-label" for="licenseInvalid">
+                                                    Giấy phép kinh doanh không phù hợp
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="cert-missing" id="certMissing">
+                                                <label class="form-check-label" for="certMissing">
+                                                    Thiếu chứng chỉ hành nghề
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="info-mismatch" id="infoMismatch">
+                                                <label class="form-check-label" for="infoMismatch">
+                                                    Thông tin không khớp nhau
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="poor-quality" id="poorQuality">
+                                                <label class="form-check-label" for="poorQuality">
+                                                    Hình ảnh không rõ nét
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="incomplete" id="incomplete">
+                                                <label class="form-check-label" for="incomplete">
+                                                    Hồ sơ không đầy đủ
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                <button type="submit" class="btn btn-danger">Từ chối đơn đăng ký</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image Modal -->
+            <div class="modal fade" id="imageModal" tabindex="-1">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="imageModalTitle">Xem chi tiết</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <img id="modalImage" class="img-fluid" alt="Document">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Checklist progress tracking
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkboxes = document.querySelectorAll('.review-checklist input[type="checkbox"]');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const approveBtn = document.getElementById('approveBtn');
+
+        function updateProgress() {
+            const total = checkboxes.length;
+            const checked = document.querySelectorAll('.review-checklist input[type="checkbox"]:checked').length;
+            const percentage = (checked / total) * 100;
+
+            progressBar.style.width = percentage + '%';
+            progressText.textContent = checked + '/' + total;
+
+            // Update category status indicators
+            updateCategoryStatus('cccd');
+            updateCategoryStatus('license');
+            updateCategoryStatus('cert');
+
+            // Enable approve button only when all items are checked
+            if (checked === total) {
+                approveBtn.disabled = false;
+                progressBar.classList.add('bg-success');
+                progressBar.classList.remove('bg-primary');
+            } else {
+                approveBtn.disabled = true;
+                progressBar.classList.add('bg-primary');
+                progressBar.classList.remove('bg-success');
+            }
+        }
+
+        function updateCategoryStatus(category) {
+            const categoryCheckboxes = document.querySelectorAll(`input[data-category="${category}"]`);
+            const checkedCount = document.querySelectorAll(`input[data-category="${category}"]:checked`).length;
+            const statusElement = document.getElementById(`${category}-status`);
+
+            if (checkedCount === categoryCheckboxes.length) {
+                statusElement.className = 'verification-status status-verified';
+            } else if (checkedCount > 0) {
+                statusElement.className = 'verification-status status-pending';
+            } else {
+                statusElement.className = 'verification-status status-pending';
+            }
+        }
+
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateProgress);
+        });
+
+        // Initialize progress
+        updateProgress();
+    });
+
+    // Image modal functionality
+    function showImageModal(img) {
+        const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+        const modalImage = document.getElementById('modalImage');
+        const modalTitle = document.getElementById('imageModalTitle');
+
+        modalImage.src = img.src;
+        modalTitle.textContent = img.alt;
+        modal.show();
+    }
+
+    // Auto-fill decline reasons based on checkbox selections
+    document.addEventListener('DOMContentLoaded', function() {
+        const declineCheckboxes = document.querySelectorAll('#declineModal input[type="checkbox"]');
+        const declineTextarea = document.querySelector('#declineModal textarea[name="reason"]');
+
+        function updateDeclineReason() {
+            const selectedReasons = [];
+            declineCheckboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    selectedReasons.push('- ' + checkbox.nextElementSibling.textContent.trim());
+                }
+            });
+
+            if (selectedReasons.length > 0) {
+                declineTextarea.value = 'Đơn đăng ký bị từ chối vì các lý do sau:\n\n' +
+                                      selectedReasons.join('\n') +
+                                      '\n\nVui lòng chỉnh sửa và nộp lại hồ sơ.\n\nChi tiết: ';
+            } else {
+                declineTextarea.value = '';
+            }
+        }
+
+        declineCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateDeclineReason);
+        });
+    });
+</script>
+<script>
+    // Auto-update pending counts
+    function updatePendingCounts() {
+        fetch('/api/admin/pending-counts')
+            .then(response => response.json())
+            .then(data => {
+                const pendingProductElement = document.getElementById('pendingProductCount');
+                const pendingApplicationElement = document.getElementById('pendingApplicationCount');
+
+                if (pendingProductElement) {
+                    pendingProductElement.textContent = data.pendingProducts;
+                    if (data.pendingProducts > 0) {
+                        pendingProductElement.style.display = 'inline';
+                    } else {
+                        pendingProductElement.style.display = 'none';
+                    }
+                }
+
+                if (pendingApplicationElement) {
+                    pendingApplicationElement.textContent = data.pendingApplications;
+                    if (data.pendingApplications > 0) {
+                        pendingApplicationElement.style.display = 'inline';
+                    } else {
+                        pendingApplicationElement.style.display = 'none';
+                    }
+                }
+            })
+            .catch(error => console.error('Error fetching pending counts:', error));
+    }
+
+    // Update counts on page load
+    document.addEventListener('DOMContentLoaded', updatePendingCounts);
+
+    // Update counts every 30 seconds
+    setInterval(updatePendingCounts, 30000);
+</script>
+</body>
+</html>

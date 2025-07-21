@@ -1,0 +1,535 @@
+<!-- src/main/resources/templates/admin/products/management.html -->
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Sản phẩm - CTU Shop Admin</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .main-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            border: none;
+        }
+        .product-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .status-badge {
+            font-size: 0.8em;
+        }
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+            <div class="position-sticky pt-3">
+                <div class="text-center mb-4">
+                    <h4 class="text-white">
+                        <i class="fas fa-store"></i> CTU Shop Admin
+                    </h4>
+                </div>
+
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link text-white active" href="/admin/dashboard">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-box"></i> QUẢN LÝ SẢN PHẨM VÀ KIỂM DUYỆT
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/admin/products">
+                                <i class="fas fa-list"></i> Tất cả sản phẩm
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/products/pending">
+                                <i class="fas fa-clock"></i> Chờ duyệt
+                                <span class="badge bg-warning ms-2" id="pendingProductCount">0</span>
+                            </a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-users"></i> QUẢN LÝ TÀI KHOẢN
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/admin/users/customers">
+                                <i class="fas fa-user"></i> Khách hàng
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/users/agencies">
+                                <i class="fas fa-store"></i> Agency
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/admin/users/agencies/applications">
+                                <i class="fas fa-file-alt"></i> Đơn đăng ký Agency
+                                <span class="badge bg-warning ms-2" id="pendingApplicationCount">0</span>
+                            </a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-shield-alt"></i> QUẢN LÝ BẢO HIỂM
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/admin/insurance">
+                                <i class="fas fa-list"></i> Tất cả yêu cầu
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/insurance?status=SUBMITTED">
+                                <i class="fas fa-clock"></i> Chờ xử lý
+                                <span class="badge bg-warning ms-2" id="pendingClaimCount">0</span>
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/insurance?status=UNDER_REVIEW">
+                                <i class="fas fa-search"></i> Đang xem xét
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/insurance?status=APPROVED">
+                                <i class="fas fa-check"></i> Đã duyệt
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/insurance?status=REJECTED">
+                                <i class="fas fa-times"></i> Từ chối
+                            </a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white active" href="/admin/reports">
+                            <i class="fas fa-chart-bar"></i> BÁO CÁO VÀ PHÂN TÍCH
+                        </a>
+                    </li>
+                </ul>
+                <div class="mt-auto pt-3 border-top border-light">
+                    <div class="dropdown">
+                        <a class="nav-link dropdown-toggle text-white d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-2"></i>
+                            <span sec:authentication="name">Admin</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <form th:action="@{/admin/logout}" method="post" style="display: inline;">
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-box"></i> Quản lý Sản phẩm
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="/admin/products/pending" class="btn btn-sm btn-warning me-2">
+                        <i class="fas fa-clock"></i> Chờ duyệt
+                    </a>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="location.reload();">
+                        <i class="fas fa-sync-alt"></i> Làm mới
+                    </button>
+                </div>
+            </div>
+
+            <!-- Alerts -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle"></i>
+                <span th:text="${success}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <form method="get" th:action="@{/admin/products}">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="form-label">Trạng thái</label>
+                            <select name="status" class="form-select">
+                                <option value="">Tất cả</option>
+                                <option th:each="status : ${statuses}"
+                                        th:value="${status}"
+                                        th:text="${status}"
+                                        th:selected="${status == param.status}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Danh mục</label>
+                            <select name="category" class="form-select">
+                                <option value="">Tất cả</option>
+                                <option th:each="cat : ${categories}"
+                                        th:value="${cat.category_name}"
+                                        th:text="${cat.category_name}"
+                                        th:selected="${cat.category_name == param.category}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Agency</label>
+                            <select name="agency" class="form-select">
+                                <option value="">Tất cả</option>
+                                <option th:each="agency : ${agencies}"
+                                        th:value="${agency.agencyName}"
+                                        th:text="${agency.agencyName}"
+                                        th:selected="${agency.agencyName == param.agency}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Tìm kiếm</label>
+                            <input type="text" name="keyword" class="form-control"
+                                   th:value="${param.keyword}" placeholder="Tên sản phẩm...">
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Tìm kiếm
+                            </button>
+                            <a href="/admin/products" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Xóa bộ lọc
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Products Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list"></i> Danh sách sản phẩm
+                        <span class="badge bg-primary ms-2" th:text="${totalElements}"></span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th>Hình ảnh</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Agency</th>
+                                <th>Danh mục</th>
+                                <th>Giá bán</th>
+                                <th>Đã bán</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày tạo</th>
+                                <th>Thao tác</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="product : ${products.content}">
+                                <td>
+                                    <img th:src="${product.imageUrl}"
+                                         alt="Product Image"
+                                         class="product-image">
+                                </td>
+                                <td>
+                                    <strong th:text="${product.productName}"></strong>
+                                    <br>
+                                    <small class="text-muted" th:text="${#strings.abbreviate(product.productDescription, 50)}"></small>
+                                </td>
+                                <td>
+                                    <span th:text="${product.agencyName}"></span>
+                                    <br>
+                                    <small class="text-muted" th:text="${product.agencyEmail}"></small>
+                                </td>
+                                <td th:text="${product.categoryName}"></td>
+                                <td>
+                                    <span th:text="${#numbers.formatDecimal(product.salePrice, 0, 'COMMA', 0, 'POINT')} + ' VND'"></span>
+                                    <br>
+                                    <small class="text-muted">
+                                        Giá gốc: <span th:text="${#numbers.formatDecimal(product.listPrice, 0, 'COMMA', 0, 'POINT')} + ' VND'"></span>
+                                    </small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info" th:text="${product.soldAmount}"></span>
+                                    <br>
+                                    <small class="text-muted">
+                                        Còn: <span th:text="${product.inventoryQuantity}"></span>
+                                    </small>
+                                </td>
+                                <td>
+                                            <span th:switch="${product.status}">
+                                                <span th:case="'pending'" class="badge bg-warning status-badge">Chờ duyệt</span>
+                                                <span th:case="'approved'" class="badge bg-success status-badge">Đã duyệt</span>
+                                                <span th:case="'rejected'" class="badge bg-danger status-badge">Từ chối</span>
+                                                <span th:case="*" class="badge bg-secondary status-badge" th:text="${product.statusName}"></span>
+                                            </span>
+                                </td>
+                                <td th:text="${#temporals.format(product.createdDate, 'dd/MM/yyyy HH:mm')}"></td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle"
+                                                data-bs-toggle="dropdown">
+                                            <i class="fas fa-cog"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a class="dropdown-item" th:href="@{/admin/products/review/{id}(id=${product.productId})}">
+                                                    <i class="fas fa-eye"></i> Xem chi tiết
+                                                </a>
+                                            </li>
+                                            <li th:if="${product.status == 'pending'}">
+                                                <form th:action="@{/admin/products/approve/{id}(id=${product.productId})}"
+                                                      method="post" style="display: inline;">
+                                                    <button type="submit" class="dropdown-item text-success">
+                                                        <i class="fas fa-check"></i> Phê duyệt
+                                                    </button>
+                                                </form>
+                                            </li>
+                                            <li th:if="${product.status == 'pending'}">
+                                                <a class="dropdown-item text-warning" href="#"
+                                                   data-bs-toggle="modal"
+                                                   th:data-bs-target="'#rejectModal' + ${product.productId}">
+                                                    <i class="fas fa-times"></i> Từ chối
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item text-info" href="#"
+                                                   data-bs-toggle="modal"
+                                                   th:data-bs-target="'#editModal' + ${product.productId}">
+                                                    <i class="fas fa-edit"></i> Yêu cầu sửa
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <a class="dropdown-item text-warning" href="#"
+                                                   data-bs-toggle="modal"
+                                                   th:data-bs-target="'#warnModal' + ${product.productId}">
+                                                    <i class="fas fa-exclamation-triangle"></i> Cảnh báo
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item text-danger" href="#"
+                                                   data-bs-toggle="modal"
+                                                   th:data-bs-target="'#removeModal' + ${product.productId}">
+                                                    <i class="fas fa-trash"></i> Gỡ bỏ
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(products.content)}">
+                                <td colspan="9" class="text-center text-muted py-4">
+                                    <i class="fas fa-box-open fa-2x mb-2"></i>
+                                    <br>Không có sản phẩm nào
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <nav th:if="${totalPages > 1}">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                <a class="page-link" th:href="@{/admin/products(page=${currentPage - 1}, size=${size}, status=${param.status}, category=${param.category}, agency=${param.agency}, keyword=${param.keyword})}">
+                                    Trước
+                                </a>
+                            </li>
+
+                            <li th:each="page : ${#numbers.sequence(0, totalPages - 1)}"
+                                class="page-item"
+                                th:classappend="${page == currentPage} ? 'active'">
+                                <a class="page-link"
+                                   th:href="@{/admin/products(page=${page}, size=${size}, status=${param.status}, category=${param.category}, agency=${param.agency}, keyword=${param.keyword})}"
+                                   th:text="${page + 1}"></a>
+                            </li>
+
+                            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                <a class="page-link" th:href="@{/admin/products(page=${currentPage + 1}, size=${size}, status=${param.status}, category=${param.category}, agency=${param.agency}, keyword=${param.keyword})}">
+                                    Sau
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Modals for each product -->
+            <div th:each="product : ${products.content}">
+                <!-- Reject Modal -->
+                <div class="modal fade" th:id="'rejectModal' + ${product.productId}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form th:action="@{/admin/products/reject/{id}(id=${product.productId})}" method="post">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Từ chối sản phẩm</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Bạn có chắc muốn từ chối sản phẩm: <strong th:text="${product.productName}"></strong>?</p>
+                                    <div class="mb-3">
+                                        <label class="form-label">Lý do từ chối:</label>
+                                        <textarea class="form-control" name="rejectionReason" rows="3" required
+                                                  placeholder="Nhập lý do từ chối sản phẩm..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                    <button type="submit" class="btn btn-danger">Từ chối</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Edit Request Modal -->
+                <div class="modal fade" th:id="'editModal' + ${product.productId}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form th:action="@{/admin/products/request-edit/{id}(id=${product.productId})}" method="post">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Yêu cầu chỉnh sửa</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Gửi yêu cầu chỉnh sửa cho sản phẩm: <strong th:text="${product.productName}"></strong></p>
+                                    <div class="mb-3">
+                                        <label class="form-label">Ghi chú chỉnh sửa:</label>
+                                        <textarea class="form-control" name="editNotes" rows="4" required
+                                                  placeholder="Mô tả chi tiết những điểm cần chỉnh sửa..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                    <button type="submit" class="btn btn-warning">Gửi yêu cầu</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Warning Modal -->
+                <div class="modal fade" th:id="'warnModal' + ${product.productId}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form th:action="@{/admin/products/warn-agency/{id}(id=${product.productId})}" method="post">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Cảnh báo Agency</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Gửi cảnh báo về sản phẩm: <strong th:text="${product.productName}"></strong></p>
+                                    <div class="mb-3">
+                                        <label class="form-label">Nội dung cảnh báo:</label>
+                                        <textarea class="form-control" name="warningMessage" rows="4" required
+                                                  placeholder="Nội dung cảnh báo gửi đến Agency..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                    <button type="submit" class="btn btn-warning">Gửi cảnh báo</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Remove Modal -->
+                <div class="modal fade" th:id="'removeModal' + ${product.productId}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form th:action="@{/admin/products/remove/{id}(id=${product.productId})}" method="post">
+                                <div class="modal-header">
+                                    <h5 class="modal-title text-danger">Gỡ bỏ sản phẩm</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <strong>Cảnh báo:</strong> Hành động này sẽ xóa vĩnh viễn sản phẩm khỏi hệ thống!
+                                    </div>
+                                    <p>Bạn có chắc muốn gỡ bỏ sản phẩm: <strong th:text="${product.productName}"></strong>?</p>
+                                    <div class="mb-3">
+                                        <label class="form-label">Lý do gỡ bỏ:</label>
+                                        <textarea class="form-control" name="removeReason" rows="3" required
+                                                  placeholder="Nhập lý do gỡ bỏ sản phẩm..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                    <button type="submit" class="btn btn-danger">Gỡ bỏ</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Auto-update pending counts
+    function updatePendingCounts() {
+        fetch('/api/admin/pending-counts')
+            .then(response => response.json())
+            .then(data => {
+                const pendingProductElement = document.getElementById('pendingProductCount');
+                const pendingApplicationElement = document.getElementById('pendingApplicationCount');
+
+                if (pendingProductElement) {
+                    pendingProductElement.textContent = data.pendingProducts;
+                    if (data.pendingProducts > 0) {
+                        pendingProductElement.style.display = 'inline';
+                    } else {
+                        pendingProductElement.style.display = 'none';
+                    }
+                }
+
+                if (pendingApplicationElement) {
+                    pendingApplicationElement.textContent = data.pendingApplications;
+                    if (data.pendingApplications > 0) {
+                        pendingApplicationElement.style.display = 'inline';
+                    } else {
+                        pendingApplicationElement.style.display = 'none';
+                    }
+                }
+            })
+            .catch(error => console.error('Error fetching pending counts:', error));
+    }
+
+    // Update counts on page load
+    document.addEventListener('DOMContentLoaded', updatePendingCounts);
+
+    // Update counts every 30 seconds
+    setInterval(updatePendingCounts, 30000);
+</script>
+</body>
+</html>
