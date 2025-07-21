@@ -1,0 +1,373 @@
+2025-07-19T16:43:24.290+07:00  INFO 16088 --- [restartedMain] c.e.s.ShoppingSystemApplication          : Starting ShoppingSystemApplication using Java 23.0.2 with PID 16088 (D:\IntelliJ IDEA\app-server\target\classes started by dothi in D:\IntelliJ IDEA\app-server)
+2025-07-19T16:43:24.294+07:00  INFO 16088 --- [restartedMain] c.e.s.ShoppingSystemApplication          : No active profile set, falling back to 1 default profile: "default"
+2025-07-19T16:43:24.348+07:00  INFO 16088 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-07-19T16:43:24.349+07:00  INFO 16088 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-07-19T16:43:25.095+07:00  INFO 16088 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-07-19T16:43:25.181+07:00  INFO 16088 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 80 ms. Found 18 JPA repository interfaces.
+2025-07-19T16:43:25.679+07:00  INFO 16088 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2025-07-19T16:43:25.686+07:00  INFO 16088 --- [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-07-19T16:43:25.687+07:00  INFO 16088 --- [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.13]
+2025-07-19T16:43:25.741+07:00  INFO 16088 --- [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-07-19T16:43:25.741+07:00  INFO 16088 --- [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1392 ms
+2025-07-19T16:43:25.846+07:00  INFO 16088 --- [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-07-19T16:43:25.901+07:00  INFO 16088 --- [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.9.Final
+2025-07-19T16:43:25.905+07:00  INFO 16088 --- [restartedMain] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2025-07-19T16:43:26.036+07:00  INFO 16088 --- [restartedMain] o.h.b.i.BytecodeProviderInitiator        : HHH000021: Bytecode provider name : bytebuddy
+2025-07-19T16:43:26.147+07:00  INFO 16088 --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-07-19T16:43:26.162+07:00  INFO 16088 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-07-19T16:43:26.270+07:00  INFO 16088 --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@1a20b373
+2025-07-19T16:43:26.271+07:00  INFO 16088 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-07-19T16:43:26.289+07:00  WARN 16088 --- [restartedMain] org.hibernate.orm.deprecation            : HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+2025-07-19T16:43:26.544+07:00  INFO 16088 --- [restartedMain] o.h.b.i.BytecodeProviderInitiator        : HHH000021: Bytecode provider name : bytebuddy
+2025-07-19T16:43:27.238+07:00  INFO 16088 --- [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2025-07-19T16:43:27.240+07:00  INFO 16088 --- [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-07-19T16:43:27.723+07:00  INFO 16088 --- [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-07-19T16:43:28.153+07:00  WARN 16088 --- [restartedMain] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'shippingApiClient' defined in file [D:\IntelliJ IDEA\app-server\target\classes\com\example\shoppingsystem\extensions\ShippingApiClient.class]: Unsatisfied dependency expressed through constructor parameter 0: No qualifying bean of type 'org.springframework.web.client.RestTemplate' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+2025-07-19T16:43:28.155+07:00  INFO 16088 --- [restartedMain] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-07-19T16:43:28.157+07:00  INFO 16088 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-07-19T16:43:28.164+07:00  INFO 16088 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-07-19T16:43:28.166+07:00  INFO 16088 --- [restartedMain] o.apache.catalina.core.StandardService   : Stopping service [Tomcat]
+2025-07-19T16:43:28.181+07:00  INFO 16088 --- [restartedMain] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2025-07-19T16:43:28.207+07:00 ERROR 16088 --- [restartedMain] o.s.b.d.LoggingFailureAnalysisReporter   : 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Parameter 0 of constructor in com.example.shoppingsystem.extensions.ShippingApiClient required a bean of type 'org.springframework.web.client.RestTemplate' that could not be found.
+
+
+Action:
+
+Consider defining a bean of type 'org.springframework.web.client.RestTemplate' in your configuration.
+
+2025-07-19T16:44:11.381+07:00  INFO 3100 --- [restartedMain] c.e.s.ShoppingSystemApplication          : Starting ShoppingSystemApplication using Java 23.0.2 with PID 3100 (D:\IntelliJ IDEA\app-server\target\classes started by dothi in D:\IntelliJ IDEA\app-server)
+2025-07-19T16:44:11.382+07:00  INFO 3100 --- [restartedMain] c.e.s.ShoppingSystemApplication          : No active profile set, falling back to 1 default profile: "default"
+2025-07-19T16:44:11.434+07:00  INFO 3100 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-07-19T16:44:11.435+07:00  INFO 3100 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-07-19T16:44:12.170+07:00  INFO 3100 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-07-19T16:44:12.261+07:00  INFO 3100 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 85 ms. Found 18 JPA repository interfaces.
+2025-07-19T16:44:12.817+07:00  INFO 3100 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2025-07-19T16:44:12.826+07:00  INFO 3100 --- [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-07-19T16:44:12.826+07:00  INFO 3100 --- [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.13]
+2025-07-19T16:44:12.880+07:00  INFO 3100 --- [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-07-19T16:44:12.880+07:00  INFO 3100 --- [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1445 ms
+2025-07-19T16:44:12.989+07:00  INFO 3100 --- [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-07-19T16:44:13.048+07:00  INFO 3100 --- [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.9.Final
+2025-07-19T16:44:13.050+07:00  INFO 3100 --- [restartedMain] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2025-07-19T16:44:13.179+07:00  INFO 3100 --- [restartedMain] o.h.b.i.BytecodeProviderInitiator        : HHH000021: Bytecode provider name : bytebuddy
+2025-07-19T16:44:13.290+07:00  INFO 3100 --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-07-19T16:44:13.304+07:00  INFO 3100 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-07-19T16:44:13.412+07:00  INFO 3100 --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@2b9d33a9
+2025-07-19T16:44:13.415+07:00  INFO 3100 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-07-19T16:44:13.432+07:00  WARN 3100 --- [restartedMain] org.hibernate.orm.deprecation            : HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+2025-07-19T16:44:13.688+07:00  INFO 3100 --- [restartedMain] o.h.b.i.BytecodeProviderInitiator        : HHH000021: Bytecode provider name : bytebuddy
+2025-07-19T16:44:14.366+07:00  INFO 3100 --- [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2025-07-19T16:44:14.368+07:00  INFO 3100 --- [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-07-19T16:44:14.844+07:00  INFO 3100 --- [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-07-19T16:44:15.370+07:00  WARN 3100 --- [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-07-19T16:44:15.978+07:00  INFO 3100 --- [restartedMain] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@4d90bd3c, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@278d3422, org.springframework.security.web.context.SecurityContextHolderFilter@33b9230b, org.springframework.security.web.header.HeaderWriterFilter@4f6b379, org.springframework.web.filter.CorsFilter@3ec194ce, org.springframework.security.web.authentication.logout.LogoutFilter@2fb2c84f, com.example.shoppingsystem.config.JwtAuthenticationFilter@2e91cae8, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@39e60a43, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@3cdb6aba, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@138c4f05, org.springframework.security.web.session.SessionManagementFilter@28f469cd, org.springframework.security.web.access.ExceptionTranslationFilter@206f11c, org.springframework.security.web.access.intercept.AuthorizationFilter@23093fcb]
+2025-07-19T16:44:16.179+07:00  INFO 3100 --- [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-07-19T16:44:16.233+07:00  INFO 3100 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
+2025-07-19T16:44:16.241+07:00  INFO 3100 --- [restartedMain] c.e.s.ShoppingSystemApplication          : Started ShoppingSystemApplication in 5.213 seconds (process running for 6.066)
+2025-07-19T16:44:16.245+07:00  INFO 3100 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T16:44:16.308+07:00  INFO 3100 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T16:45:29.728+07:00  INFO 3100 --- [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-07-19T16:45:29.729+07:00  INFO 3100 --- [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-07-19T16:45:29.746+07:00  INFO 3100 --- [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 17 ms
+2025-07-19T16:46:15.962+07:00  INFO 3100 --- [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-07-19T16:46:15.983+07:00  INFO 3100 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-07-19T16:46:16.001+07:00  INFO 3100 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-07-19T16:46:21.377+07:00  INFO 16292 --- [restartedMain] c.e.s.ShoppingSystemApplication          : Starting ShoppingSystemApplication using Java 23.0.2 with PID 16292 (D:\IntelliJ IDEA\app-server\target\classes started by dothi in D:\IntelliJ IDEA\app-server)
+2025-07-19T16:46:21.378+07:00  INFO 16292 --- [restartedMain] c.e.s.ShoppingSystemApplication          : No active profile set, falling back to 1 default profile: "default"
+2025-07-19T16:46:21.422+07:00  INFO 16292 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-07-19T16:46:21.422+07:00  INFO 16292 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-07-19T16:46:22.089+07:00  INFO 16292 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-07-19T16:46:22.173+07:00  INFO 16292 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 78 ms. Found 18 JPA repository interfaces.
+2025-07-19T16:46:22.643+07:00  INFO 16292 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2025-07-19T16:46:22.651+07:00  INFO 16292 --- [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-07-19T16:46:22.651+07:00  INFO 16292 --- [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.13]
+2025-07-19T16:46:22.704+07:00  INFO 16292 --- [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-07-19T16:46:22.704+07:00  INFO 16292 --- [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1282 ms
+2025-07-19T16:46:22.806+07:00  INFO 16292 --- [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-07-19T16:46:22.860+07:00  INFO 16292 --- [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.9.Final
+2025-07-19T16:46:22.862+07:00  INFO 16292 --- [restartedMain] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2025-07-19T16:46:22.987+07:00  INFO 16292 --- [restartedMain] o.h.b.i.BytecodeProviderInitiator        : HHH000021: Bytecode provider name : bytebuddy
+2025-07-19T16:46:23.098+07:00  INFO 16292 --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-07-19T16:46:23.111+07:00  INFO 16292 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-07-19T16:46:23.224+07:00  INFO 16292 --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@6d31e92e
+2025-07-19T16:46:23.225+07:00  INFO 16292 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-07-19T16:46:23.243+07:00  WARN 16292 --- [restartedMain] org.hibernate.orm.deprecation            : HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+2025-07-19T16:46:23.501+07:00  INFO 16292 --- [restartedMain] o.h.b.i.BytecodeProviderInitiator        : HHH000021: Bytecode provider name : bytebuddy
+2025-07-19T16:46:24.164+07:00  INFO 16292 --- [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2025-07-19T16:46:24.166+07:00  INFO 16292 --- [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-07-19T16:46:24.650+07:00  INFO 16292 --- [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-07-19T16:46:25.153+07:00  WARN 16292 --- [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-07-19T16:46:25.768+07:00  INFO 16292 --- [restartedMain] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@7931868f, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@58beb8c9, org.springframework.security.web.context.SecurityContextHolderFilter@5de6eeee, org.springframework.security.web.header.HeaderWriterFilter@519e4d34, org.springframework.web.filter.CorsFilter@56ade0d9, org.springframework.security.web.authentication.logout.LogoutFilter@74d0c382, com.example.shoppingsystem.config.JwtAuthenticationFilter@1d9fb4e8, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@5e1360b7, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@6c22aa75, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@e6fdebe, org.springframework.security.web.session.SessionManagementFilter@38ad2a24, org.springframework.security.web.access.ExceptionTranslationFilter@7997a720, org.springframework.security.web.access.intercept.AuthorizationFilter@2e11f7ef]
+2025-07-19T16:46:25.962+07:00  INFO 16292 --- [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-07-19T16:46:25.995+07:00  INFO 16292 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
+2025-07-19T16:46:26.005+07:00  INFO 16292 --- [restartedMain] c.e.s.ShoppingSystemApplication          : Started ShoppingSystemApplication in 4.964 seconds (process running for 5.678)
+2025-07-19T16:46:26.009+07:00  INFO 16292 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T16:46:26.062+07:00  INFO 16292 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T16:46:30.861+07:00  INFO 16292 --- [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-07-19T16:46:30.861+07:00  INFO 16292 --- [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-07-19T16:46:30.862+07:00  INFO 16292 --- [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2025-07-19T16:46:52.074+07:00  INFO 16292 --- [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-07-19T16:46:52.076+07:00  INFO 16292 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-07-19T16:46:52.082+07:00  INFO 16292 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-07-19T16:46:55.328+07:00  INFO 17188 --- [restartedMain] c.e.s.ShoppingSystemApplication          : Starting ShoppingSystemApplication using Java 23.0.2 with PID 17188 (D:\IntelliJ IDEA\app-server\target\classes started by dothi in D:\IntelliJ IDEA\app-server)
+2025-07-19T16:46:55.329+07:00  INFO 17188 --- [restartedMain] c.e.s.ShoppingSystemApplication          : No active profile set, falling back to 1 default profile: "default"
+2025-07-19T16:46:55.375+07:00  INFO 17188 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-07-19T16:46:55.375+07:00  INFO 17188 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-07-19T16:46:55.926+07:00  INFO 17188 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-07-19T16:46:56.006+07:00  INFO 17188 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 74 ms. Found 18 JPA repository interfaces.
+2025-07-19T16:46:56.460+07:00  INFO 17188 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2025-07-19T16:46:56.466+07:00  INFO 17188 --- [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-07-19T16:46:56.467+07:00  INFO 17188 --- [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.13]
+2025-07-19T16:46:56.513+07:00  INFO 17188 --- [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-07-19T16:46:56.513+07:00  INFO 17188 --- [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1138 ms
+2025-07-19T16:46:56.607+07:00  INFO 17188 --- [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-07-19T16:46:56.636+07:00  INFO 17188 --- [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.9.Final
+2025-07-19T16:46:56.638+07:00  INFO 17188 --- [restartedMain] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2025-07-19T16:46:56.732+07:00  INFO 17188 --- [restartedMain] o.h.b.i.BytecodeProviderInitiator        : HHH000021: Bytecode provider name : bytebuddy
+2025-07-19T16:46:56.817+07:00  INFO 17188 --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-07-19T16:46:56.827+07:00  INFO 17188 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-07-19T16:46:56.928+07:00  INFO 17188 --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@213e9ec5
+2025-07-19T16:46:56.930+07:00  INFO 17188 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-07-19T16:46:56.948+07:00  WARN 17188 --- [restartedMain] org.hibernate.orm.deprecation            : HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+2025-07-19T16:46:57.191+07:00  INFO 17188 --- [restartedMain] o.h.b.i.BytecodeProviderInitiator        : HHH000021: Bytecode provider name : bytebuddy
+2025-07-19T16:46:57.817+07:00  INFO 17188 --- [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2025-07-19T16:46:57.819+07:00  INFO 17188 --- [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-07-19T16:46:58.277+07:00  INFO 17188 --- [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-07-19T16:46:58.724+07:00  WARN 17188 --- [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-07-19T16:46:59.307+07:00  INFO 17188 --- [restartedMain] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@55cc201c, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@65a5299c, org.springframework.security.web.context.SecurityContextHolderFilter@3ed5fcb4, org.springframework.security.web.header.HeaderWriterFilter@6cdcc19c, org.springframework.web.filter.CorsFilter@2d01e194, org.springframework.security.web.authentication.logout.LogoutFilter@23093fcb, com.example.shoppingsystem.config.JwtAuthenticationFilter@25ca8379, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@3f6c894, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@1fbac8ac, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@3de5a734, org.springframework.security.web.session.SessionManagementFilter@1844afd8, org.springframework.security.web.access.ExceptionTranslationFilter@28f469cd, org.springframework.security.web.access.intercept.AuthorizationFilter@66cad273]
+2025-07-19T16:46:59.488+07:00  INFO 17188 --- [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-07-19T16:46:59.520+07:00  INFO 17188 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
+2025-07-19T16:46:59.529+07:00  INFO 17188 --- [restartedMain] c.e.s.ShoppingSystemApplication          : Started ShoppingSystemApplication in 4.494 seconds (process running for 5.131)
+2025-07-19T16:46:59.534+07:00  INFO 17188 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T16:46:59.583+07:00  INFO 17188 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T16:47:02.972+07:00  INFO 17188 --- [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-07-19T16:47:02.972+07:00  INFO 17188 --- [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-07-19T16:47:02.974+07:00  INFO 17188 --- [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2025-07-19T16:47:27.692+07:00  INFO 17188 --- [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-07-19T16:47:27.694+07:00  INFO 17188 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-07-19T16:47:27.700+07:00  INFO 17188 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-07-19T16:47:32.398+07:00  INFO 20928 --- [restartedMain] c.e.s.ShoppingSystemApplication          : Starting ShoppingSystemApplication using Java 23.0.2 with PID 20928 (D:\IntelliJ IDEA\app-server\target\classes started by dothi in D:\IntelliJ IDEA\app-server)
+2025-07-19T16:47:32.399+07:00  INFO 20928 --- [restartedMain] c.e.s.ShoppingSystemApplication          : No active profile set, falling back to 1 default profile: "default"
+2025-07-19T16:47:32.442+07:00  INFO 20928 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-07-19T16:47:32.443+07:00  INFO 20928 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-07-19T16:47:32.992+07:00  INFO 20928 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-07-19T16:47:33.073+07:00  INFO 20928 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 76 ms. Found 18 JPA repository interfaces.
+2025-07-19T16:47:33.502+07:00  INFO 20928 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2025-07-19T16:47:33.508+07:00  INFO 20928 --- [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-07-19T16:47:33.508+07:00  INFO 20928 --- [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.13]
+2025-07-19T16:47:33.556+07:00  INFO 20928 --- [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-07-19T16:47:33.557+07:00  INFO 20928 --- [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1114 ms
+2025-07-19T16:47:33.650+07:00  INFO 20928 --- [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-07-19T16:47:33.683+07:00  INFO 20928 --- [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.9.Final
+2025-07-19T16:47:33.685+07:00  INFO 20928 --- [restartedMain] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2025-07-19T16:47:33.784+07:00  INFO 20928 --- [restartedMain] o.h.b.i.BytecodeProviderInitiator        : HHH000021: Bytecode provider name : bytebuddy
+2025-07-19T16:47:33.895+07:00  INFO 20928 --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-07-19T16:47:33.907+07:00  INFO 20928 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-07-19T16:47:34.018+07:00  INFO 20928 --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@6b2849f7
+2025-07-19T16:47:34.021+07:00  INFO 20928 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-07-19T16:47:34.043+07:00  WARN 20928 --- [restartedMain] org.hibernate.orm.deprecation            : HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+2025-07-19T16:47:34.327+07:00  INFO 20928 --- [restartedMain] o.h.b.i.BytecodeProviderInitiator        : HHH000021: Bytecode provider name : bytebuddy
+2025-07-19T16:47:34.937+07:00  INFO 20928 --- [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2025-07-19T16:47:34.940+07:00  INFO 20928 --- [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-07-19T16:47:35.406+07:00  INFO 20928 --- [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-07-19T16:47:35.853+07:00  WARN 20928 --- [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-07-19T16:47:36.468+07:00  INFO 20928 --- [restartedMain] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@66cad273, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@8281884, org.springframework.security.web.context.SecurityContextHolderFilter@1844afd8, org.springframework.security.web.header.HeaderWriterFilter@5b509d59, org.springframework.web.filter.CorsFilter@788d1f27, org.springframework.security.web.authentication.logout.LogoutFilter@56c70f41, com.example.shoppingsystem.config.JwtAuthenticationFilter@54fa06db, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@7c1a5d8b, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@2dae3b64, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@55cc201c, org.springframework.security.web.session.SessionManagementFilter@35e6ca57, org.springframework.security.web.access.ExceptionTranslationFilter@a3f6623, org.springframework.security.web.access.intercept.AuthorizationFilter@15df6a64]
+2025-07-19T16:47:36.650+07:00  INFO 20928 --- [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-07-19T16:47:36.685+07:00  INFO 20928 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
+2025-07-19T16:47:36.693+07:00  INFO 20928 --- [restartedMain] c.e.s.ShoppingSystemApplication          : Started ShoppingSystemApplication in 4.585 seconds (process running for 5.206)
+2025-07-19T16:47:36.697+07:00  INFO 20928 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T16:47:36.737+07:00  INFO 20928 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T16:47:43.205+07:00  INFO 20928 --- [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-07-19T16:47:43.205+07:00  INFO 20928 --- [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-07-19T16:47:43.206+07:00  INFO 20928 --- [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2025-07-19T16:52:36.722+07:00  INFO 20928 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T16:52:36.785+07:00  INFO 20928 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T16:57:36.720+07:00  INFO 20928 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T16:57:36.738+07:00  INFO 20928 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T17:02:36.699+07:00  INFO 20928 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T17:02:36.699+07:00  INFO 20928 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T17:07:36.728+07:00  INFO 20928 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T17:07:36.744+07:00  INFO 20928 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T17:10:55.084+07:00  INFO 20928 --- [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-07-19T17:10:55.090+07:00  INFO 20928 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-07-19T17:10:55.107+07:00  INFO 20928 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-07-19T17:13:23.881+07:00  INFO 17476 --- [restartedMain] c.e.s.ShoppingSystemApplication          : Starting ShoppingSystemApplication using Java 23.0.2 with PID 17476 (D:\IntelliJ IDEA\app-server\target\classes started by dothi in D:\IntelliJ IDEA\app-server)
+2025-07-19T17:13:23.882+07:00  INFO 17476 --- [restartedMain] c.e.s.ShoppingSystemApplication          : No active profile set, falling back to 1 default profile: "default"
+2025-07-19T17:13:23.936+07:00  INFO 17476 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-07-19T17:13:23.936+07:00  INFO 17476 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-07-19T17:13:24.656+07:00  INFO 17476 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-07-19T17:13:24.746+07:00  INFO 17476 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 85 ms. Found 18 JPA repository interfaces.
+2025-07-19T17:13:25.247+07:00  INFO 17476 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2025-07-19T17:13:25.255+07:00  INFO 17476 --- [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-07-19T17:13:25.256+07:00  INFO 17476 --- [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.13]
+2025-07-19T17:13:25.308+07:00  INFO 17476 --- [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-07-19T17:13:25.308+07:00  INFO 17476 --- [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1371 ms
+2025-07-19T17:13:25.416+07:00  INFO 17476 --- [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-07-19T17:13:25.471+07:00  INFO 17476 --- [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.9.Final
+2025-07-19T17:13:25.475+07:00  INFO 17476 --- [restartedMain] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2025-07-19T17:13:25.600+07:00  INFO 17476 --- [restartedMain] o.h.b.i.BytecodeProviderInitiator        : HHH000021: Bytecode provider name : bytebuddy
+2025-07-19T17:13:25.709+07:00  INFO 17476 --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-07-19T17:13:25.723+07:00  INFO 17476 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-07-19T17:13:25.856+07:00  INFO 17476 --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@3ec4a61d
+2025-07-19T17:13:25.857+07:00  INFO 17476 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-07-19T17:13:25.875+07:00  WARN 17476 --- [restartedMain] org.hibernate.orm.deprecation            : HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+2025-07-19T17:13:26.138+07:00  INFO 17476 --- [restartedMain] o.h.b.i.BytecodeProviderInitiator        : HHH000021: Bytecode provider name : bytebuddy
+2025-07-19T17:13:26.806+07:00  INFO 17476 --- [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2025-07-19T17:13:26.810+07:00  INFO 17476 --- [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-07-19T17:13:27.318+07:00  INFO 17476 --- [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-07-19T17:13:27.834+07:00  WARN 17476 --- [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-07-19T17:13:28.449+07:00  INFO 17476 --- [restartedMain] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@3de5a734, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@99dac54, org.springframework.security.web.context.SecurityContextHolderFilter@2dae3b64, org.springframework.security.web.header.HeaderWriterFilter@39e60a43, org.springframework.web.filter.CorsFilter@45b89d32, org.springframework.security.web.authentication.logout.LogoutFilter@4d90bd3c, com.example.shoppingsystem.config.JwtAuthenticationFilter@50f58ac1, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@2abd0707, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@478c1364, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@6717d950, org.springframework.security.web.session.SessionManagementFilter@3ed5fcb4, org.springframework.security.web.access.ExceptionTranslationFilter@33b9230b, org.springframework.security.web.access.intercept.AuthorizationFilter@55cc201c]
+2025-07-19T17:13:28.655+07:00  INFO 17476 --- [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-07-19T17:13:28.687+07:00  INFO 17476 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
+2025-07-19T17:13:28.695+07:00  INFO 17476 --- [restartedMain] c.e.s.ShoppingSystemApplication          : Started ShoppingSystemApplication in 5.164 seconds (process running for 6.196)
+2025-07-19T17:13:28.700+07:00  INFO 17476 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T17:13:28.756+07:00  INFO 17476 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T17:13:34.902+07:00  INFO 17476 --- [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-07-19T17:13:34.903+07:00  INFO 17476 --- [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-07-19T17:13:34.904+07:00  INFO 17476 --- [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2025-07-19T17:13:44.513+07:00  INFO 17476 --- [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-07-19T17:13:44.513+07:00  INFO 17476 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-07-19T17:13:44.529+07:00  INFO 17476 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-07-19T17:14:35.550+07:00  INFO 21252 --- [restartedMain] c.e.s.ShoppingSystemApplication          : Starting ShoppingSystemApplication using Java 23.0.2 with PID 21252 (D:\IntelliJ IDEA\app-server\target\classes started by dothi in D:\IntelliJ IDEA\app-server)
+2025-07-19T17:14:35.551+07:00  INFO 21252 --- [restartedMain] c.e.s.ShoppingSystemApplication          : No active profile set, falling back to 1 default profile: "default"
+2025-07-19T17:14:35.594+07:00  INFO 21252 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-07-19T17:14:35.594+07:00  INFO 21252 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-07-19T17:14:36.294+07:00  INFO 21252 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-07-19T17:14:36.384+07:00  INFO 21252 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 83 ms. Found 18 JPA repository interfaces.
+2025-07-19T17:14:36.871+07:00  INFO 21252 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2025-07-19T17:14:36.879+07:00  INFO 21252 --- [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-07-19T17:14:36.880+07:00  INFO 21252 --- [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.13]
+2025-07-19T17:14:36.932+07:00  INFO 21252 --- [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-07-19T17:14:36.932+07:00  INFO 21252 --- [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1337 ms
+2025-07-19T17:14:37.037+07:00  INFO 21252 --- [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-07-19T17:14:37.091+07:00  INFO 21252 --- [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.9.Final
+2025-07-19T17:14:37.094+07:00  INFO 21252 --- [restartedMain] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2025-07-19T17:14:37.219+07:00  INFO 21252 --- [restartedMain] o.h.b.i.BytecodeProviderInitiator        : HHH000021: Bytecode provider name : bytebuddy
+2025-07-19T17:14:37.330+07:00  INFO 21252 --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-07-19T17:14:37.344+07:00  INFO 21252 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-07-19T17:14:37.453+07:00  INFO 21252 --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@575644c4
+2025-07-19T17:14:37.455+07:00  INFO 21252 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-07-19T17:14:37.473+07:00  WARN 21252 --- [restartedMain] org.hibernate.orm.deprecation            : HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+2025-07-19T17:14:37.736+07:00  INFO 21252 --- [restartedMain] o.h.b.i.BytecodeProviderInitiator        : HHH000021: Bytecode provider name : bytebuddy
+2025-07-19T17:14:38.416+07:00  INFO 21252 --- [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2025-07-19T17:14:38.418+07:00  INFO 21252 --- [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-07-19T17:14:38.914+07:00  INFO 21252 --- [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-07-19T17:14:39.422+07:00  WARN 21252 --- [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-07-19T17:14:40.075+07:00  INFO 21252 --- [restartedMain] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@138c4f05, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@5bbd7915, org.springframework.security.web.context.SecurityContextHolderFilter@33bcecc2, org.springframework.security.web.header.HeaderWriterFilter@52dbbdbe, org.springframework.web.filter.CorsFilter@15df6a64, org.springframework.security.web.authentication.logout.LogoutFilter@4b2b0799, com.example.shoppingsystem.config.JwtAuthenticationFilter@2f10ddca, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@35e6ca57, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@1bf36af5, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@278afbf5, org.springframework.security.web.session.SessionManagementFilter@33b9230b, org.springframework.security.web.access.ExceptionTranslationFilter@12f1df7e, org.springframework.security.web.access.intercept.AuthorizationFilter@4d90bd3c]
+2025-07-19T17:14:40.272+07:00  INFO 21252 --- [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-07-19T17:14:40.312+07:00  INFO 21252 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
+2025-07-19T17:14:40.320+07:00  INFO 21252 --- [restartedMain] c.e.s.ShoppingSystemApplication          : Started ShoppingSystemApplication in 5.07 seconds (process running for 5.754)
+2025-07-19T17:14:40.325+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T17:14:40.376+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T17:14:45.275+07:00  INFO 21252 --- [http-nio-8080-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-07-19T17:14:45.275+07:00  INFO 21252 --- [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-07-19T17:14:45.278+07:00  INFO 21252 --- [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2025-07-19T17:19:40.326+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T17:19:40.329+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T17:24:40.327+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T17:24:40.333+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T17:29:40.328+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T17:29:40.331+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T17:34:40.333+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T17:34:40.337+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T17:39:40.334+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T17:39:40.337+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T17:44:40.332+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T17:44:40.337+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T17:49:40.327+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T17:49:40.331+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T17:54:40.349+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T17:54:40.367+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T17:59:40.323+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T17:59:40.328+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T18:04:40.321+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T18:04:40.329+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T18:09:40.333+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T18:09:40.335+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T18:14:40.341+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T18:14:40.352+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T18:19:40.337+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T18:19:40.339+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T18:24:40.335+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T18:24:40.338+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T18:29:40.350+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T18:29:40.353+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T18:34:40.348+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T18:34:40.352+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T18:39:40.352+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T18:39:40.356+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T18:44:40.359+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T18:44:40.376+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T18:49:40.347+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T18:49:40.350+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T18:54:40.360+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T18:54:40.362+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T18:59:40.355+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T18:59:40.359+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T19:04:40.359+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T19:04:40.362+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T19:09:40.408+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T19:09:40.446+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T19:14:40.371+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T19:14:40.387+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T19:19:40.364+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T19:19:40.370+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T19:24:40.372+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T19:24:40.376+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T19:29:40.364+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T19:29:40.369+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T19:34:40.360+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T19:34:40.366+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T19:39:40.363+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T19:39:40.367+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T19:44:40.371+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T19:44:40.376+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T19:49:40.366+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T19:49:40.376+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T19:54:40.363+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T19:54:40.368+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T19:59:40.373+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T19:59:40.377+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T20:04:40.374+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T20:04:40.377+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T20:09:40.372+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T20:09:40.381+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T20:14:40.378+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T20:14:40.391+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T20:19:40.389+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T20:19:40.407+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T20:24:40.382+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T20:24:40.387+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T20:29:40.370+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T20:29:40.375+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T20:34:40.379+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T20:34:40.383+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T20:39:40.370+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T20:39:40.374+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T20:44:40.372+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T20:44:40.375+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T20:49:40.373+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T20:49:40.378+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T20:54:40.373+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T20:54:40.376+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T20:59:40.376+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T20:59:40.379+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T21:04:40.372+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T21:04:40.376+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T21:09:40.375+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T21:09:40.377+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T21:14:40.367+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : Starting OTP cleanup...
+2025-07-19T21:14:40.373+07:00  INFO 21252 --- [scheduling-1] c.e.shoppingsystem.auth.OtpServiceImpl   : OTP cleanup completed.
+2025-07-19T23:51:59.167+07:00  INFO 21252 --- [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-07-19T23:51:59.262+07:00  INFO 21252 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-07-19T23:51:59.381+07:00  INFO 21252 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
