@@ -43,4 +43,18 @@ public class Message {
     public static final String ADDRESS_NOT_FOUND = "Address not found or cannot set address of another account";
     public static final String NOT_FOUND_CATEGORY = "Not found category";
     public static final String NOT_FOUND_ORDER = "Not found order";
+    public static final String NOT_FOUND_PRODUCT = "Not found product";
+    public static final String NOT_FOUND_PRODUCT_VARIANT = "Not found product variant";
+    public static final String AGENCY_NOT_ALLOWED = "AGENCY is not allowed";
+    public static final String SELLER_REGISTER_PENDING = "Hồ sơ đã được gửi đi và đang chờ xét duyệt."; // <-- Thêm dòng này
+    public static final String AGENCY_NOT_FOUND = "Agency not found";
+    public static final String ORDER_IS_NOT_PENDING = "Order is not in a confirmable state!";
+    public static final String ORDER_IS_ALREADY_CONFIRMED = "Order is already confirmed!";
+    public static final String ORDER_IS_NOT_CONFIRMED = "Order is not confirmed yet!";
+    public static final String CONFIRM_ORDER_SUCCESS = "Confirm order successfully!";
+    public static final String CONFIRM_ORDER_FAILURE = "Confirm order failed!";
+    public static final String FETCHING_ORDER_SUCCESS = "Fetching order successfully!";
+    public static final String FETCHING_ORDER_FAILURE = "Fetching order failed!";
+    public static final String NOT_FOUND_ARTICLE = "Not found article";
+
 }

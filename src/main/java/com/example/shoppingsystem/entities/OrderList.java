@@ -40,6 +40,9 @@ public class OrderList extends BaseEntity{
     @Column(name = "ADDRESS_DETAIL")
     private String addressDetail;
 
+    @Column(name = "RETURN_REASON")
+    private String returnReason;
+
     @ManyToMany
     @JoinTable(
             name = "coupon_order_list",

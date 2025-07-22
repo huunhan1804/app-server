@@ -130,8 +130,8 @@ public class UserManagementServiceImpl implements UserManagementService {
         // Update application status
         ApprovalStatus approvedStatus = approvalStatusRepository.findApprovalStatusByStatusCode(StatusCode.STATUS_APPROVED);
         application.setApprovalStatus(approvedStatus);
-        application.setReviewedDate(LocalDateTime.now());
-        application.setReviewedBy(adminUsername);
+        application.setUpdatedDate(LocalDateTime.now());
+        application.setUpdatedBy(adminUsername);
         agencyInfoRepository.save(application);
 
         // Update account status and role
@@ -156,8 +156,8 @@ public class UserManagementServiceImpl implements UserManagementService {
         ApprovalStatus rejectedStatus = approvalStatusRepository.findApprovalStatusByStatusCode(StatusCode.STATUS_REJECTED);
         application.setApprovalStatus(rejectedStatus);
         application.setRejectionReason(reason);
-        application.setReviewedDate(LocalDateTime.now());
-        application.setReviewedBy(adminUsername);
+        application.setUpdatedDate(LocalDateTime.now());
+        application.setUpdatedBy(adminUsername);
         agencyInfoRepository.save(application);
 
         // Update account status
@@ -357,8 +357,8 @@ public class UserManagementServiceImpl implements UserManagementService {
                 .submittedDate(application.getSubmittedDate() != null ?
                         application.getSubmittedDate().toInstant()
                                 .atZone(java.time.ZoneId.systemDefault()).toLocalDateTime() : null)
-                .reviewedDate(application.getReviewedDate())
-                .reviewedBy(application.getReviewedBy())
+                .reviewedDate(application.getUpdatedDate())
+                .reviewedBy(application.getCreatedBy())
                 .build();
     }
 

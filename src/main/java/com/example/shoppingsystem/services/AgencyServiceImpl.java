@@ -7,6 +7,7 @@ import com.example.shoppingsystem.constants.StatusCode;
 import com.example.shoppingsystem.dtos.*;
 import com.example.shoppingsystem.entities.*;
 import com.example.shoppingsystem.enums.MultimediaType;
+import com.example.shoppingsystem.enums.OrderStatus;
 import com.example.shoppingsystem.repositories.*;
 import com.example.shoppingsystem.requests.*;
 import com.example.shoppingsystem.responses.ApiResponse;
@@ -35,9 +36,10 @@ public class AgencyServiceImpl implements AgencyService {
     private final FeedbackRepository feedbackRepository;
     private final AccountService accountService;
     private final ProductServiceImpl productService;
+    private final AgencyInfoRepository agencyInfoRepository;
 
     @Autowired
-    public AgencyServiceImpl(ProductRepository productRepository, ApprovalStatusRepository approvalStatusRepository, OrderRepository orderRepository, AccountRepository accountRepository, CategoryRepository categoryRepository, ProductVariantRepository productVariantRepository, MultimediaRepository multimediaRepository, FeedbackRepository feedbackRepository, AccountService accountService, ProductServiceImpl productService) {
+    public AgencyServiceImpl(ProductRepository productRepository, ApprovalStatusRepository approvalStatusRepository, OrderRepository orderRepository, AccountRepository accountRepository, CategoryRepository categoryRepository, ProductVariantRepository productVariantRepository, MultimediaRepository multimediaRepository, FeedbackRepository feedbackRepository, AccountService accountService, ProductServiceImpl productService, AgencyInfoRepository agencyInfoRepository) {
         this.productRepository = productRepository;
         this.approvalStatusRepository = approvalStatusRepository;
         this.orderRepository = orderRepository;
@@ -48,6 +50,7 @@ public class AgencyServiceImpl implements AgencyService {
         this.feedbackRepository = feedbackRepository;
         this.accountService = accountService;
         this.productService = productService;
+        this.agencyInfoRepository = agencyInfoRepository;
     }
 
     @Override
@@ -138,7 +141,7 @@ public class AgencyServiceImpl implements AgencyService {
                 .build();
     }
     @Override
-    public ApiResponse<AccountInfoDTO> deleteProduct(long product_id){
+    public ApiResponse<AccountInfoDTO> deleteProduct(Long product_id){
         Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         if(account.isPresent()){
             List<Product> products = new ArrayList<>();
@@ -291,8 +294,100 @@ public class AgencyServiceImpl implements AgencyService {
     }
 
     @Override
-    public ShipmentResponse shipOrder(long order_id, String agency_email) throws AccessDeniedException {
-        OrderList orderList = orderRepository.findOrderListByOrderId(order_id);
+    public ApiResponse<OrderDTO> confirmOrder(ConfirmOrderRequest request){
+        Optional<AgencyInfo> agencyInfo = agencyInfoRepository.findByApplicationId(request.getAgencyId());
+        if(agencyInfo.isPresent()) {
+            OrderList orderList = orderRepository.findByOrderId(request.getOrderId());
+
+            if(orderList == null) {
+                return ApiResponse.<OrderDTO>builder()
+                        .status(ErrorCode.NOT_FOUND)
+                        .message(Message.NOT_FOUND_ORDER)
+                        .timestamp(new java.util.Date())
+                        .build();
+            }
+            if(!orderList.getOrderStatus().equals(OrderStatus.PENDING)) {
+                return ApiResponse.<OrderDTO>builder()
+                        .status(ErrorCode.BAD_REQUEST)
+                        .message(Message.ORDER_IS_NOT_PENDING)
+                        .timestamp(new java.util.Date())
+                        .build();
+            }
+            //Xac minh order la cua agency
+
+            orderList.setOrderStatus(OrderStatus.CONFIRMED);
+            orderRepository.save(orderList);
+
+            return ApiResponse.<OrderDTO>builder()
+                    .status(ErrorCode.SUCCESS)
+                    .message(Message.CONFIRM_ORDER_SUCCESS)
+                    .data(convertOrderToDTO(orderList, (List<OrderDetail>) orderList.getOrderDetails()))
+                    .timestamp(new java.util.Date())
+                    .build();
+        }
+        return ApiResponse.<OrderDTO>builder()
+                .status(ErrorCode.NOT_FOUND)
+                .message(Message.AGENCY_NOT_FOUND)
+                .timestamp(new java.util.Date())
+                .build();
+    }
+
+    @Override
+    public ApiResponse<String> getOrderStatus(Long order_id){
+        OrderList orderList = orderRepository.findByOrderId(order_id);
+        if(orderList == null) {
+            String orderStatus = orderList.getOrderStatus().name();
+            return ApiResponse.<String>builder()
+                    .status(ErrorCode.SUCCESS)
+                    .message(Message.SUCCESS)
+                    .data(orderStatus)
+                    .timestamp(new java.util.Date())
+                    .build();
+        }
+        return ApiResponse.<String>builder()
+                .status(ErrorCode.NOT_FOUND)
+                .message(Message.NOT_FOUND_ORDER)
+                .timestamp(new java.util.Date())
+                .build();
+    }
+
+    @Override
+    public ApiResponse<List<OrderDTO>> getListOfOrdersByStatus(ListOrderByStatusRequest request){
+        Optional<AgencyInfo> agencyInfo = agencyInfoRepository.findByApplicationId(request.getAgencyId());
+        if(agencyInfo.isPresent()) {
+            Account account = agencyInfo.get().getAccount();
+            List<OrderList> orderLists = orderRepository.findAllByAccount_AccountId(account.getAccountId());
+            if(orderLists.isEmpty()) {
+                return ApiResponse.<List<OrderDTO>>builder()
+                        .status(ErrorCode.NOT_FOUND)
+                        .message(Message.NOT_FOUND_ORDER)
+                        .timestamp(new java.util.Date())
+                        .build();
+            }
+            List<OrderDTO> orderDTOS = new ArrayList<>();
+            for(OrderList orderList : orderLists) {
+                if(orderList.getOrderStatus().equals(OrderStatus.valueOf(request.getStatus()))) {
+                    OrderDTO orderDTO = convertOrderToDTO(orderList, (List<OrderDetail>) orderList.getOrderDetails());
+                    orderDTOS.add(orderDTO);
+                }
+            }
+            return ApiResponse.<List<OrderDTO>>builder()
+                    .status(ErrorCode.SUCCESS)
+                    .message(Message.FETCHING_ORDER_SUCCESS)
+                    .data(orderDTOS)
+                    .timestamp(new java.util.Date())
+                    .build();
+        }
+        return ApiResponse.<List<OrderDTO>>builder()
+                .status(ErrorCode.FORBIDDEN)
+                .message(Message.AGENCY_NOT_FOUND)
+                .timestamp(new java.util.Date())
+                .build();
+    }
+
+    @Override
+    public ShipmentResponse shipOrder(Long order_id, String agency_email) throws AccessDeniedException {
+        OrderList orderList = orderRepository.findByOrderId(order_id);
         if(orderList != null) {
             boolean ownsProduct = orderList.getOrderDetails().stream().anyMatch(item -> item.getProduct().getAccount().getEmail().equals(agency_email));
             if(!ownsProduct) {

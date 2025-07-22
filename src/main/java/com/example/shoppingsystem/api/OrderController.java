@@ -73,4 +73,14 @@ public class OrderController {
         ApiResponse<List<OrderDetailDTO>> apiResponse = orderService.getOrderDetailCheckout(request);
         return ResponseEntity.status(apiResponse.getStatus()).body(apiResponse);
     }
+
+    @Operation(
+            summary = "Receive order",
+            description = "Receive order."
+    )
+    @GetMapping("/receive/{orderId}")
+    public ResponseEntity<ApiResponse<List<OrderDTO>>> receiveOrder(@Parameter(description = "Order ID") @PathVariable long orderId) {
+        ApiResponse<List<OrderDTO>> apiResponse = orderService.receiveOrder(orderId);
+        return ResponseEntity.status(apiResponse.getStatus()).body(apiResponse);
+    }
 }

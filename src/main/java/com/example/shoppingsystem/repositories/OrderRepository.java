@@ -14,6 +14,7 @@ import java.util.List;
 @Repository
 public interface OrderRepository extends JpaRepository<OrderList, Long> {
     List<OrderList> findAllByAccount_AccountId(Long accountId);
+    //List<OrderList> findAllByAgency_AgencyId(Long agencyId);
 
     @Query("SELECT o FROM OrderList o WHERE o.orderDate BETWEEN :startDate AND :endDate")
     List<OrderList> findOrdersInDateRange(
@@ -25,4 +26,6 @@ public interface OrderRepository extends JpaRepository<OrderList, Long> {
 
     @Query("SELECT o FROM OrderList o ORDER BY o.orderDate DESC")
     Page<OrderList> findTop10ByOrderByOrderDateDesc(Pageable pageable);
+
+    OrderList findByOrderId(Long orderId);
 }

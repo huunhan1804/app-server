@@ -89,6 +89,9 @@ public class LogMessage {
     public static final String LOG_ACCOUNT_EXIST_PHONE = "Account with phone '%s' is already exist!";
     public static final String LOG_RECEIVED_CURRENT_ACCOUNT = "Received request to get information of account.";
 
+    public static final String LOG_RECEIVED_AGENCY_REGISTER_REQUEST = "Received agency registration request.";
+    public static final String LOG_AGENCY_REGISTRATION_FAILED = "Agency registration failed for account ID %d: %s";
+
     public static final String LOG_NOT_AUTHENTICATED = "Request not authenticated";
     public static final String LOG_AGENCY_EXIST_ID_NUMBER = "Agency with id number '%s' already exist!";
 }

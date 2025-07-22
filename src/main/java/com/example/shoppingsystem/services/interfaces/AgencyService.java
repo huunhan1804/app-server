@@ -4,6 +4,8 @@ import com.example.shoppingsystem.dtos.AccountInfoDTO;
 import com.example.shoppingsystem.dtos.OrderDTO;
 import com.example.shoppingsystem.dtos.ProductInfoDTO;
 import com.example.shoppingsystem.requests.AddNewProductRequest;
+import com.example.shoppingsystem.requests.ConfirmOrderRequest;
+import com.example.shoppingsystem.requests.ListOrderByStatusRequest;
 import com.example.shoppingsystem.requests.UpdateProductRequest;
 import com.example.shoppingsystem.responses.ApiResponse;
 import com.example.shoppingsystem.responses.ShipmentResponse;
@@ -16,9 +18,11 @@ import java.util.List;
 public interface AgencyService {
     ApiResponse<ProductInfoDTO> createProduct(AddNewProductRequest request);
     ApiResponse<ProductInfoDTO> updateProduct(UpdateProductRequest request);
-    ApiResponse<AccountInfoDTO> deleteProduct(long product_id);
-    ShipmentResponse shipOrder(long order_id, String agency_email) throws AccessDeniedException;
-//    OrderDTO confirmOrder(Long orderId);
+    ApiResponse<AccountInfoDTO> deleteProduct(Long product_id);
+    ShipmentResponse shipOrder(Long order_id, String agency_email) throws AccessDeniedException;
+    ApiResponse<OrderDTO> confirmOrder(ConfirmOrderRequest request);
+    ApiResponse<String> getOrderStatus(Long order_id);
+    ApiResponse<List<OrderDTO>> getListOfOrdersByStatus(ListOrderByStatusRequest request);
 //    ApiResponse<OrderDTO> sendOrderToShipping(Long orderId);
 //    ApiResponse<OrderDTO> trackShippingStatus(String trackingCode);
 

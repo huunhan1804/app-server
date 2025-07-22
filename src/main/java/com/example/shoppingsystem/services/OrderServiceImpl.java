@@ -12,6 +12,7 @@ import com.example.shoppingsystem.repositories.*;
 import com.example.shoppingsystem.requests.CheckoutRequest;
 import com.example.shoppingsystem.requests.OrderDetailRequest;
 import com.example.shoppingsystem.requests.OrderRequest;
+import com.example.shoppingsystem.requests.ReturnOrderRequest;
 import com.example.shoppingsystem.responses.ApiResponse;
 import com.example.shoppingsystem.services.interfaces.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +60,7 @@ public class OrderServiceImpl implements OrderService {
             orderList.setAddressDetail(orderRequest.getAddress_detail());
             System.out.println(Regex.parseVNDToBigDecimal(orderRequest.getTotal_bill()));
             orderList.setTotalPrice(Regex.parseVNDToBigDecimal(orderRequest.getTotal_bill()));
-            orderList.setOrderStatus(OrderStatus.SHIPPING);
+            orderList.setOrderStatus(OrderStatus.PENDING);
             orderList.setAccount(account.get());
             OrderList savedOrder = orderRepository.save(orderList);
 
@@ -141,6 +142,55 @@ public class OrderServiceImpl implements OrderService {
                 orderRepository.save(order.get());
                 return getAllOrder();
             } else {
+                return ApiResponse.<List<OrderDTO>>builder()
+                        .status(ErrorCode.BAD_REQUEST)
+                        .message(Message.NOT_FOUND_ORDER)
+                        .timestamp(new java.util.Date())
+                        .build();
+            }
+        }
+        return ApiResponse.<List<OrderDTO>>builder()
+                .status(ErrorCode.FORBIDDEN)
+                .message(Message.ACCOUNT_NOT_FOUND)
+                .timestamp(new java.util.Date())
+                .build();
+    }
+
+    @Override
+    public ApiResponse<List<OrderDTO>> receiveOrder(long orderId){
+        Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        if (account.isPresent()) {
+            Optional<OrderList> order = orderRepository.findById(orderId);
+            if(order.isPresent()){
+                order.get().setOrderStatus(OrderStatus.COMPLETED);
+                orderRepository.save(order.get());
+                return getAllOrder();
+            }else {
+                return ApiResponse.<List<OrderDTO>>builder()
+                        .status(ErrorCode.BAD_REQUEST)
+                        .message(Message.NOT_FOUND_ORDER)
+                        .timestamp(new java.util.Date())
+                        .build();
+            }
+        }
+        return ApiResponse.<List<OrderDTO>>builder()
+                .status(ErrorCode.FORBIDDEN)
+                .message(Message.ACCOUNT_NOT_FOUND)
+                .timestamp(new java.util.Date())
+                .build();
+    }
+
+    @Override
+    public ApiResponse<List<OrderDTO>> returnOrder(ReturnOrderRequest request) {
+        Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        if (account.isPresent()) {
+            Optional<OrderList> order = orderRepository.findById(request.getOrderId());
+            if(order.isPresent()){
+                order.get().setOrderStatus(OrderStatus.RETURNED);
+                order.get().setReturnReason(request.getReturnReason());
+                orderRepository.save(order.get());
+                return getAllOrder();
+            }else {
                 return ApiResponse.<List<OrderDTO>>builder()
                         .status(ErrorCode.BAD_REQUEST)
                         .message(Message.NOT_FOUND_ORDER)

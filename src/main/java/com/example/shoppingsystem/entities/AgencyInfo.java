@@ -44,7 +44,7 @@ public class AgencyInfo extends BaseEntity {
     private String fullNameApplicant;
 
     @Column(name = "BIRTHDATE_APPLICANT")
-    private LocalDate birthdateApplicant;
+    private Date birthdateApplicant;
 
     @Column(name = "GENDER_APPLICANT")
     private String genderApplicant;
@@ -53,7 +53,7 @@ public class AgencyInfo extends BaseEntity {
     private String idCardNumber;
 
     @Column(name = "DATE_OF_ISSUE_IDCARD")
-    private LocalDate dateOfIssueIdCard;
+    private Date dateOfIssueIdCard;
 
     @Column(name = "PLACE_OF_ISSUE_IDCARD")
     private String placeOfIssueIdCard;
@@ -81,7 +81,7 @@ public class AgencyInfo extends BaseEntity {
     private String rejectionReason;
 
     @Column(name = "SUBMITTED_DATE")
-    private LocalDate submittedDate;
+    private Date submittedDate;
 
 
 }

@@ -1,4 +1,4 @@
-package com.example.shoppingsystem.controllers.api;
+package com.example.shoppingsystem.api;
 
 import com.example.shoppingsystem.dtos.InsuranceClaimDTO;
 import com.example.shoppingsystem.entities.InsuranceClaim.ClaimStatus;
