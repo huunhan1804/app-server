@@ -53,7 +53,6 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
                 .map(entry -> new RevenueDataDTO(entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
     }
-
     @Override
     public List<CategoryStatDTO> getCategoryStatistics() {
         List<Category> categories = categoryRepository.findAll();

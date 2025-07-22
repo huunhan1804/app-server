@@ -10,8 +10,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
@@ -136,40 +136,88 @@ public class SampleDataController {
         }
     }
 
-    @PostMapping("/clear-all")
+    @RequestMapping(value = "/clear-all", method = {RequestMethod.GET, RequestMethod.POST})
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public ResponseEntity<String> clearAllData() {
         try {
             System.out.println("🗑️ Bắt đầu xóa toàn bộ dữ liệu...");
 
-            // Sử dụng deleteAllInBatch() để hiệu suất tốt hơn
-            feedbackRepository.deleteAllInBatch();
-            couponOrderListRepository.deleteAllInBatch();
-            orderDetailRepository.deleteAllInBatch();
-            orderRepository.deleteAllInBatch();
-            accountCouponRepository.deleteAllInBatch();
-            couponRepository.deleteAllInBatch();
-            cartItemRepository.deleteAllInBatch();
-            cartRepository.deleteAllInBatch();
-            multimediaRepository.deleteAllInBatch();
-            productVariantRepository.deleteAllInBatch();
-            productRepository.deleteAllInBatch();
-            addressRepository.deleteAllInBatch();
-            agencyInfoRepository.deleteAllInBatch();
-            membershipRepository.deleteAllInBatch();
+            // Tắt foreign key checks trước khi xóa
+            entityManager.createNativeQuery("SET FOREIGN_KEY_CHECKS = 0").executeUpdate();
 
-            // Xóa accounts (trừ admin hiện tại)
+            // Lấy thông tin admin hiện tại để giữ lại
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String currentUsername = auth.getName();
-            accountRepository.deleteByUsernameNot(currentUsername); // Giữ lại admin đang đăng nhập
 
-            categoryRepository.deleteAllInBatch();
-            parentCategoryRepository.deleteAllInBatch();
-            approvalStatusRepository.deleteAllInBatch();
+            try {
+                // Xóa theo thứ tự ĐÚNG để tránh foreign key constraint
 
-            // Không xóa roles để tránh lỗi hệ thống
-            // roleRepository.deleteAllInBatch();
+                // 1. Xóa các bảng con trước (không có dependency)
+                feedbackRepository.deleteAllInBatch();
+                System.out.println("✓ Deleted feedbacks");
+
+                couponOrderListRepository.deleteAllInBatch();
+                System.out.println("✓ Deleted coupon order lists");
+
+                orderDetailRepository.deleteAllInBatch();
+                System.out.println("✓ Deleted order details");
+
+                orderRepository.deleteAllInBatch();
+                System.out.println("✓ Deleted orders");
+
+                accountCouponRepository.deleteAllInBatch();
+                System.out.println("✓ Deleted account coupons");
+
+                couponRepository.deleteAllInBatch();
+                System.out.println("✓ Deleted coupons");
+
+                cartItemRepository.deleteAllInBatch();
+                System.out.println("✓ Deleted cart items");
+
+                cartRepository.deleteAllInBatch();
+                System.out.println("✓ Deleted carts");
+
+                multimediaRepository.deleteAllInBatch();
+                System.out.println("✓ Deleted multimedia");
+
+                productVariantRepository.deleteAllInBatch();
+                System.out.println("✓ Deleted product variants");
+
+                productRepository.deleteAllInBatch();
+                System.out.println("✓ Deleted products");
+
+                addressRepository.deleteAllInBatch();
+                System.out.println("✓ Deleted addresses");
+
+                // 2. Xóa agency_info TRƯỚC account
+                agencyInfoRepository.deleteAllInBatch();
+                System.out.println("✓ Deleted agency info");
+
+                membershipRepository.deleteAllInBatch();
+                System.out.println("✓ Deleted memberships");
+
+                // 3. Xóa accounts (trừ admin hiện tại)
+                accountRepository.deleteByUsernameNot(currentUsername);
+                System.out.println("✓ Deleted accounts (kept current admin)");
+
+                // 4. Xóa categories
+                categoryRepository.deleteAllInBatch();
+                System.out.println("✓ Deleted categories");
+
+                parentCategoryRepository.deleteAllInBatch();
+                System.out.println("✓ Deleted parent categories");
+
+                approvalStatusRepository.deleteAllInBatch();
+                System.out.println("✓ Deleted approval statuses");
+
+                // Không xóa roles để tránh lỗi hệ thống
+                // roleRepository.deleteAllInBatch();
+
+            } finally {
+                // Bật lại foreign key checks
+                entityManager.createNativeQuery("SET FOREIGN_KEY_CHECKS = 1").executeUpdate();
+            }
 
             System.out.println("✅ Đã xóa tất cả dữ liệu thành công!");
             return ResponseEntity.ok("Đã xóa tất cả dữ liệu thành công! (Giữ lại account admin hiện tại và roles)");
@@ -181,7 +229,6 @@ public class SampleDataController {
                     .body("Lỗi khi xóa dữ liệu: " + e.getMessage());
         }
     }
-
     @GetMapping("/force-clear")
     @Transactional
     public ResponseEntity<String> forceClearData() {

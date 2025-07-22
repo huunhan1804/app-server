@@ -5,8 +5,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.AuthenticationTrustResolver;
-import org.springframework.security.authentication.AuthenticationTrustResolverImpl;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -14,8 +12,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
-import org.springframework.security.web.DefaultRedirectStrategy;
-import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
@@ -35,16 +31,16 @@ public class SecurityConfig {
 
     @Bean
     @Order(1)
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .securityMatcher("/api/**") // Chỉ áp dụng cho API
+    public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
+        return http
+                .securityMatcher("/api/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/**",
-                                "/api/admin/data/**",  // THÊM DÒNG NÀY - Cho phép endpoint data
-                                "/api/public/**"       // THÊM DÒNG NÀY - Cho phép endpoint public
+                                "/api/admin/data/**",
+                                "/api/public/**"
                         ).permitAll()
                         .requestMatchers(
                                 "/swagger-ui/**",
@@ -63,16 +59,16 @@ public class SecurityConfig {
                         .logoutUrl("/api/auth/logout")
                         .addLogoutHandler(logoutHandler)
                         .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
-                );
-        return http.build();
+                )
+                .build();
     }
 
     @Bean
     @Order(2)
-    public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain adminFilterChain(HttpSecurity http) throws Exception {
         return http
                 .securityMatcher("/admin/**")
-                .csrf(csrf -> csrf.disable()) // Tắt CSRF cho admin
+                .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
@@ -84,7 +80,7 @@ public class SecurityConfig {
                                 "/admin/static/**",
                                 "/admin/webjars/**"
                         ).permitAll()
-                        .anyRequest().hasAuthority("admin") // Yêu cầu quyền admin
+                        .requestMatchers("/admin/**").hasAuthority("ADMIN") //
                 )
                 .formLogin(form -> form
                         .loginPage("/admin/login")
@@ -105,10 +101,9 @@ public class SecurityConfig {
                 )
                 .sessionManagement(sess -> sess
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                        // TẮT hoặc cấu hình lại session concurrency control
                         .maximumSessions(1)
                         .maxSessionsPreventsLogin(false)
-                        .sessionRegistry(sessionRegistry()) // Thêm session registry tùy chỉnh
+                        .sessionRegistry(sessionRegistry())
                 )
                 .exceptionHandling(ex -> ex
                         .accessDeniedPage("/admin/login?error=access_denied")
@@ -117,11 +112,6 @@ public class SecurityConfig {
                         })
                 )
                 .build();
-    }
-
-    @Bean
-    public SessionRegistry sessionRegistry() {
-        return new SessionRegistryImpl();
     }
 
     @Bean
@@ -138,21 +128,16 @@ public class SecurityConfig {
                                 "/js/**",
                                 "/images/**",
                                 "/favicon.ico",
-                                "/test/**"  // THÊM DÒNG NÀY - Cho phép endpoint test
+                                "/test/**"
                         ).permitAll()
-                        .anyRequest().permitAll() // Cho phép tất cả các route khác
+                        .anyRequest().permitAll()
                 )
                 .build();
     }
 
     @Bean
-    public RedirectStrategy redirectStrategy() {
-        return new DefaultRedirectStrategy();
-    }
-
-    @Bean
-    public AuthenticationTrustResolver authenticationTrustResolver() {
-        return new AuthenticationTrustResolverImpl();
+    public SessionRegistry sessionRegistry() {
+        return new SessionRegistryImpl();
     }
 
     @Bean

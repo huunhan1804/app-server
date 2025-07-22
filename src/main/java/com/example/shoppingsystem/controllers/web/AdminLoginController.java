@@ -20,9 +20,11 @@ public class AdminLoginController {
             @RequestParam(value = "logout", required = false) String logout,
             Model model) {
 
-        // Nếu đã đăng nhập rồi thì redirect về dashboard
+        // Kiểm tra authentication
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+        if (auth != null && auth.isAuthenticated() &&
+                !"anonymousUser".equals(auth.getName()) &&
+                auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("admin"))) {
             return "redirect:/admin/dashboard";
         }
 

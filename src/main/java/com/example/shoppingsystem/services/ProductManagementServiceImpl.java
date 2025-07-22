@@ -196,7 +196,9 @@ public class ProductManagementServiceImpl implements ProductManagementService {
 
     private ProductManagementDTO convertToProductManagementDTO(Product product) {
         // Lấy hình ảnh đại diện
-        String imageUrl = multimediaRepository.findByProduct_ProductId(product.getProductId())
+        String imageUrl = multimediaRepository.findAllByProduct_ProductId(product.getProductId())
+                .stream()
+                .findFirst()
                 .map(Multimedia::getMultimediaUrl)
                 .orElse("https://via.placeholder.com/150");
 

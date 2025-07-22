@@ -707,3 +707,65 @@ function exportReport() {
         window.reportManager.exportReport();
     }
 }
+
+// Fix navigation issues
+function fixNavigation() {
+    // Fix insurance section navigation
+    const insuranceLinks = document.querySelectorAll('a[href*="insurance"]');
+    insuranceLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            showSection('insurance');
+        });
+    });
+
+    // Fix breadcrumb navigation
+    const breadcrumbLinks = document.querySelectorAll('.breadcrumb-item a');
+    breadcrumbLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const href = this.getAttribute('href');
+            if (href.startsWith('#')) {
+                const sectionId = href.substring(1);
+                showSection(sectionId);
+            }
+        });
+    });
+}
+
+// Call fix on page load
+document.addEventListener('DOMContentLoaded', function() {
+    fixNavigation();
+
+    // Fix chart responsiveness
+    window.addEventListener('resize', function() {
+        Chart.helpers.each(Chart.instances, function(instance) {
+            instance.resize();
+        });
+    });
+});
+
+// Add smooth scrolling
+function addSmoothScrolling() {
+    const style = document.createElement('style');
+    style.textContent = `
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        .content-section {
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        .content-section.fade-in {
+            opacity: 1;
+        }
+        
+        .content-section.fade-out {
+            opacity: 0;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+addSmoothScrolling();
