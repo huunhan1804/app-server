@@ -196,17 +196,17 @@ public class SampleDataGenerator {
 
         List<Role> roles = Arrays.asList(
                 Role.builder()
-                        .roleCode("ADMIN")
+                        .roleCode("admin")
                         .roleName("Administrator")
                         .description("System Administrator")
                         .build(),
                 Role.builder()
-                        .roleCode("CUSTOMER")
+                        .roleCode("customer")
                         .roleName("Customer")
                         .description("Regular Customer")
                         .build(),
                 Role.builder()
-                        .roleCode("AGENCY")
+                        .roleCode("agency")
                         .roleName("Agency")
                         .description("Product Agency/Seller")
                         .build(),

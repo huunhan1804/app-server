@@ -52,7 +52,7 @@ public class SecurityConfig {
                                 "/actuator/**"
                         ).permitAll()
                         // Admin API endpoints
-                        .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
+                        .requestMatchers("/api/admin/**").hasAuthority("admin")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -83,7 +83,7 @@ public class SecurityConfig {
                                 "/admin/static/**",
                                 "/admin/webjars/**"
                         ).permitAll()
-                        .requestMatchers("/admin/**").hasAuthority("ADMIN")
+                        .requestMatchers("/admin/**").hasAuthority("admin")
                 )
                 .formLogin(form -> form
                         .loginPage("/admin/login")
