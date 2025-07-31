@@ -5,23 +5,23 @@ import com.example.shoppingsystem.dtos.*;
 import com.example.shoppingsystem.entities.*;
 import com.example.shoppingsystem.enums.MultimediaType;
 import com.example.shoppingsystem.repositories.*;
-import com.example.shoppingsystem.requests.AddLoginIdRequest;
-import com.example.shoppingsystem.requests.ChangePasswordRequest;
-import com.example.shoppingsystem.requests.UpdateAccountRequest;
-import com.example.shoppingsystem.requests.UpdateAvatarRequest;
+import com.example.shoppingsystem.requests.*;
 import com.example.shoppingsystem.responses.ApiResponse;
 import com.example.shoppingsystem.services.interfaces.AccountService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -96,13 +96,83 @@ public class AccountServiceImpl implements AccountService {
         return createAccount(username, "", phone, password, fullname, Regex.URL_IMAGE_DEFAULT);
     }
 
+//    @Override
+//    public AgencyInfo registerAgency(String shopName, String shopAddress, String shopEmail, String shopPhone, String taxCode, String idCardNumber, String frontIdCardImageUrl, String backIdCardImageUrl, String professionalCertUrl, String businessLicenseUrl){
+//        if(agencyInfoRepository.findByIdCardNumber(idCardNumber).isPresent()){
+//            logger.error(String.format(LogMessage.LOG_AGENCY_EXIST_ID_NUMBER, idCardNumber));
+//            return null;
+//        }
+//        return regiesterAgencyInfo(shopName, shopAddress, shopEmail, shopPhone, taxCode, idCardNumber, frontIdCardImageUrl, backIdCardImageUrl, professionalCertUrl, businessLicenseUrl);
+//    }
+
     @Override
-    public AgencyInfo registerAgency(String shopName, String shopAddress, String shopEmail, String shopPhone, String taxCode, String idCardNumber, String frontIdCardImageUrl, String backIdCardImageUrl, String professionalCertUrl, String businessLicenseUrl){
-        if(agencyInfoRepository.findByIdCardNumber(idCardNumber).isPresent()){
-            logger.error(String.format(LogMessage.LOG_AGENCY_EXIST_ID_NUMBER, idCardNumber));
-            return null;
+    public ApiResponse<AgencyInfoDTO> registerAgency(AgencyRegisterRequest request) {
+        Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        if (account.isPresent()) {
+            if(account.get().getRole().getRoleCode().equals(RoleCode.ROLE_AGENCY)) {
+                return ApiResponse.<AgencyInfoDTO>builder()
+                        .status(ErrorCode.CONFLICT)
+                        .message(Message.ACCOUNT_IS_AGENCY)
+                        .timestamp(new java.util.Date())
+                        .build();
+            }
+
+            Optional<AgencyInfo> existingAgency = agencyInfoRepository.findTopByAccountOrderBySubmittedDateDesc(account.get());
+            if (existingAgency.isPresent()) {
+                return ApiResponse.<AgencyInfoDTO>builder()
+                        .status(ErrorCode.CONFLICT)
+                        .message(Message.AGENCY_IS_PENDING)
+                        .data(convertToAgencyInfoDTO(existingAgency.get()))
+                        .timestamp(new java.util.Date())
+                        .build();
+            }
+
+            try{
+                AgencyRegisterDTO agencyRegisterDTO = request.getRegistrationData();
+
+                AgencyInfo agencyInfo = new AgencyInfo();
+                agencyInfo.setAccount(account.get());
+                agencyInfo.setShopName(agencyRegisterDTO.getShop_name());
+                agencyInfo.setShopEmail(agencyRegisterDTO.getShop_email());
+                agencyInfo.setShopPhone(agencyRegisterDTO.getShop_phone());
+                agencyInfo.setShopAddressDetail(agencyRegisterDTO.getShop_address());
+                agencyInfo.setTaxNumber(agencyRegisterDTO.getTax_code());
+
+                agencyInfo.setFullNameApplicant(agencyRegisterDTO.getFull_name_applicant());
+                agencyInfo.setBirthdateApplicant(agencyRegisterDTO.getBirth_date_applicant());
+                agencyInfo.setGenderApplicant(agencyRegisterDTO.getGender_applicant());
+                agencyInfo.setIdCardNumber(agencyRegisterDTO.getId_card_number_applicant());
+                agencyInfo.setDateOfIssueIdCard(agencyRegisterDTO.getDate_of_issue_card());
+                agencyInfo.setPlaceOfIssueIdCard(agencyRegisterDTO.getPlace_of_issue_card());
+
+                agencyInfo.setIdCardFrontImageUrl(request.getIdCardFrontUrl());
+                agencyInfo.setIdCardBackImageUrl(request.getIdCardBackUrl());
+                agencyInfo.setBusinessLicenseUrls(request.getBusinessLicenseUrl());
+                agencyInfo.setProfessionalCertUrls(request.getProfessionalCertificateUrl());
+                agencyInfo.setDiplomaCertUrls(request.getDiplomaCertificateUrl());
+
+                agencyInfo.setApprovalStatus(approvalStatusRepository.findApprovalStatusByStatusCode(StatusCode.STATUS_PENDING));
+                agencyInfo.setSubmittedDate(new java.util.Date());
+                AgencyInfo savedAgencyInfo = agencyInfoRepository.save(agencyInfo);
+
+                AgencyInfoDTO agencyInfoDTO = convertToAgencyInfoDTO(savedAgencyInfo);
+
+                return ApiResponse.<AgencyInfoDTO>builder()
+                        .status(ErrorCode.SUCCESS)
+                        .message(Message.AGENCY_REGISTER_SUCCESS)
+                        .data(agencyInfoDTO)
+                        .timestamp(new java.util.Date())
+                        .build();
+
+            }catch (Exception e){
+                logger.error(String.format(LogMessage.LOG_AGENCY_REGISTRATION_FAILED, accountRepository.findByAccountId(account.get().getAccountId()).getAccountId(), e.getMessage()));
+            }
         }
-        return regiesterAgencyInfo(shopName, shopAddress, shopEmail, shopPhone, taxCode, idCardNumber, frontIdCardImageUrl, backIdCardImageUrl, professionalCertUrl, businessLicenseUrl);
+        return ApiResponse.<AgencyInfoDTO>builder()
+                .status(ErrorCode.FORBIDDEN)
+                .message(Message.ACCOUNT_NOT_FOUND)
+                .timestamp(new java.util.Date())
+                .build();
     }
 
     @Async
@@ -333,6 +403,18 @@ public class AccountServiceImpl implements AccountService {
                 new CartDTO(cart.getCartId(), cart.getTotalItem(), getCartItemList(cart.getCartId())),
                 new AccountProfileDTO(account.getFullname(), account.getEmail(), account.getPhone(), account.getGender(), account.getBirthdate())
         );
+    }
+
+    public AgencyInfoDTO convertToAgencyInfoDTO(AgencyInfo agencyInfo){
+        AgencyInfoDTO agencyInfoDTO = new AgencyInfoDTO();
+        agencyInfoDTO.setAccount_id(agencyInfo.getAccount().getAccountId());
+        agencyInfoDTO.setAgency_id(agencyInfo.getApplicationId());
+        agencyInfoDTO.setAgency_name(agencyInfo.getShopName());
+        agencyInfoDTO.setAgency_email(agencyInfo.getShopEmail());
+        agencyInfoDTO.setAgency_phone(agencyInfo.getShopPhone());
+        agencyInfoDTO.setAgency_address(agencyInfo.getShopAddressDetail());
+        agencyInfoDTO.setAgency_tax_code(agencyInfo.getTaxNumber());
+        return agencyInfoDTO;
     }
 
     public Optional<Account> findAccountByLoginId(String loginId) {

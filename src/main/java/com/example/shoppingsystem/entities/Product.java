@@ -49,9 +49,9 @@ public class Product extends BaseEntity{
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ProductVariant> productVariants;
 
-    @OneToOne
-    @JoinColumn(name = "ACCOUNT_ID", referencedColumnName = "ACCOUNT_ID", nullable = false)
-    private Account account;
+    @ManyToOne
+    @JoinColumn(name = "APPLICATION_ID", referencedColumnName = "APPLICATION_ID", nullable = true)
+    private AgencyInfo agencyInfo;
 
     @Column(name = "IS_SALE")
     private Boolean isSale;

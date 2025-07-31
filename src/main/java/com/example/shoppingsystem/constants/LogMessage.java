@@ -94,4 +94,5 @@ public class LogMessage {
 
     public static final String LOG_NOT_AUTHENTICATED = "Request not authenticated";
     public static final String LOG_AGENCY_EXIST_ID_NUMBER = "Agency with id number '%s' already exist!";
+
 }

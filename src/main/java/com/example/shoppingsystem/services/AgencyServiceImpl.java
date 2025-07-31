@@ -387,14 +387,14 @@ public class AgencyServiceImpl implements AgencyService {
 
     @Override
     public ShipmentResponse shipOrder(Long order_id, String agency_email) throws AccessDeniedException {
-        OrderList orderList = orderRepository.findByOrderId(order_id);
-        if(orderList != null) {
-            boolean ownsProduct = orderList.getOrderDetails().stream().anyMatch(item -> item.getProduct().getAccount().getEmail().equals(agency_email));
-            if(!ownsProduct) {
-                throw new AccessDeniedException(String.format(Message.AGENCY_NOT_ALLOWED));
-            }
-            ShippingRequest shippingRequest;
-        }
+//        OrderList orderList = orderRepository.findByOrderId(order_id);
+//        if(orderList != null) {
+//            boolean ownsProduct = orderList.getOrderDetails().stream().anyMatch(item -> item.getProduct().getAccount().getEmail().equals(agency_email));
+//            if(!ownsProduct) {
+//                throw new AccessDeniedException(String.format(Message.AGENCY_NOT_ALLOWED));
+//            }
+//            ShippingRequest shippingRequest;
+//        }
         return null;
     }
 

@@ -2,10 +2,9 @@ package com.example.shoppingsystem.api;
 
 import com.example.shoppingsystem.constants.LogMessage;
 import com.example.shoppingsystem.dtos.AccountInfoDTO;
-import com.example.shoppingsystem.requests.AddLoginIdRequest;
-import com.example.shoppingsystem.requests.ChangePasswordRequest;
-import com.example.shoppingsystem.requests.UpdateAccountRequest;
-import com.example.shoppingsystem.requests.UpdateAvatarRequest;
+import com.example.shoppingsystem.dtos.AgencyInfoDTO;
+import com.example.shoppingsystem.dtos.AgencyRegisterDTO;
+import com.example.shoppingsystem.requests.*;
 import com.example.shoppingsystem.responses.ApiResponse;
 import com.example.shoppingsystem.services.interfaces.AccountService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,8 +12,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @RestController
@@ -62,6 +63,16 @@ public class AccountController {
     public ResponseEntity<ApiResponse<String>> changePassword(@RequestBody ChangePasswordRequest request) {
         logger.info(LogMessage.LOG_RECEIVED_CHANGE_PASSWORD_REQUEST);
         ApiResponse<String> apiResponse = accountService.changePassword(request);
+        return ResponseEntity.status(apiResponse.getStatus()).body(apiResponse);
+    }
+
+    @Operation(summary = "Agency Register", description = "Agency Register")
+    @PostMapping(value = "/register-agency", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<AgencyInfoDTO>> registerAgency(
+            @RequestBody AgencyRegisterRequest request
+    ) {
+        logger.info(LogMessage.LOG_RECEIVED_AGENCY_REGISTER_REQUEST);
+        ApiResponse<AgencyInfoDTO> apiResponse = accountService.registerAgency(request);
         return ResponseEntity.status(apiResponse.getStatus()).body(apiResponse);
     }
 

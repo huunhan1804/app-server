@@ -9,5 +9,6 @@ public class ErrorCode {
     public static final int INTERNAL_SERVER_ERROR = 500; // Mã lỗi máy chủ nội bộ
     public static final int TOO_MANY_REQUEST = 429; //Too Many Requests
     public static final int ACCOUNT_ALREADY_EXISTS = 409;
+    public static final int CONFLICT = 33;
 
 }

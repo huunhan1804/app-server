@@ -56,5 +56,8 @@ public class Message {
     public static final String FETCHING_ORDER_SUCCESS = "Fetching order successfully!";
     public static final String FETCHING_ORDER_FAILURE = "Fetching order failed!";
     public static final String NOT_FOUND_ARTICLE = "Not found article";
+    public static final String ACCOUNT_IS_AGENCY = "Account ID %d is agency, can't not register!";
+    public static final String AGENCY_IS_PENDING = "Agency is pending!";
+    public static final String AGENCY_REGISTER_SUCCESS = "Agency register successfully!";
 
 }
