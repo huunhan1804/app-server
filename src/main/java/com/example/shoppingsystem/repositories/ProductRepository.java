@@ -1,6 +1,7 @@
 package com.example.shoppingsystem.repositories;
 
 import com.example.shoppingsystem.entities.Account;
+import com.example.shoppingsystem.entities.AgencyInfo;
 import com.example.shoppingsystem.entities.Category;
 import com.example.shoppingsystem.entities.Product;
 import org.springframework.data.domain.Page;
@@ -25,15 +26,15 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     List<Product> findByProductNameContainingIgnoreCase(String keyword);
     List<Product> findByApprovalStatus_StatusCode(String statusCode);
-    List<Product> findProductByAccountAndProductId(Account account, long productId);
-    List<Product> findByAccount(Account account);
+    List<Product> findProductByAgencyInfoAndProductId(AgencyInfo agencyInfo, long productId);
+    List<Product> findByAgencyInfo(AgencyInfo agencyInfo);
 
     Page<Product> findByApprovalStatus_StatusCode(String statusCode, Pageable pageable);
 
     @Query("SELECT p FROM Product p WHERE " +
             "(:status IS NULL OR p.approvalStatus.statusCode = :status) AND " +
             "(:categoryId IS NULL OR p.category.categoryId = :categoryId) AND " +
-            "(:agencyId IS NULL OR p.account.accountId = :agencyId) AND " +
+            "(:agencyId IS NULL OR p.agencyInfo.account.accountId = :agencyId) AND " +
             "(:keyword IS NULL OR LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Product> findProductsWithFilters(
             @Param("status") String status,

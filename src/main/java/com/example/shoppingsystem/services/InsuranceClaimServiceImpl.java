@@ -74,7 +74,7 @@ public class InsuranceClaimServiceImpl implements InsuranceClaimService {
             }
 
             Product product = productOpt.get();
-            Account agency = product.getAccount(); // Agency là owner của product
+            Account agency = product.getAgencyInfo().getAccount(); // Agency là owner của product
 
             // Kiểm tra agency có đúng role không
             if (!"agency".equals(agency.getRole().getRoleCode())) {

@@ -438,7 +438,7 @@ public class SampleDataGenerator {
                     .inventoryQuantity(random.nextInt(1000) + 10)
                     .desiredQuantity(random.nextInt(500) + 50)
                     .soldAmount(random.nextInt(200))
-                    .account(agency)
+//                    .agencyInfo(agency)
                     .isSale(random.nextBoolean())
                     .approvalStatus(approvalStatuses.get(1)) // APPROVED
                     .build());
@@ -921,7 +921,7 @@ public class SampleDataGenerator {
                     .inventoryQuantity(random.nextInt(1000) + 10)
                     .desiredQuantity(random.nextInt(500) + 50)
                     .soldAmount(random.nextInt(200))
-                    .account(agency)
+//                    .account(agency)
                     .isSale(random.nextBoolean())
                     .approvalStatus(approvalStatuses.get(1))
                     .build());

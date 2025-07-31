@@ -101,7 +101,10 @@ public class AgencyServiceImpl implements AgencyService {
         Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         if(account.isPresent()){
             List<Product> products = new ArrayList<Product>();
-            products = productRepository.findProductByAccountAndProductId(account.get(), request.getProduct_id());
+            Optional<AgencyInfo> agency = agencyInfoRepository.findByAccount(account.get());
+            if(agency.isPresent()){
+                products = productRepository.findProductByAgencyInfoAndProductId(agency.get(), request.getProduct_id());
+            }
             if(products.isEmpty()){
                 return ApiResponse.<ProductInfoDTO>builder()
                         .status(ErrorCode.NOT_FOUND)
@@ -144,17 +147,25 @@ public class AgencyServiceImpl implements AgencyService {
     public ApiResponse<AccountInfoDTO> deleteProduct(Long product_id){
         Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         if(account.isPresent()){
-            List<Product> products = new ArrayList<>();
-            products = productRepository.findProductByAccountAndProductId(account.get(), product_id);
-            if(products.isEmpty()){
-                return ApiResponse.<AccountInfoDTO>builder()
-                        .status(ErrorCode.NOT_FOUND)
-                        .message(Message.PRODUCT_NOT_FOUND)
-                        .timestamp(new Date())
-                        .build();
+            List<Product> products;
+            Optional<AgencyInfo> agencyInfo = agencyInfoRepository.findByAccount(account.get());
+            if (agencyInfo.isPresent()) {
+                products = productRepository.findProductByAgencyInfoAndProductId(agencyInfo.get(), product_id);
+                if (products.isEmpty()) {
+                    return ApiResponse.<AccountInfoDTO>builder()
+                            .status(ErrorCode.NOT_FOUND)
+                            .message(Message.PRODUCT_NOT_FOUND)
+                            .timestamp(new Date())
+                            .build();
+                }
+                productRepository.deleteById(product_id);
+                return accountService.getCurrentUserInfo();
             }
-            productRepository.deleteById(product_id);
-            return accountService.getCurrentUserInfo();
+            return ApiResponse.<AccountInfoDTO>builder()
+                    .status(ErrorCode.NOT_FOUND)
+                    .message(Message.AGENCY_INFO_NOT_FOUND)
+                    .timestamp(new java.util.Date())
+                    .build();
         }
         return ApiResponse.<AccountInfoDTO>builder()
                 .status(ErrorCode.FORBIDDEN)
@@ -167,24 +178,34 @@ public class AgencyServiceImpl implements AgencyService {
     public ApiResponse<List<ProductInfoDTO>> getListProductByStatus(String status_code){
         Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         if(account.isPresent()){
-            List<Product> results = productRepository.findByAccount(account.get());
-            results.sort(Comparator.comparing(Product::getProductName));
-            List<ProductInfoDTO> productDTOs = new ArrayList<>();
-            for(Product product : results){
-                if(product.getApprovalStatus().getStatusCode().equals(status_code)){
-                    List<ProductVariant> productVariants = product.getProductVariants();
-                    List<Feedback> feedbacks = feedbackRepository.findByProduct_ProductId(product.getProductId());
-                    List<Multimedia> multimedias = multimediaRepository.findAllByProduct_ProductId(product.getProductId());
-                    ProductInfoDTO productInfoDTO = convertToProductInfoDTO(product, productVariants, feedbacks, multimedias);
-                    productDTOs.add(productInfoDTO);
+            Optional<AgencyInfo> agencyInfo = agencyInfoRepository.findByAccount(account.get());
+            if(agencyInfo.isPresent()){
+                List<Product> results = productRepository.findByAgencyInfo(agencyInfo.get());
+                results.sort(Comparator.comparing(Product::getProductName));
+                List<ProductInfoDTO> productDTOs = new ArrayList<>();
+                for(Product product : results){
+                    if(product.getApprovalStatus().getStatusCode().equals(status_code)){
+                        List<ProductVariant> productVariants = product.getProductVariants();
+                        List<Feedback> feedbacks = feedbackRepository.findByProduct_ProductId(product.getProductId());
+                        List<Multimedia> multimedias = multimediaRepository.findAllByProduct_ProductId(product.getProductId());
+                        ProductInfoDTO productInfoDTO = convertToProductInfoDTO(product, productVariants, feedbacks, multimedias);
+                        productDTOs.add(productInfoDTO);
+                    }
                 }
+                return ApiResponse.<List<ProductInfoDTO>>builder()
+                        .data(productDTOs)
+                        .status(ErrorCode.SUCCESS)
+                        .message("Successfully fetched products")
+                        .timestamp(new java.util.Date())
+                        .build();
             }
+
             return ApiResponse.<List<ProductInfoDTO>>builder()
-                    .data(productDTOs)
-                    .status(ErrorCode.SUCCESS)
-                    .message("Successfully fetched products")
+                    .status(ErrorCode.FORBIDDEN)
+                    .message(Message.AGENCY_INFO_NOT_FOUND)
                     .timestamp(new java.util.Date())
                     .build();
+
         }
         return ApiResponse.<List<ProductInfoDTO>>builder()
                 .status(ErrorCode.FORBIDDEN)

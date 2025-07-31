@@ -62,8 +62,8 @@ public class ProductManagementServiceImpl implements ProductManagementService {
                 .productName(product.getProductName())
                 .productDescription(product.getProductDescription())
                 .imageUrl(getProductImageUrl(product)) // Helper method to get image
-                .agencyName(product.getAccount().getFullname())
-                .agencyEmail(product.getAccount().getEmail())
+                .agencyName(product.getAgencyInfo().getAccount().getFullname())
+                .agencyEmail(product.getAgencyInfo().getAccount().getEmail())
                 .categoryName(product.getCategory().getCategoryName())
                 .listPrice(product.getListPrice())
                 .salePrice(product.getSalePrice())
@@ -134,7 +134,7 @@ public class ProductManagementServiceImpl implements ProductManagementService {
         product.setApprovalStatus(approvedStatus);
         productRepository.save(product);
 
-        notificationService.sendProductNotification(product.getAccount(), product.getProductName(),
+        notificationService.sendProductNotification(product.getAgencyInfo().getAccount(), product.getProductName(),
                 "Sản phẩm được phê duyệt",
                 "Chúc mừng! Sản phẩm '" + product.getProductName() + "' đã được phê duyệt và có thể bán trên hệ thống.");
 
@@ -150,7 +150,7 @@ public class ProductManagementServiceImpl implements ProductManagementService {
         product.setApprovalStatus(rejectedStatus);
         productRepository.save(product);
 
-        notificationService.sendProductNotification(product.getAccount(), product.getProductName(),
+        notificationService.sendProductNotification(product.getAgencyInfo().getAccount(), product.getProductName(),
                 "Sản phẩm bị từ chối",
                 "Sản phẩm '" + product.getProductName() + "' đã bị từ chối. Lý do: " + rejectionReason +
                         ". Vui lòng chỉnh sửa sản phẩm theo yêu cầu và gửi lại để được duyệt.");
@@ -164,7 +164,7 @@ public class ProductManagementServiceImpl implements ProductManagementService {
                 .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
 
         // Gửi thông báo yêu cầu chỉnh sửa đến Agency
-        notificationService.sendProductNotification(product.getAccount(), product.getProductName(),
+        notificationService.sendProductNotification(product.getAgencyInfo().getAccount(), product.getProductName(),
                 "Yêu cầu chỉnh sửa sản phẩm",
                 "Sản phẩm '" + product.getProductName() + "' cần được chỉnh sửa. Ghi chú từ admin: " + editNotes +
                         ". Vui lòng cập nhật sản phẩm theo yêu cầu.");
@@ -178,7 +178,7 @@ public class ProductManagementServiceImpl implements ProductManagementService {
                 .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
 
         // Gửi thông báo trước khi xóa
-        sendNotificationToAgency(product.getAccount(), "Sản phẩm bị gỡ bỏ",
+        sendNotificationToAgency(product.getAgencyInfo().getAccount(), "Sản phẩm bị gỡ bỏ",
                 "Sản phẩm '" + product.getProductName() + "' đã bị gỡ bỏ. Lý do: " + removeReason);
 
         // Xóa sản phẩm
@@ -192,7 +192,7 @@ public class ProductManagementServiceImpl implements ProductManagementService {
                 .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
 
         // Gửi cảnh báo đến Agency
-        notificationService.sendProductNotification(product.getAccount(), product.getProductName(),
+        notificationService.sendProductNotification(product.getAgencyInfo().getAccount(), product.getProductName(),
                 "Cảnh báo vi phạm",
                 "Cảnh báo về sản phẩm '" + product.getProductName() + "': " + warningMessage +
                         ". Vui lòng tuân thủ các quy định của hệ thống để tránh bị khóa tài khoản.");
@@ -241,8 +241,8 @@ public class ProductManagementServiceImpl implements ProductManagementService {
                 .productName(product.getProductName())
                 .productDescription(product.getProductDescription())
                 .imageUrl(imageUrl)
-                .agencyName(product.getAccount().getFullname())
-                .agencyEmail(product.getAccount().getEmail())
+                .agencyName(product.getAgencyInfo().getAccount().getFullname())
+                .agencyEmail(product.getAgencyInfo().getAccount().getEmail())
                 .categoryName(product.getCategory().getCategoryName())
                 .listPrice(product.getListPrice())
                 .salePrice(product.getSalePrice())

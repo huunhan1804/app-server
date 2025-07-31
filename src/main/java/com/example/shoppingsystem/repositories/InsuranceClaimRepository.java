@@ -19,11 +19,6 @@ import java.util.Optional;
 @Repository
 public interface InsuranceClaimRepository extends JpaRepository<InsuranceClaim, Long>,
         JpaSpecificationExecutor<InsuranceClaim> {
-
-    Optional<InsuranceClaim> findByClaimCode(String claimCode);
-
-    Page<InsuranceClaim> findByClaimStatus(ClaimStatus status, Pageable pageable);
-
     // Query cho customer (account có role = 'customer')
     @Query("SELECT ic FROM InsuranceClaim ic " +
             "JOIN ic.customer c " +
@@ -37,30 +32,4 @@ public interface InsuranceClaimRepository extends JpaRepository<InsuranceClaim, 
             "JOIN a.role r " +
             "WHERE a.accountId = :agencyId AND r.roleCode = 'agency'")
     Page<InsuranceClaim> findByAgencyId(@Param("agencyId") Long agencyId, Pageable pageable);
-
-    // Query để lấy claims theo agency thông qua product
-    @Query("SELECT ic FROM InsuranceClaim ic " +
-            "JOIN ic.product p " +
-            "JOIN p.account a " +
-            "JOIN a.role r " +
-            "WHERE a.accountId = :agencyId AND r.roleCode = 'agency'")
-    Page<InsuranceClaim> findByProductAgencyId(@Param("agencyId") Long agencyId, Pageable pageable);
-
-    @Query("SELECT COUNT(ic) FROM InsuranceClaim ic WHERE ic.claimStatus = :status")
-    Long countByStatus(@Param("status") ClaimStatus status);
-
-    @Query("SELECT COUNT(ic) FROM InsuranceClaim ic WHERE ic.severityLevel = :severity AND ic.claimStatus = :status")
-    Long countBySeverityLevelAndClaimStatus(@Param("severity") SeverityLevel severity, @Param("status") ClaimStatus status);
-
-    @Query("SELECT COUNT(ic) FROM InsuranceClaim ic WHERE ic.claimStatus = :status AND ic.processedDate >= :date")
-    Long countByClaimStatusAndProcessedDateAfter(@Param("status") ClaimStatus status, @Param("date") LocalDateTime date);
-
-    @Query("SELECT ic FROM InsuranceClaim ic WHERE ic.submittedDate BETWEEN :startDate AND :endDate")
-    List<InsuranceClaim> findBySubmittedDateBetween(
-            @Param("startDate") LocalDateTime startDate,
-            @Param("endDate") LocalDateTime endDate);
-
-    // Thêm query để tìm customer và agency accounts
-    @Query("SELECT a FROM Account a JOIN a.role r WHERE r.roleCode = :roleCode")
-    List<Account> findAccountsByRole(@Param("roleCode") String roleCode);
 }

@@ -10,6 +10,7 @@ public class Message {
     public static final String INVALID_EMAIL = "Invalid email address!";
     public static final String ACCOUNT_ALREADY_EXISTS = "Account already exists!";
     public static final String ACCOUNT_NOT_FOUND = "Account not found!";
+    public static final String AGENCY_INFO_NOT_FOUND = "Agency info not found!";
     public static final String CURRENT_USER_NOT_FOUND = "Current account not found!";
     public static final String INVALID_CREDENTIALS = "Invalid credentials!";
     public static final String ACCOUNT_BANNED = "Account is banned!";
