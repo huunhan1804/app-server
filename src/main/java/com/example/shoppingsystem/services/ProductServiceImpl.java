@@ -18,6 +18,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -29,7 +30,7 @@ public class ProductServiceImpl implements ProductService {
     private final FeedbackRepository feedbackRepository;
     private final MultimediaRepository multimediaRepository;
     private final OrderDetailRepository orderDetailRepository;
-
+    private final Random random = new Random();
     @Autowired
     public ProductServiceImpl(ProductRepository productRepository, ProductVariantRepository productVariantRepository, CategoryRepository categoryRepository, FeedbackRepository feedbackRepository, MultimediaRepository multimediaRepository, OrderDetailRepository orderDetailRepository) {
         this.productRepository = productRepository;
@@ -127,24 +128,41 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ApiResponse<List<ProductBasicDTO>> getListRelatedProduct(long productId) {
-        Optional<Product> productOpt = productRepository.findById(productId);
-        if(productOpt.isPresent()) {
-            Product product = productOpt.get();
-            Category productCategory = product.getCategory();
-            List<Product> relatedProducts = productRepository.findByCategoryAndProductIdNot(productCategory, productId);
-            List<ProductBasicDTO> productBasicDTOS = relatedProducts.stream()
-                    .map(this::convertToProductBasicDTO).collect(Collectors.toList());
-            return ApiResponse.<List<ProductBasicDTO>>builder()
-                    .status(ErrorCode.SUCCESS)
-                    .message(Message.SUCCESS)
-                    .data(productBasicDTOS)
-                    .timestamp(new java.util.Date())
-                    .build();
+        List<Product> relatedProducts = new ArrayList<>();
+
+        // Lấy 3 sản phẩm bán chạy nhất
+        List<Product> bestSellers = productRepository.findTop3ByOrderBySoldAmountDesc();
+        relatedProducts.addAll(bestSellers);
+
+        // Lấy 3 sản phẩm mới nhất
+        List<Product> latestProducts = productRepository.findTop3ByOrderByProductIdDesc();
+        relatedProducts.addAll(latestProducts);
+
+        // Lấy 4 sản phẩm ngẫu nhiên từ category ngẫu nhiên
+        List<Category> categories = categoryRepository.findAll();
+        if (!categories.isEmpty()) {
+            Category randomCategory = categories.get(random.nextInt(categories.size()));
+            List<Product> randomProducts = productRepository.findByCategory_CategoryId(randomCategory.getCategoryId())
+                    .stream()
+                    .limit(4)
+                    .collect(Collectors.toList());
+            relatedProducts.addAll(randomProducts);
         }
+
+        // Loại bỏ duplicate và giới hạn 10 sản phẩm
+        List<Product> uniqueProducts = relatedProducts.stream()
+                .distinct()
+                .limit(10)
+                .collect(Collectors.toList());
+
+        List<ProductBasicDTO> productBasicDTOS = uniqueProducts.stream()
+                .map(this::convertToProductBasicDTO)
+                .collect(Collectors.toList());
+
         return ApiResponse.<List<ProductBasicDTO>>builder()
-                .status(ErrorCode.NOT_FOUND)
-                .message(Message.NOT_FOUND)
-                .data(null)
+                .status(ErrorCode.SUCCESS)
+                .message(Message.SUCCESS)
+                .data(productBasicDTOS)
                 .timestamp(new java.util.Date())
                 .build();
     }

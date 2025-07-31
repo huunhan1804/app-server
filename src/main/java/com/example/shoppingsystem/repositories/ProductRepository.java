@@ -44,4 +44,8 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
             @Param("keyword") String keyword,
             Pageable pageable
     );
+
+    List<Product> findTop3ByOrderBySoldAmountDesc();
+
+    List<Product> findTop3ByOrderByProductIdDesc();
 }
