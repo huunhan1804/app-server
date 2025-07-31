@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -910,10 +911,33 @@ public class SampleDataGenerator {
             return products;
         }
 
+        // Lấy danh sách AgencyInfo đã tạo (chỉ lấy 1 lần cho cả batch)
+        List<AgencyInfo> agencyInfos = agencyInfoRepository.findAll();
+        if (agencyInfos.isEmpty()) {
+            System.out.println("⚠️  Không có agency info nào để tạo product batch!");
+            return products;
+        }
+
+        // Tạo Map để tra cứu nhanh AgencyInfo theo Account ID
+        Map<Long, AgencyInfo> agencyInfoMap = agencyInfos.stream()
+                .collect(Collectors.toMap(
+                        agencyInfo -> agencyInfo.getAccount().getAccountId(),
+                        agencyInfo -> agencyInfo
+                ));
+
         for (int i = 0; i < batchSize; i++) {
             int globalIndex = batchIndex * batchSize + i;
             Category category = categories.get(random.nextInt(categories.size()));
-            Account agency = agencies.get(random.nextInt(agencies.size()));
+            Account selectedAgencyAccount = agencies.get(random.nextInt(agencies.size()));
+
+            // Tìm AgencyInfo tương ứng với Account đã chọn
+            AgencyInfo selectedAgencyInfo = agencyInfoMap.get(selectedAgencyAccount.getAccountId());
+
+            if (selectedAgencyInfo == null) {
+                System.out.println("⚠️  Không tìm thấy AgencyInfo cho Account ID: " + selectedAgencyAccount.getAccountId());
+                continue; // Bỏ qua product này
+            }
+
             BigDecimal listPrice = BigDecimal.valueOf(50000 + random.nextInt(9950000));
             BigDecimal salePrice = listPrice.multiply(BigDecimal.valueOf(0.7 + random.nextDouble() * 0.3));
 
@@ -926,7 +950,7 @@ public class SampleDataGenerator {
                     .inventoryQuantity(random.nextInt(1000) + 10)
                     .desiredQuantity(random.nextInt(500) + 50)
                     .soldAmount(random.nextInt(200))
-//                    .account(agency)
+                    .agencyInfo(selectedAgencyInfo)  // ✅ THÊM DÒNG NÀY
                     .isSale(random.nextBoolean())
                     .approvalStatus(approvalStatuses.get(1))
                     .build());
