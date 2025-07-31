@@ -67,7 +67,7 @@ public class AccountController {
     }
 
     @Operation(summary = "Agency Register", description = "Agency Register")
-    @PostMapping(value = "/register-agency", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/register-agency")
     public ResponseEntity<ApiResponse<AgencyInfoDTO>> registerAgency(
             @RequestBody AgencyRegisterRequest request
     ) {
