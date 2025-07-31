@@ -11,7 +11,8 @@ import java.util.List;
 
 @Service
 public interface ProductManagementService {
-    Page<ProductManagementDTO> getAllProducts(Pageable pageable, String status, String category, String agency, String keyword);
+    Page<ProductManagementDTO> getAllProducts(Pageable pageable, String status,
+                                              Long categoryId, Long agencyId, String keyword);
     Page<ProductManagementDTO> getPendingProducts(Pageable pageable);
     ProductManagementDTO getProductForReview(Long productId);
     void approveProduct(Long productId);

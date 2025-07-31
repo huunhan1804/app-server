@@ -32,13 +32,13 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     @Query("SELECT p FROM Product p WHERE " +
             "(:status IS NULL OR p.approvalStatus.statusCode = :status) AND " +
-            "(:category IS NULL OR p.category.categoryName = :category) AND " +
-            "(:agency IS NULL OR p.account.fullname = :agency) AND " +
+            "(:categoryId IS NULL OR p.category.categoryId = :categoryId) AND " +
+            "(:agencyId IS NULL OR p.account.accountId = :agencyId) AND " +
             "(:keyword IS NULL OR LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Product> findProductsWithFilters(
             @Param("status") String status,
-            @Param("category") String category,
-            @Param("agency") String agency,
+            @Param("categoryId") Long categoryId,
+            @Param("agencyId") Long agencyId,
             @Param("keyword") String keyword,
             Pageable pageable
     );

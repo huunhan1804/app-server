@@ -16,18 +16,20 @@ import java.util.List;
 public interface OrderRepository extends JpaRepository<OrderList, Long> {
     List<OrderList> findAllByAccount_AccountId(Long accountId);
 
-    @Query("SELECT o FROM OrderList o WHERE o.orderDate BETWEEN :startDate AND :endDate")
+    @Query("SELECT o FROM OrderList o WHERE o.orderDate BETWEEN :startDate AND :endDate ORDER BY o.orderDate DESC")
     List<OrderList> findOrdersInDateRange(
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
     );
 
-    List<OrderList> findTop10ByOrderByOrderDateDesc();
+    // Pagination methods
+    Page<OrderList> findAllByOrderByOrderDateDesc(Pageable pageable);
 
-    @Query("SELECT o FROM OrderList o ORDER BY o.orderDate DESC")
-    Page<OrderList> findTop10ByOrderByOrderDateDesc(Pageable pageable);
+    // Top N methods for dashboard
+    List<OrderList> findTop5ByOrderByOrderDateDesc();
+
+    List<OrderList> findTop10ByOrderByOrderDateDesc();
 
     List<OrderList> findByOrderStatus(OrderStatus status);
     List<OrderList> findByAgency_AccountId(Long agencyId);
-
 }

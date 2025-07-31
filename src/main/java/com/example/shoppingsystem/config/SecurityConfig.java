@@ -19,6 +19,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 @Configuration
@@ -50,6 +51,8 @@ public class SecurityConfig {
                                 "/api/insurance-claims/**",
                                 "/actuator/**"
                         ).permitAll()
+                        // Admin API endpoints
+                        .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -80,7 +83,7 @@ public class SecurityConfig {
                                 "/admin/static/**",
                                 "/admin/webjars/**"
                         ).permitAll()
-                        .requestMatchers("/admin/**").hasAuthority("ADMIN") //
+                        .requestMatchers("/admin/**").hasAuthority("ADMIN")
                 )
                 .formLogin(form -> form
                         .loginPage("/admin/login")
@@ -143,11 +146,26 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("http://localhost:3000");
-        configuration.addAllowedOrigin("http://localhost:8080");
-        configuration.setAllowedMethods(Collections.singletonList("*"));
+
+        // Allow specific origins
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:3000",
+                "http://localhost:8080",
+                "http://127.0.0.1:3000"
+        ));
+
+        // Allow all HTTP methods
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+
+        // Allow all headers
         configuration.setAllowedHeaders(Collections.singletonList("*"));
+
+        // Allow credentials
         configuration.setAllowCredentials(true);
+
+        // Cache preflight response for 1 hour
+        configuration.setMaxAge(3600L);
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
