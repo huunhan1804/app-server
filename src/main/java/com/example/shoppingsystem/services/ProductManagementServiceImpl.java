@@ -6,6 +6,7 @@ import com.example.shoppingsystem.entities.Account;
 import com.example.shoppingsystem.entities.ApprovalStatus;
 import com.example.shoppingsystem.entities.Multimedia;
 import com.example.shoppingsystem.entities.Product;
+import com.example.shoppingsystem.enums.MultimediaType;
 import com.example.shoppingsystem.repositories.*;
 import com.example.shoppingsystem.responses.AgencyResponse;
 import com.example.shoppingsystem.responses.CategoryResponse;
@@ -16,11 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -37,37 +38,70 @@ public class ProductManagementServiceImpl implements ProductManagementService {
     private NotificationService notificationService;
 
     @Override
-    public Page<ProductManagementDTO> getAllProducts(Pageable pageable, String status, String category, String agency, String keyword) {
-        Specification<Product> spec = Specification.where(null);
+    public Page<ProductManagementDTO> getAllProducts(Pageable pageable, String status,
+                                                     Long categoryId, Long agencyId, String keyword) {
+        try {
+            System.out.println("Service filtering with: status=" + status +
+                    ", categoryId=" + categoryId + ", agencyId=" + agencyId + ", keyword=" + keyword);
 
-        if (status != null && !status.isEmpty()) {
-            spec = spec.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.equal(root.get("approvalStatus").get("statusCode"), status));
+            Page<Product> productPage = productRepository.findProductsWithFilters(
+                    status, categoryId, agencyId, keyword, pageable);
+
+            System.out.println("Found " + productPage.getTotalElements() + " products");
+
+            return productPage.map(this::convertToDTO);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
         }
+    }
 
-        if (category != null && !category.isEmpty()) {
-            spec = spec.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.equal(root.get("category").get("categoryName"), category));
+    private ProductManagementDTO convertToDTO(Product product) {
+        return ProductManagementDTO.builder()
+                .productId(product.getProductId())
+                .productName(product.getProductName())
+                .productDescription(product.getProductDescription())
+                .imageUrl(getProductImageUrl(product)) // Helper method to get image
+                .agencyName(product.getAccount().getFullname())
+                .agencyEmail(product.getAccount().getEmail())
+                .categoryName(product.getCategory().getCategoryName())
+                .listPrice(product.getListPrice())
+                .salePrice(product.getSalePrice())
+                .inventoryQuantity(product.getInventoryQuantity())
+                .soldAmount(product.getSoldAmount() != null ? product.getSoldAmount() : 0)
+                .status(product.getApprovalStatus().getStatusCode())
+                .statusName(product.getApprovalStatus().getStatusName())
+                .createdDate(product.getCreatedDate())
+                .updatedDate(product.getUpdatedDate())
+                .build();
+    }
+
+    private String getProductImageUrl(Product product) {
+        try {
+            // Lấy hình ảnh theo loại
+            List<Multimedia> multimediaList = multimediaRepository.findAllByProduct_ProductId(product.getProductId());
+
+            // Lọc chỉ lấy hình ảnh (không phải video)
+            Optional<Multimedia> imageMultimedia = multimediaList.stream()
+                    .filter(m -> m.getMultimediaType() == MultimediaType.IMAGE)
+                    .findFirst();
+
+            if (imageMultimedia.isPresent()) {
+                return imageMultimedia.get().getMultimediaUrl();
+            }
+
+            return getDefaultProductImage();
+
+        } catch (Exception e) {
+            System.err.println("Error getting product image for product ID: " + product.getProductId());
+            e.printStackTrace();
+            return getDefaultProductImage();
         }
+    }
 
-        if (agency != null && !agency.isEmpty()) {
-            spec = spec.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.equal(root.get("account").get("fullname"), agency));
-        }
-
-        if (keyword != null && !keyword.isEmpty()) {
-            spec = spec.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get("productName")),
-                            "%" + keyword.toLowerCase() + "%"));
-        }
-
-        Page<Product> products = productRepository.findAll(spec, pageable);
-
-        List<ProductManagementDTO> productDTOs = products.getContent().stream()
-                .map(this::convertToProductManagementDTO)
-                .collect(Collectors.toList());
-
-        return new PageImpl<>(productDTOs, pageable, products.getTotalElements());
+    // ← Thêm method cho hình ảnh mặc định
+    private String getDefaultProductImage() {
+        return "https://via.placeholder.com/300x300?text=No+Image";
     }
 
     @Override
@@ -196,7 +230,9 @@ public class ProductManagementServiceImpl implements ProductManagementService {
 
     private ProductManagementDTO convertToProductManagementDTO(Product product) {
         // Lấy hình ảnh đại diện
-        String imageUrl = multimediaRepository.findByProduct_ProductId(product.getProductId())
+        String imageUrl = multimediaRepository.findAllByProduct_ProductId(product.getProductId())
+                .stream()
+                .findFirst()
                 .map(Multimedia::getMultimediaUrl)
                 .orElse("https://via.placeholder.com/150");
 

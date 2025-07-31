@@ -19,13 +19,18 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     List<Account> findByRoleRoleId(Long roleId);
     Page<Account> findAll(Specification<Account> specificationAccount, Pageable pageable);
     Account findByAccountId(Long accountId);
-  //  Optional<Account> findByAccountIdAndIsBannedFalse(Long accountId);
     Optional<Account> findByApprovalStatus_StatusCode(String approvalStatus);
+
+    // Pagination methods for new users
+    Page<Account> findByCreatedDateAfterOrderByCreatedDateDesc(LocalDateTime date, Pageable pageable);
+
+    // Top N methods for dashboard
     List<Account> findByCreatedDateAfter(LocalDateTime date);
 
+    List<Account> findTop5ByCreatedDateAfterOrderByCreatedDateDesc(LocalDateTime date);
+
     boolean existsByUsername(String admin);
-
     Long countByCreatedDateBetween(LocalDateTime localDateTime, LocalDateTime localDateTime1);
-
     List<Account> findByRole_RoleCode(String admin);
+    void deleteByUsernameNot(String username);
 }

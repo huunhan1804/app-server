@@ -60,7 +60,7 @@ public class OrderServiceImpl implements OrderService {
             orderList.setAddressDetail(orderRequest.getAddress_detail());
             System.out.println(Regex.parseVNDToBigDecimal(orderRequest.getTotal_bill()));
             orderList.setTotalPrice(Regex.parseVNDToBigDecimal(orderRequest.getTotal_bill()));
-            orderList.setOrderStatus(OrderStatus.PENDING);
+            orderList.setOrderStatus(OrderStatus.SHIPPED);
             orderList.setAccount(account.get());
             OrderList savedOrder = orderRepository.save(orderList);
 

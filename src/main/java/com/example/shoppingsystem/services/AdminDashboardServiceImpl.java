@@ -1,190 +1,341 @@
-// AdminDashboardServiceImpl.java
 package com.example.shoppingsystem.services;
 
-import com.example.shoppingsystem.constants.StatusCode;
 import com.example.shoppingsystem.dtos.dashboard.*;
-import com.example.shoppingsystem.entities.*;
 import com.example.shoppingsystem.repositories.*;
 import com.example.shoppingsystem.services.interfaces.AdminDashboardService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component
+@Service
 @RequiredArgsConstructor
+@Slf4j
 public class AdminDashboardServiceImpl implements AdminDashboardService {
 
+    private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
     private final AccountRepository accountRepository;
-    private final ProductRepository productRepository;
-    private final CategoryRepository categoryRepository;
     private final AgencyInfoRepository agencyInfoRepository;
+    private final OrderDetailRepository orderDetailRepository;
+    private final CategoryRepository categoryRepository;
 
     @Override
     public List<RevenueDataDTO> getRevenueLast30Days() {
-        LocalDateTime endDate = LocalDateTime.now();
-        LocalDateTime startDate = endDate.minusDays(30);
+        try {
+            LocalDateTime endDate = LocalDateTime.now();
+            LocalDateTime startDate = endDate.minusDays(30);
 
-        List<OrderList> orders = orderRepository.findOrdersInDateRange(startDate, endDate);
+            List<com.example.shoppingsystem.entities.OrderList> orders =
+                    orderRepository.findOrdersInDateRange(startDate, endDate);
 
-        Map<String, BigDecimal> dailyRevenue = new LinkedHashMap<>();
+            // Group orders by date and sum revenue
+            Map<LocalDate, BigDecimal> dailyRevenue = orders.stream()
+                    .collect(Collectors.groupingBy(
+                            order -> order.getOrderDate().toLocalDate(),
+                            Collectors.reducing(BigDecimal.ZERO,
+                                    com.example.shoppingsystem.entities.OrderList::getTotalPrice,
+                                    BigDecimal::add)
+                    ));
 
-        // Initialize all days with 0
-        for (int i = 29; i >= 0; i--) {
-            LocalDateTime date = endDate.minusDays(i);
-            String dateKey = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            dailyRevenue.put(dateKey, BigDecimal.ZERO);
+            List<RevenueDataDTO> result = new ArrayList<>();
+            LocalDate currentDate = startDate.toLocalDate();
+
+            while (!currentDate.isAfter(endDate.toLocalDate())) {
+                BigDecimal revenue = dailyRevenue.getOrDefault(currentDate, BigDecimal.ZERO);
+                result.add(new RevenueDataDTO(
+                        currentDate.format(DateTimeFormatter.ofPattern("dd/MM")),
+                        revenue
+                ));
+                currentDate = currentDate.plusDays(1);
+            }
+
+            return result;
+        } catch (Exception e) {
+            log.error("Error getting revenue data for last 30 days", e);
+            return new ArrayList<>();
         }
-
-        // Calculate actual revenue
-        orders.stream()
-                .filter(order -> "DELIVERED".equals(order.getOrderStatus().toString()))
-                .forEach(order -> {
-                    String dateKey = order.getOrderDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-                    dailyRevenue.merge(dateKey, order.getTotalPrice(), BigDecimal::add);
-                });
-
-        return dailyRevenue.entrySet().stream()
-                .map(entry -> new RevenueDataDTO(entry.getKey(), entry.getValue()))
-                .collect(Collectors.toList());
     }
 
     @Override
     public List<CategoryStatDTO> getCategoryStatistics() {
-        List<Category> categories = categoryRepository.findAll();
+        try {
+            List<com.example.shoppingsystem.entities.Category> categories = categoryRepository.findAll();
+            List<CategoryStatDTO> stats = new ArrayList<>();
 
-        return categories.stream()
-                .map(category -> {
-                    List<Product> products = productRepository.findByCategory_CategoryId(category.getCategoryId());
-                    int productCount = products.size();
-                    BigDecimal totalSales = products.stream()
-                            .map(Product::getSoldAmount)
-                            .map(soldAmount -> soldAmount != null ? BigDecimal.valueOf(soldAmount) : BigDecimal.ZERO)
-                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+            for (com.example.shoppingsystem.entities.Category category : categories) {
+                long productCount = productRepository.findByCategory_CategoryId(category.getCategoryId()).size();
 
-                    return new CategoryStatDTO(
-                            category.getCategoryName(),
-                            productCount,
-                            totalSales
-                    );
-                })
-                .collect(Collectors.toList());
+                // Calculate total sales for this category
+                BigDecimal totalSales = orderDetailRepository.findAll().stream()
+                        .filter(od -> od.getProduct() != null &&
+                                od.getProduct().getCategory().getCategoryId().equals(category.getCategoryId()))
+                        .map(com.example.shoppingsystem.entities.OrderDetail::getSubtotal)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                stats.add(new CategoryStatDTO(
+                        category.getCategoryName(),
+                        (int) productCount,
+                        totalSales
+                ));
+            }
+
+            return stats.stream()
+                    .sorted((a, b) -> b.getTotalSales().compareTo(a.getTotalSales()))
+                    .limit(10)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error getting category statistics", e);
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public Page<RecentOrderDTO> getRecentOrders(Pageable pageable) {
+        try {
+            Page<com.example.shoppingsystem.entities.OrderList> orderPage =
+                    orderRepository.findAllByOrderByOrderDateDesc(pageable);
+
+            List<RecentOrderDTO> recentOrderDTOs = orderPage.getContent().stream()
+                    .map(order -> new RecentOrderDTO(
+                            order.getOrderId(),
+                            order.getAccount().getFullname(),
+                            formatCurrency(order.getTotalPrice()),
+                            translateOrderStatus(order.getOrderStatus().toString()),
+                            order.getOrderDate()
+                    ))
+                    .collect(Collectors.toList());
+
+            return new PageImpl<>(recentOrderDTOs, pageable, orderPage.getTotalElements());
+        } catch (Exception e) {
+            log.error("Error getting paginated recent orders", e);
+            return new PageImpl<>(new ArrayList<>(), pageable, 0);
+        }
     }
 
     @Override
     public List<RecentOrderDTO> getRecentOrders() {
-        List<OrderList> recentOrders = orderRepository.findTop10ByOrderByOrderDateDesc();
+        try {
+            List<com.example.shoppingsystem.entities.OrderList> recentOrders =
+                    orderRepository.findTop5ByOrderByOrderDateDesc();
 
-        return recentOrders.stream()
-                .map(order -> new RecentOrderDTO(
-                        order.getOrderId(),
-                        order.getAccount().getFullname(),
-                        formatPrice(order.getTotalPrice()),
-                        order.getOrderStatus().toString(),
-                        order.getOrderDate()
-                ))
-                .collect(Collectors.toList());
+            return recentOrders.stream()
+                    .map(order -> new RecentOrderDTO(
+                            order.getOrderId(),
+                            order.getAccount().getFullname(),
+                            formatCurrency(order.getTotalPrice()),
+                            translateOrderStatus(order.getOrderStatus().toString()),
+                            order.getOrderDate()
+                    ))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error getting recent orders for dashboard", e);
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public Page<NewUserDTO> getNewUsers(Pageable pageable) {
+        try {
+            // Get users from last 30 days for more data
+            LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
+            Page<com.example.shoppingsystem.entities.Account> userPage =
+                    accountRepository.findByCreatedDateAfterOrderByCreatedDateDesc(thirtyDaysAgo, pageable);
+
+            List<NewUserDTO> newUserDTOs = userPage.getContent().stream()
+                    .map(user -> new NewUserDTO(
+                            user.getFullname(),
+                            user.getEmail(),
+                            translateRole(user.getRole().getRoleName()),
+                            user.getCreatedDate()
+                    ))
+                    .collect(Collectors.toList());
+
+            return new PageImpl<>(newUserDTOs, pageable, userPage.getTotalElements());
+        } catch (Exception e) {
+            log.error("Error getting paginated new users", e);
+            return new PageImpl<>(new ArrayList<>(), pageable, 0);
+        }
     }
 
     @Override
     public List<NewUserDTO> getNewUsers() {
-        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
-        List<Account> newUsers = accountRepository.findByCreatedDateAfter(sevenDaysAgo);
+        try {
+            LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+            List<com.example.shoppingsystem.entities.Account> newUsers =
+                    accountRepository.findTop5ByCreatedDateAfterOrderByCreatedDateDesc(sevenDaysAgo);
 
-        return newUsers.stream()
-                .map(account -> new NewUserDTO(
-                        account.getFullname(),
-                        account.getEmail(),
-                        account.getRole().getRoleName(),
-                        account.getCreatedDate()
-                ))
-                .collect(Collectors.toList());
+            return newUsers.stream()
+                    .map(user -> new NewUserDTO(
+                            user.getFullname(),
+                            user.getEmail(),
+                            translateRole(user.getRole().getRoleName()),
+                            user.getCreatedDate()
+                    ))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error getting new users for dashboard", e);
+            return new ArrayList<>();
+        }
     }
 
     @Override
     public Map<String, Object> getRevenueChartData(int days) {
-        List<RevenueDataDTO> revenueData = getRevenueLast30Days();
+        try {
+            List<RevenueDataDTO> revenueData = getRevenueLast30Days();
 
-        Map<String, Object> chartData = new HashMap<>();
-        chartData.put("labels", revenueData.stream()
-                .map(RevenueDataDTO::getDate)
-                .collect(Collectors.toList()));
-        chartData.put("data", revenueData.stream()
-                .map(RevenueDataDTO::getRevenue)
-                .collect(Collectors.toList()));
+            Map<String, Object> chartData = new HashMap<>();
+            chartData.put("labels", revenueData.stream()
+                    .map(RevenueDataDTO::getDate)
+                    .collect(Collectors.toList()));
+            chartData.put("data", revenueData.stream()
+                    .map(RevenueDataDTO::getRevenue)
+                    .collect(Collectors.toList()));
 
-        return chartData;
+            return chartData;
+        } catch (Exception e) {
+            log.error("Error getting revenue chart data", e);
+            return new HashMap<>();
+        }
     }
 
     @Override
     public Map<String, Object> getCategoryChartData() {
-        List<CategoryStatDTO> categoryStats = getCategoryStatistics();
+        try {
+            List<CategoryStatDTO> categoryStats = getCategoryStatistics();
 
-        Map<String, Object> chartData = new HashMap<>();
-        chartData.put("labels", categoryStats.stream()
-                .map(CategoryStatDTO::getCategoryName)
-                .collect(Collectors.toList()));
-        chartData.put("data", categoryStats.stream()
-                .map(CategoryStatDTO::getProductCount)
-                .collect(Collectors.toList()));
+            Map<String, Object> chartData = new HashMap<>();
+            chartData.put("labels", categoryStats.stream()
+                    .map(CategoryStatDTO::getCategoryName)
+                    .collect(Collectors.toList()));
+            chartData.put("data", categoryStats.stream()
+                    .map(CategoryStatDTO::getProductCount)
+                    .collect(Collectors.toList()));
 
-        return chartData;
+            return chartData;
+        } catch (Exception e) {
+            log.error("Error getting category chart data", e);
+            return new HashMap<>();
+        }
     }
 
     @Override
     public int getPendingProductsCount() {
-        return productRepository.findByApprovalStatus_StatusCode(StatusCode.STATUS_PENDING).size();
+        try {
+            return (int) productRepository.findByApprovalStatus_StatusCode("pending").size();
+        } catch (Exception e) {
+            log.error("Error getting pending products count", e);
+            return 0;
+        }
     }
 
     @Override
     public int getPendingApplicationsCount() {
-        return Math.toIntExact(agencyInfoRepository.findByApprovalStatus_StatusCode(StatusCode.STATUS_PENDING,
-                org.springframework.data.domain.PageRequest.of(0, Integer.MAX_VALUE)).getTotalElements());
+        try {
+            return (int) agencyInfoRepository.findByApprovalStatus_StatusCode("pending")
+                    .map(page -> 1)
+                    .orElse(0);
+        } catch (Exception e) {
+            log.error("Error getting pending applications count", e);
+            return 0;
+        }
     }
 
-    private String formatPrice(BigDecimal price) {
-        if (price == null) return "0 VND";
-        return String.format("%,.0f VND", price);
-    }
-
-    // Thêm vào AdminDashboardServiceImpl.java
     @Override
     public Map<String, Object> getDashboardStats() {
-        Map<String, Object> stats = new HashMap<>();
-        stats.put("totalProducts", getTotalProducts());
-        stats.put("totalOrders", getTotalOrders());
-        stats.put("totalUsers", getTotalUsers());
-        stats.put("totalRevenue", getTotalRevenue());
-        return stats;
+        try {
+            Map<String, Object> stats = new HashMap<>();
+
+            stats.put("totalProducts", getTotalProducts());
+            stats.put("totalOrders", getTotalOrders());
+            stats.put("totalUsers", getTotalUsers());
+            stats.put("totalRevenue", getTotalRevenue());
+
+            return stats;
+        } catch (Exception e) {
+            log.error("Error getting dashboard stats", e);
+            return new HashMap<>();
+        }
     }
 
     @Override
     public int getTotalProducts() {
-        return (int) productRepository.count();
+        try {
+            return (int) productRepository.count();
+        } catch (Exception e) {
+            log.error("Error getting total products", e);
+            return 0;
+        }
     }
 
     @Override
     public int getTotalOrders() {
-        return (int) orderRepository.count();
+        try {
+            return (int) orderRepository.count();
+        } catch (Exception e) {
+            log.error("Error getting total orders", e);
+            return 0;
+        }
     }
 
     @Override
     public int getTotalUsers() {
-        return (int) accountRepository.count();
+        try {
+            return (int) accountRepository.count();
+        } catch (Exception e) {
+            log.error("Error getting total users", e);
+            return 0;
+        }
     }
 
     @Override
     public String getTotalRevenue() {
-        List<OrderList> orders = orderRepository.findAll();
-        BigDecimal total = orders.stream()
-                .filter(order -> "DELIVERED".equals(order.getOrderStatus().toString()))
-                .map(OrderList::getTotalPrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        return formatPrice(total);
+        try {
+            BigDecimal totalRevenue = orderRepository.findAll().stream()
+                    .map(com.example.shoppingsystem.entities.OrderList::getTotalPrice)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            return formatCurrency(totalRevenue);
+        } catch (Exception e) {
+            log.error("Error getting total revenue", e);
+            return "0 VND";
+        }
+    }
+
+    private String formatCurrency(BigDecimal amount) {
+        if (amount == null) {
+            return "0 VND";
+        }
+        return String.format("%,.0f VND", amount);
+    }
+
+    private String translateOrderStatus(String status) {
+        switch (status.toLowerCase()) {
+            case "pending": return "Chờ xử lý";
+            case "confirmed": return "Đã xác nhận";
+            case "shipping": return "Đang giao";
+            case "delivered": return "Đã giao";
+            case "cancelled": return "Đã hủy";
+            default: return status;
+        }
+    }
+
+    private String translateRole(String role) {
+        switch (role.toLowerCase()) {
+            case "admin":
+            case "administrator": return "Quản trị viên";
+            case "agency": return "Đại lý";
+            case "customer": return "Khách hàng";
+            default: return role;
+        }
     }
 }

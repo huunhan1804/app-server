@@ -1,6 +1,7 @@
 package com.example.shoppingsystem.repositories;
 
 import com.example.shoppingsystem.entities.OrderList;
+import com.example.shoppingsystem.enums.OrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,11 +17,17 @@ public interface OrderRepository extends JpaRepository<OrderList, Long> {
     List<OrderList> findAllByAccount_AccountId(Long accountId);
     //List<OrderList> findAllByAgency_AgencyId(Long agencyId);
 
-    @Query("SELECT o FROM OrderList o WHERE o.orderDate BETWEEN :startDate AND :endDate")
+    @Query("SELECT o FROM OrderList o WHERE o.orderDate BETWEEN :startDate AND :endDate ORDER BY o.orderDate DESC")
     List<OrderList> findOrdersInDateRange(
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
     );
+
+    // Pagination methods
+    Page<OrderList> findAllByOrderByOrderDateDesc(Pageable pageable);
+
+    // Top N methods for dashboard
+    List<OrderList> findTop5ByOrderByOrderDateDesc();
 
     List<OrderList> findTop10ByOrderByOrderDateDesc();
 
@@ -28,4 +35,6 @@ public interface OrderRepository extends JpaRepository<OrderList, Long> {
     Page<OrderList> findTop10ByOrderByOrderDateDesc(Pageable pageable);
 
     OrderList findByOrderId(Long orderId);
+    List<OrderList> findByOrderStatus(OrderStatus status);
+    List<OrderList> findByAgency_AccountId(Long agencyId);
 }

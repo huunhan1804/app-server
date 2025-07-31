@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,8 +40,15 @@ public class UserManagementServiceImpl implements UserManagementService {
     @Autowired
     private NotificationService notificationService;
 
+    // ==== CUSTOMER METHODS ====
+
     @Override
     public Page<UserManagementDTO> getAllCustomers(Pageable pageable, String status, String membershipLevel, String keyword) {
+        return getCustomers(pageable, status, membershipLevel, keyword);
+    }
+
+    @Override
+    public Page<UserManagementDTO> getCustomers(Pageable pageable, String status, String membershipLevel, String keyword) {
         Specification<Account> spec = Specification.where(null);
 
         // Filter by customer role
@@ -51,7 +59,10 @@ public class UserManagementServiceImpl implements UserManagementService {
             spec = spec.and((root, query, criteriaBuilder) ->
                     criteriaBuilder.equal(root.get("accountStatus"), Account.AccountStatus.valueOf(status)));
         }
-
+        if (membershipLevel != null && !membershipLevel.isEmpty()) {
+            spec = spec.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("membershipLevel"), Membership.MembershipLevel.valueOf(membershipLevel)));
+        }
         if (keyword != null && !keyword.isEmpty()) {
             spec = spec.and((root, query, criteriaBuilder) ->
                     criteriaBuilder.or(
@@ -71,7 +82,67 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @Override
+    public UserManagementDTO getCustomerDetail(Long accountId) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
+        return convertToCustomerDTO(account);
+    }
+
+    @Override
+    @Transactional
+    public void suspendCustomer(Long accountId, String reason) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
+
+        account.setIsBanned(true);
+        account.setAccountStatus(Account.AccountStatus.SUSPENDED);
+        accountRepository.save(account);
+
+        // Send notification
+        sendNotificationToUser(account, "Tài khoản bị tạm khóa",
+                "Tài khoản của bạn đã bị tạm khóa. Lý do: " + reason);
+    }
+
+    @Override
+    @Transactional
+    public void activateCustomer(Long accountId) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
+
+        account.setIsBanned(false);
+        account.setAccountStatus(Account.AccountStatus.ACTIVE);
+        accountRepository.save(account);
+
+        // Send notification
+        sendNotificationToUser(account, "Tài khoản được kích hoạt",
+                "Tài khoản của bạn đã được kích hoạt lại. Bạn có thể tiếp tục sử dụng dịch vụ.");
+    }
+
+    @Override
+    @Transactional
+    public void resetCustomerPassword(Long accountId) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
+
+        // Generate temporary password
+        String tempPassword = generateTemporaryPassword();
+        account.setPassword(passwordEncoder.encode(tempPassword));
+        accountRepository.save(account);
+
+        // Send notification with new password
+        sendNotificationToUser(account, "Mật khẩu đã được reset",
+                "Mật khẩu mới của bạn là: " + tempPassword + ". Vui lòng đổi mật khẩu sau khi đăng nhập.");
+    }
+
+    // ==== AGENCY METHODS ====
+
+    @Override
     public Page<UserManagementDTO> getAllAgencies(Pageable pageable, String approvalStatus, String keyword) {
+        return getAgencies(pageable, approvalStatus, keyword);
+    }
+
+    @Override
+    public Page<UserManagementDTO> getAgencies(Pageable pageable, String approvalStatus, String keyword) {
         Specification<Account> spec = Specification.where(null);
 
         // Filter by agency role
@@ -100,6 +171,45 @@ public class UserManagementServiceImpl implements UserManagementService {
 
         return new PageImpl<>(userDTOs, pageable, accounts.getTotalElements());
     }
+
+    @Override
+    public UserManagementDTO getAgencyDetail(Long accountId) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
+        return convertToAgencyDTO(account);
+    }
+
+    @Override
+    @Transactional
+    public void suspendAgency(Long accountId, String reason) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
+
+        account.setIsBanned(true);
+        account.setAccountStatus(Account.AccountStatus.SUSPENDED);
+        accountRepository.save(account);
+
+        // Send notification
+        sendNotificationToAgency(account, "Agency bị tạm khóa",
+                "Agency của bạn đã bị tạm khóa. Lý do: " + reason);
+    }
+
+    @Override
+    @Transactional
+    public void activateAgency(Long accountId) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
+
+        account.setIsBanned(false);
+        account.setAccountStatus(Account.AccountStatus.ACTIVE);
+        accountRepository.save(account);
+
+        // Send notification
+        sendNotificationToAgency(account, "Agency được kích hoạt",
+                "Agency của bạn đã được kích hoạt lại. Bạn có thể tiếp tục bán hàng.");
+    }
+
+    // ==== APPLICATION METHODS ====
 
     @Override
     public Page<AgencyApplicationDetailDTO> getPendingApplications(Pageable pageable) {
@@ -171,97 +281,25 @@ public class UserManagementServiceImpl implements UserManagementService {
                         ". Vui lòng chỉnh sửa và nộp lại hồ sơ.");
     }
 
+    // ==== FILTER OPTIONS ====
+
     @Override
-    @Transactional
-    public void suspendCustomer(Long accountId, String reason) {
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
-
-        account.setIsBanned(true);
-        account.setAccountStatus(Account.AccountStatus.SUSPENDED);
-        accountRepository.save(account);
-
-        // Send notification
-        sendNotificationToUser(account, "Tài khoản bị tạm khóa",
-                "Tài khoản của bạn đã bị tạm khóa. Lý do: " + reason);
+    public List<String> getAllAccountStatuses() {
+        return Arrays.asList("ACTIVE", "INACTIVE", "PENDING", "SUSPENDED");
     }
 
     @Override
-    @Transactional
-    public void activateCustomer(Long accountId) {
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
-
-        account.setIsBanned(false);
-        account.setAccountStatus(Account.AccountStatus.ACTIVE);
-        accountRepository.save(account);
-
-        // Send notification
-        sendNotificationToUser(account, "Tài khoản được kích hoạt",
-                "Tài khoản của bạn đã được kích hoạt lại. Bạn có thể tiếp tục sử dụng dịch vụ.");
+    public List<String> getAllMembershipLevels() {
+        return Arrays.asList("BRONZE", "SILVER", "GOLD", "DIAMOND");
     }
 
     @Override
-    @Transactional
-    public void resetCustomerPassword(Long accountId) {
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
-
-        // Generate temporary password
-        String tempPassword = generateTemporaryPassword();
-        account.setPassword(passwordEncoder.encode(tempPassword));
-        accountRepository.save(account);
-
-        // Send notification with new password
-        sendNotificationToUser(account, "Mật khẩu đã được reset",
-                "Mật khẩu mới của bạn là: " + tempPassword + ". Vui lòng đổi mật khẩu sau khi đăng nhập.");
+    public List<String> getAllApprovalStatuses() {
+        return Arrays.asList("pending", "approved", "rejected");
     }
 
-    @Override
-    public UserManagementDTO getCustomerDetail(Long accountId) {
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
-        return convertToCustomerDTO(account);
-    }
+    // ==== HELPER METHODS ====
 
-    @Override
-    public UserManagementDTO getAgencyDetail(Long accountId) {
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
-        return convertToAgencyDTO(account);
-    }
-
-    @Override
-    @Transactional
-    public void suspendAgency(Long accountId, String reason) {
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
-
-        account.setIsBanned(true);
-        account.setAccountStatus(Account.AccountStatus.SUSPENDED);
-        accountRepository.save(account);
-
-        // Send notification
-        sendNotificationToAgency(account, "Agency bị tạm khóa",
-                "Agency của bạn đã bị tạm khóa. Lý do: " + reason);
-    }
-
-    @Override
-    @Transactional
-    public void activateAgency(Long accountId) {
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
-
-        account.setIsBanned(false);
-        account.setAccountStatus(Account.AccountStatus.ACTIVE);
-        accountRepository.save(account);
-
-        // Send notification
-        sendNotificationToAgency(account, "Agency được kích hoạt",
-                "Agency của bạn đã được kích hoạt lại. Bạn có thể tiếp tục bán hàng.");
-    }
-
-    // Helper methods
     private UserManagementDTO convertToCustomerDTO(Account account) {
         // Get customer statistics
         List<OrderList> orders = orderRepository.findAllByAccount_AccountId(account.getAccountId());
@@ -288,20 +326,19 @@ public class UserManagementServiceImpl implements UserManagementService {
                 .build();
     }
 
-    // UserManagementServiceImpl.java - Sửa method convertToAgencyDTO
     private UserManagementDTO convertToAgencyDTO(Account account) {
         Optional<AgencyInfo> agencyInfo = agencyInfoRepository.findByAccount_AccountId(account.getAccountId());
 
         // Calculate agency statistics from orders
         BigDecimal totalRevenue = BigDecimal.ZERO;
         try {
-            List<OrderList> orders = orderRepository.findAllByAccount_AccountId(account.getAccountId()); // Sửa từ findAllByAgency_AccountId
+            List<OrderList> orders = orderRepository.findAllByAccount_AccountId(account.getAccountId());
             totalRevenue = orders.stream()
                     .filter(order -> "DELIVERED".equals(order.getOrderStatus().toString()))
                     .map(OrderList::getTotalPrice)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
         } catch (Exception e) {
-            // Log error và continue với default value
+            // Log error and continue with default value
             System.err.println("Error calculating revenue for account " + account.getAccountId() + ": " + e.getMessage());
         }
 
@@ -367,26 +404,27 @@ public class UserManagementServiceImpl implements UserManagementService {
         return java.util.UUID.randomUUID().toString().substring(0, 8);
     }
 
+    private String getCurrentAdminUsername() {
+        try {
+            return SecurityContextHolder.getContext().getAuthentication().getName();
+        } catch (Exception e) {
+            return "System";
+        }
+    }
+
     private void sendNotificationToAgency(Account agency, String title, String message) {
-        notificationService.sendNotificationToAgency(agency, title, message);
+        try {
+            notificationService.sendNotificationToAgency(agency, title, message);
+        } catch (Exception e) {
+            System.err.println("Error sending notification to agency: " + e.getMessage());
+        }
     }
 
     private void sendNotificationToUser(Account user, String title, String message) {
-        notificationService.sendNotificationToUser(user, title, message);
-    }
-
-    @Override
-    public List<String> getAllAccountStatuses() {
-        return Arrays.asList("ACTIVE", "INACTIVE", "PENDING", "SUSPENDED");
-    }
-
-    @Override
-    public List<String> getAllMembershipLevels() {
-        return Arrays.asList("BRONZE", "SILVER", "GOLD", "DIAMOND");
-    }
-
-    @Override
-    public List<String> getAllApprovalStatuses() {
-        return Arrays.asList("pending", "approved", "rejected");
+        try {
+            notificationService.sendNotificationToUser(user, title, message);
+        } catch (Exception e) {
+            System.err.println("Error sending notification to user: " + e.getMessage());
+        }
     }
 }

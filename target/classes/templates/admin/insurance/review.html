@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết yêu cầu bảo hiểm - CTU Shop Admin</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        .evidence-image {
+            max-width: 200px;
+            max-height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin: 5px;
+            cursor: pointer;
+            border: 2px solid #ddd;
+            transition: border-color 0.3s;
+        }
+        .evidence-image:hover {
+            border-color: #007bff;
+        }
+        .communication-item {
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f8f9fa;
+        }
+        .communication-sent {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        .communication-received {
+            border-left-color: #17a2b8;
+            background: #d1ecf1;
+        }
+        .status-timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        .status-timeline::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #ddd;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -5px;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #007bff;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid mt-3">
+    <div class="row">
+        <div class="col-12">
+            <!-- Trong admin/insurance/review.html, cập nhật breadcrumb và navigation -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="/admin/insurance">Quản lý bảo hiểm</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Chi tiết yêu cầu</li>
+                        </ol>
+                    </nav>
+                    <h1><i class="fas fa-shield-alt"></i> Chi tiết yêu cầu bảo hiểm</h1>
+                    <p class="text-muted">Mã yêu cầu: <strong th:text="${claim.claimCode}"></strong></p>
+                </div>
+                <div>
+                    <a href="/admin/insurance" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left"></i> Quay lại danh sách
+                    </a>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="fas fa-cog"></i> Thao tác khác
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="printClaim()">
+                                <i class="fas fa-print"></i> In yêu cầu
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="exportClaimPDF()">
+                                <i class="fas fa-file-pdf"></i> Xuất PDF
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" th:href="@{/admin/insurance/history/{id}(id=${claim.claimId})}">
+                                <i class="fas fa-history"></i> Lịch sử xử lý
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Main Information -->
+                <div class="col-lg-8">
+                    <!-- Claim Details -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5><i class="fas fa-info-circle"></i> Thông tin yêu cầu</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Thông tin khách hàng</h6>
+                                    <p><strong>Tên:</strong> <span th:text="${claim.customerName}"></span></p>
+                                    <p><strong>Email:</strong> <span th:text="${claim.customerEmail}"></span></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Thông tin Agency</h6>
+                                    <p><strong>Tên:</strong> <span th:text="${claim.agencyName}"></span></p>
+                                    <p><strong>Email:</strong> <span th:text="${claim.agencyEmail}"></span></p>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Sản phẩm:</strong> <span th:text="${claim.productName}"></span></p>
+                                    <p><strong>Mức độ nghiêm trọng:</strong>
+                                        <span th:class="'badge ' +
+                                            (${claim.severityLevel == 'CRITICAL'} ? 'bg-danger' :
+                                             ${claim.severityLevel == 'HIGH'} ? 'bg-warning' :
+                                             ${claim.severityLevel == 'MEDIUM'} ? 'bg-info' : 'bg-success')"
+                                              th:text="${claim.severityLevel}">
+                                        </span>
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Trạng thái:</strong>
+                                        <span th:class="'badge ' +
+                                            (${claim.claimStatus == 'SUBMITTED'} ? 'bg-warning' :
+                                             ${claim.claimStatus == 'UNDER_REVIEW'} ? 'bg-info' :
+                                             ${claim.claimStatus == 'APPROVED'} ? 'bg-success' :
+                                             ${claim.claimStatus == 'REJECTED'} ? 'bg-danger' : 'bg-secondary')"
+                                              th:text="${claim.claimStatus}">
+                                        </span>
+                                    </p>
+                                    <p><strong>Ngày tạo:</strong>
+                                        <span th:text="${#temporals.format(claim.submittedDate, 'dd/MM/yyyy HH:mm')}"></span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Claim Description -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5><i class="fas fa-file-text"></i> Nội dung yêu cầu</h5>
+                        </div>
+                        <div class="card-body">
+                            <h6 th:text="${claim.claimTitle}"></h6>
+                            <p th:text="${claim.claimDescription}"></p>
+                        </div>
+                    </div>
+
+                    <!-- Evidence Documents -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5><i class="fas fa-folder-open"></i> Giấy tờ minh chứng</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- ID Card -->
+                            <div class="mb-3" th:if="${claim.customerIdCardFrontUrl != null}">
+                                <h6>CCCD/CMND</h6>
+                                <div class="d-flex flex-wrap">
+                                    <img th:src="${claim.customerIdCardFrontUrl}"
+                                         class="evidence-image"
+                                         alt="CCCD mặt trước"
+                                         onclick="showImageModal(this.src, 'CCCD mặt trước')">
+                                    <img th:if="${claim.customerIdCardBackUrl != null}"
+                                         th:src="${claim.customerIdCardBackUrl}"
+                                         class="evidence-image"
+                                         alt="CCCD mặt sau"
+                                         onclick="showImageModal(this.src, 'CCCD mặt sau')">
+                                </div>
+                            </div>
+
+                            <!-- Medical Bills -->
+                            <div class="mb-3" th:if="${claim.medicalBillUrls != null and !claim.medicalBillUrls.isEmpty()}">
+                                <h6>Hóa đơn y tế</h6>
+                                <div class="d-flex flex-wrap">
+                                    <img th:each="url : ${claim.medicalBillUrls}"
+                                         th:src="${url}"
+                                         class="evidence-image"
+                                         alt="Hóa đơn y tế"
+                                         onclick="showImageModal(this.src, 'Hóa đơn y tế')">
+                                </div>
+                            </div>
+
+                            <!-- Test Results -->
+                            <div class="mb-3" th:if="${claim.testResultUrls != null and !claim.testResultUrls.isEmpty()}">
+                                <h6>Kết quả xét nghiệm</h6>
+                                <div class="d-flex flex-wrap">
+                                    <img th:each="url : ${claim.testResultUrls}"
+                                         th:src="${url}"
+                                         class="evidence-image"
+                                         alt="Kết quả xét nghiệm"
+                                         onclick="showImageModal(this.src, 'Kết quả xét nghiệm')">
+                                </div>
+                            </div>
+
+                            <!-- Doctor Reports -->
+                            <div class="mb-3" th:if="${claim.doctorReportUrls != null and !claim.doctorReportUrls.isEmpty()}">
+                                <h6>Báo cáo bác sĩ</h6>
+                                <div class="d-flex flex-wrap">
+                                    <img th:each="url : ${claim.doctorReportUrls}"
+                                         th:src="${url}"
+                                         class="evidence-image"
+                                         alt="Báo cáo bác sĩ"
+                                         onclick="showImageModal(this.src, 'Báo cáo bác sĩ')">
+                                </div>
+                            </div>
+
+                            <!-- Other Evidence -->
+                            <div class="mb-3" th:if="${claim.otherEvidenceUrls != null and !claim.otherEvidenceUrls.isEmpty()}">
+                                <h6>Minh chứng khác</h6>
+                                <div class="d-flex flex-wrap">
+                                    <img th:each="url : ${claim.otherEvidenceUrls}"
+                                         th:src="${url}"
+                                         class="evidence-image"
+                                         alt="Minh chứng khác"
+                                         onclick="showImageModal(this.src, 'Minh chứng khác')">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Communication History -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5><i class="fas fa-comments"></i> Lịch sử liên lạc</h5>
+                        </div>
+                        <div class="card-body">
+                            <div th:if="${claim.communications != null and !claim.communications.isEmpty()}">
+                                <div th:each="comm : ${claim.communications}"
+                                     th:class="'communication-item ' +
+                                         (${comm.communicationType.contains('ADMIN')} ? 'communication-sent' : 'communication-received')">
+                                    <div class="d-flex justify-content-between">
+                                        <strong th:text="${comm.emailSubject}"></strong>
+                                        <small th:text="${#temporals.format(comm.sentDate, 'dd/MM/yyyy HH:mm')}"></small>
+                                    </div>
+                                    <p class="mb-1">
+                                        <strong>Từ:</strong> <span th:text="${comm.senderName}"></span> →
+                                        <strong>Đến:</strong> <span th:text="${comm.recipientName}"></span>
+                                    </p>
+                                    <p th:text="${comm.emailContent}"></p>
+                                </div>
+                            </div>
+                            <div th:if="${claim.communications == null or claim.communications.isEmpty()}"
+                                 class="text-center text-muted">
+                                <i class="fas fa-inbox fa-3x mb-3"></i>
+                                <p>Chưa có liên lạc nào</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Panel -->
+                <div class="col-lg-4">
+                    <!-- Process Actions -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5><i class="fas fa-cogs"></i> Xử lý yêu cầu</h5>
+                        </div>
+                        <div class="card-body">
+                            <form th:action="@{/admin/insurance/process/{id}(id=${claim.claimId})}"
+                                  method="post" id="processForm">
+
+                                <div class="mb-3">
+                                    <label for="claimStatus" class="form-label">Trạng thái</label>
+                                    <select class="form-select" id="claimStatus" name="claimStatus" required>
+                                        <option th:selected="${claim.claimStatus == 'SUBMITTED'}" value="SUBMITTED">Đã nộp</option>
+                                        <option th:selected="${claim.claimStatus == 'UNDER_REVIEW'}" value="UNDER_REVIEW">Đang xem xét</option>
+                                        <option th:selected="${claim.claimStatus == 'PENDING_DOCUMENTS'}" value="PENDING_DOCUMENTS">Chờ bổ sung</option>
+                                        <option th:selected="${claim.claimStatus == 'APPROVED'}" value="APPROVED">Chấp thuận</option>
+                                        <option th:selected="${claim.claimStatus == 'REJECTED'}" value="REJECTED">Từ chối</option>
+                                        <option th:selected="${claim.claimStatus == 'CLOSED'}" value="CLOSED">Đóng</option>
+                                    </select>
+                                </div>
+
+                                <div id="compensationFields" style="display: none;">
+                                    <div class="mb-3">
+                                        <label for="compensationAmount" class="form-label">Mức bồi thường</label>
+                                        <input type="number" step="0.01" class="form-control"
+                                               id="compensationAmount" name="compensationAmount"
+                                               th:value="${claim.compensationAmount}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="compensationType" class="form-label">Hình thức bồi thường</label>
+                                        <select class="form-select" id="compensationType" name="compensationType">
+                                            <option value="">Chọn hình thức</option>
+                                            <option th:selected="${claim.compensationType == 'CASH'}" value="CASH">Tiền mặt</option>
+                                            <option th:selected="${claim.compensationType == 'VOUCHER'}" value="VOUCHER">Voucher</option>
+                                            <option th:selected="${claim.compensationType == 'PRODUCT_REPLACEMENT'}" value="PRODUCT_REPLACEMENT">Thay thế sản phẩm</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div id="rejectionField" style="display: none;">
+                                    <div class="mb-3">
+                                        <label for="rejectionReason" class="form-label">Lý do từ chối</label>
+                                        <textarea class="form-control" id="rejectionReason" name="rejectionReason"
+                                                  rows="3" th:text="${claim.rejectionReason}"></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="adminNotes" class="form-label">Ghi chú của Admin</label>
+                                    <textarea class="form-control" id="adminNotes" name="adminNotes"
+                                              rows="4" th:text="${claim.adminNotes}"></textarea>
+                                </div>
+
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> Cập nhật
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Contact Actions -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5><i class="fas fa-envelope"></i> Liên lạc</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-outline-success"
+                                        th:onclick="'contactCustomer(' + ${claim.claimId} + ')'">
+                                    <i class="fas fa-user"></i> Liên hệ khách hàng
+                                </button>
+                                <button type="button" class="btn btn-outline-info"
+                                        th:onclick="'contactAgency(' + ${claim.claimId} + ')'">
+                                    <i class="fas fa-store"></i> Liên hệ Agency
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status Timeline -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-history"></i> Lịch sử xử lý</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="status-timeline">
+                                <div class="timeline-item">
+                                    <strong>Đã nộp</strong><br>
+                                    <small th:text="${#temporals.format(claim.submittedDate, 'dd/MM/yyyy HH:mm')}"></small>
+                                </div>
+                                <div class="timeline-item" th:if="${claim.processedDate != null}">
+                                    <strong>Đã xử lý</strong><br>
+                                    <small th:text="${#temporals.format(claim.processedDate, 'dd/MM/yyyy HH:mm')}"></small><br>
+                                    <small>Bởi: <span th:text="${claim.processedByName}"></span></small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalTitle">Xem ảnh</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" src="" class="img-fluid" alt="">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contact Modal (Same as in management.html) -->
+<div class="modal fade" id="contactModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="contactModalTitle">Gửi email liên lạc</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="contactForm">
+                    <input type="hidden" id="claimId" name="claimId" th:value="${claim.claimId}">
+                    <input type="hidden" id="recipientId" name="recipientId">
+                    <input type="hidden" id="communicationType" name="communicationType">
+
+                    <div class="mb-3">
+                        <label for="emailSubject" class="form-label">Tiêu đề email</label>
+                        <input type="text" class="form-control" id="emailSubject" name="emailSubject" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="emailContent" class="form-label">Nội dung email</label>
+                        <textarea class="form-control" id="emailContent" name="emailContent" rows="6" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="sendCommunication()">
+                    <i class="fas fa-paper-plane"></i> Gửi email
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Show/hide fields based on status
+    document.getElementById('claimStatus').addEventListener('change', function() {
+        const status = this.value;
+        const compensationFields = document.getElementById('compensationFields');
+        const rejectionField = document.getElementById('rejectionField');
+
+        compensationFields.style.display = (status === 'APPROVED') ? 'block' : 'none';
+        rejectionField.style.display = (status === 'REJECTED') ? 'block' : 'none';
+    });
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusSelect = document.getElementById('claimStatus');
+        statusSelect.dispatchEvent(new Event('change'));
+    });
+
+    function showImageModal(src, title) {
+        document.getElementById('modalImage').src = src;
+        document.getElementById('imageModalTitle').textContent = title;
+        new bootstrap.Modal(document.getElementById('imageModal')).show();
+    }
+
+    function contactCustomer(claimId) {
+        const claim = /*[[${claim}]]*/ {};
+
+        document.getElementById('contactModalTitle').textContent =
+            `Liên hệ khách hàng: ${claim.customerName}`;
+        document.getElementById('recipientId').value = claim.customerId;
+        document.getElementById('communicationType').value = 'ADMIN_TO_CUSTOMER';
+        document.getElementById('emailSubject').value =
+            `Yêu cầu bồi thường ${claim.claimCode} - Cần thêm thông tin`;
+        document.getElementById('emailContent').value =
+            `Kính chào ${claim.customerName},\n\nChúng tôi đang xem xét yêu cầu bồi thường của bạn (${claim.claimCode}).\n\n`;
+
+        new bootstrap.Modal(document.getElementById('contactModal')).show();
+    }
+
+    function contactAgency(claimId) {
+        const claim = /*[[${claim}]]*/ {};
+
+        document.getElementById('contactModalTitle').textContent =
+            `Liên hệ Agency: ${claim.agencyName}`;
+        document.getElementById('recipientId').value = claim.agencyId;
+        document.getElementById('communicationType').value = 'ADMIN_TO_AGENCY';
+        document.getElementById('emailSubject').value =
+            `Yêu cầu bồi thường ${claim.claimCode} - Cần thông tin sản phẩm`;
+        document.getElementById('emailContent').value =
+            `Kính chào ${claim.agencyName},\n\nChúng tôi cần thông tin bổ sung về sản phẩm ${claim.productName} liên quan đến yêu cầu bồi thường ${claim.claimCode}.\n\n`;
+
+        new bootstrap.Modal(document.getElementById('contactModal')).show();
+    }
+
+    function sendCommunication() {
+        const formData = {
+            claimId: parseInt(document.getElementById('claimId').value),
+            recipientId: parseInt(document.getElementById('recipientId').value),
+            emailSubject: document.getElementById('emailSubject').value,
+            emailContent: document.getElementById('emailContent').value,
+            communicationType: document.getElementById('communicationType').value
+        };
+
+        fetch('/admin/insurance/communication', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        })
+            .then(response => response.text())
+            .then(data => {
+                if (data === 'success') {
+                    alert('Gửi email thành công!');
+                    bootstrap.Modal.getInstance(document.getElementById('contactModal')).hide();
+                    location.reload();
+                } else {
+                    alert('Có lỗi xảy ra: ' + data);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi gửi email');
+            });
+    }
+</script>
+</body>
+</html>

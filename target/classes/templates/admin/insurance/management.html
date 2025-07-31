@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý bảo hiểm - CTU Shop Admin</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .main-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            border: none;
+        }
+        .status-badge {
+            font-size: 0.8em;
+        }
+        .severity-high { color: #dc3545; }
+        .severity-medium { color: #fd7e14; }
+        .severity-low { color: #198754; }
+        .severity-critical {
+            color: #dc3545;
+            font-weight: bold;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.5; }
+        }
+        .evidence-preview {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin: 2px;
+            cursor: pointer;
+        }
+        .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2) !important;
+            border-radius: 8px;
+        }
+        .dropdown-menu {
+            background-color: rgba(255, 255, 255, 0.95);
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+            <div class="position-sticky pt-3">
+                <div class="text-center mb-4">
+                    <h4 class="text-white">
+                        <i class="fas fa-store"></i> CTU Shop Admin
+                    </h4>
+                </div>
+
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/admin/dashboard">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+
+                    <!-- Quản lý sản phẩm và kiểm duyệt -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-box"></i> QUẢN LÝ SẢN PHẨM VÀ KIỂM DUYỆT
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/admin/products">
+                                <i class="fas fa-list"></i> Tất cả sản phẩm
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/products/pending">
+                                <i class="fas fa-clock"></i> Chờ duyệt
+                                <span class="badge bg-warning ms-2" id="pendingProductCount">0</span>
+                            </a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Quản lý tài khoản -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-users"></i> QUẢN LÝ TÀI KHOẢN
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/admin/users/customers">
+                                <i class="fas fa-user"></i> Khách hàng
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/users/agencies">
+                                <i class="fas fa-store"></i> Agency
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/admin/users/agencies/applications">
+                                <i class="fas fa-file-alt"></i> Đơn đăng ký Agency
+                                <span class="badge bg-warning ms-2" id="pendingApplicationCount">0</span>
+                            </a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Quản lý bảo hiểm - ACTIVE MENU -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white active" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-shield-alt"></i> QUẢN LÝ BẢO HIỂM
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item active" href="/admin/insurance">
+                                <i class="fas fa-list"></i> Tất cả yêu cầu
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/insurance?status=SUBMITTED">
+                                <i class="fas fa-clock"></i> Chờ xử lý
+                                <span class="badge bg-warning ms-2" id="pendingClaimCount">0</span>
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/insurance?status=UNDER_REVIEW">
+                                <i class="fas fa-search"></i> Đang xem xét
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/insurance?status=APPROVED">
+                                <i class="fas fa-check"></i> Đã duyệt
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/insurance?status=REJECTED">
+                                <i class="fas fa-times"></i> Từ chối
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/admin/insurance/reports">
+                                <i class="fas fa-chart-pie"></i> Báo cáo bảo hiểm
+                            </a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Báo cáo và phân tích -->
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/admin/reports">
+                            <i class="fas fa-chart-bar"></i> BÁO CÁO VÀ PHÂN TÍCH
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Admin User Info -->
+                <div class="mt-auto pt-3 border-top border-light">
+                    <div class="dropdown">
+                        <a class="nav-link dropdown-toggle text-white d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-2"></i>
+                            <span sec:authentication="principal.fullname">Admin</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-cog"></i> Cài đặt</a></li>
+                            <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+            <div class="pt-3 pb-2 mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h1><i class="fas fa-shield-alt"></i> Quản lý yêu cầu bảo hiểm</h1>
+
+                    <!-- Status Filter Buttons -->
+                    <div class="btn-group" role="group">
+                        <a href="/admin/insurance" class="btn btn-outline-primary"
+                           th:classappend="${status == null} ? 'active' : ''">
+                            <i class="fas fa-list"></i> Tất cả
+                        </a>
+                        <a href="/admin/insurance?status=SUBMITTED" class="btn btn-warning"
+                           th:classappend="${status == 'SUBMITTED'} ? 'active' : ''">
+                            <i class="fas fa-clock"></i> Chờ xử lý
+                        </a>
+                        <a href="/admin/insurance?status=UNDER_REVIEW" class="btn btn-info"
+                           th:classappend="${status == 'UNDER_REVIEW'} ? 'active' : ''">
+                            <i class="fas fa-search"></i> Đang xem xét
+                        </a>
+                        <a href="/admin/insurance?status=APPROVED" class="btn btn-success"
+                           th:classappend="${status == 'APPROVED'} ? 'active' : ''">
+                            <i class="fas fa-check"></i> Đã duyệt
+                        </a>
+                        <a href="/admin/insurance?status=REJECTED" class="btn btn-danger"
+                           th:classappend="${status == 'REJECTED'} ? 'active' : ''">
+                            <i class="fas fa-times"></i> Từ chối
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Search and Filter -->
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <form method="GET" th:action="@{/admin/insurance}">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control" name="keyword"
+                                           th:value="${keyword}" placeholder="Tìm kiếm theo mã, tiêu đề, khách hàng...">
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-select" name="status">
+                                        <option value="">Tất cả trạng thái</option>
+                                        <option th:each="s : ${statuses}"
+                                                th:value="${s}"
+                                                th:text="${s}"
+                                                th:selected="${s.toString() == status}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-search"></i> Tìm kiếm
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Claims Table -->
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                <tr>
+                                    <th>Mã yêu cầu</th>
+                                    <th>Khách hàng</th>
+                                    <th>Sản phẩm</th>
+                                    <th>Agency</th>
+                                    <th>Mức độ</th>
+                                    <th>Trạng thái</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="claim : ${claims.content}" th:if="${claims.content != null}">
+                                    <td>
+                                        <strong th:text="${claim.claimCode}">IC001</strong>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <strong th:text="${claim.customerName}">Khách hàng</strong><br>
+                                            <small class="text-muted" th:text="${claim.customerEmail}">email@example.com</small>
+                                        </div>
+                                    </td>
+                                    <td th:text="${claim.productName}">Sản phẩm</td>
+                                    <td>
+                                        <div>
+                                            <strong th:text="${claim.agencyName}">Agency</strong><br>
+                                            <small class="text-muted" th:text="${claim.agencyEmail}">agency@example.com</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                            <span th:class="'severity-' + ${claim.severityLevel.toLowerCase()}"
+                                                  th:text="${claim.severityLevel}">HIGH</span>
+                                    </td>
+                                    <td>
+                                            <span th:class="'badge ' +
+                                                (${claim.claimStatus == 'SUBMITTED'} ? 'bg-warning' :
+                                                 ${claim.claimStatus == 'UNDER_REVIEW'} ? 'bg-info' :
+                                                 ${claim.claimStatus == 'APPROVED'} ? 'bg-success' :
+                                                 ${claim.claimStatus == 'REJECTED'} ? 'bg-danger' : 'bg-secondary')"
+                                                  th:text="${claim.claimStatus}">SUBMITTED</span>
+                                    </td>
+                                    <td th:text="${#temporals.format(claim.submittedDate, 'dd/MM/yyyy HH:mm')}">01/01/2024 10:00</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a th:href="@{/admin/insurance/review/{id}(id=${claim.claimId})}"
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i> Xem
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-outline-success"
+                                                    th:onclick="'contactCustomer(' + ${claim.claimId} + ', \'' + ${claim.customerId} + '\', \'' + ${claim.customerName} + '\', \'' + ${claim.claimCode} + '\')'">
+                                                <i class="fas fa-envelope"></i> Liên hệ KH
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-info"
+                                                    th:onclick="'contactAgency(' + ${claim.claimId} + ', \'' + ${claim.agencyId} + '\', \'' + ${claim.agencyName} + '\', \'' + ${claim.claimCode} + '\')'">
+                                                <i class="fas fa-store"></i> Liên hệ Agency
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Empty state -->
+                                <tr th:if="${claims.content == null || claims.content.isEmpty()}">
+                                    <td colspan="8" class="text-center text-muted py-4">
+                                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                                        <p>Chưa có yêu cầu bảo hiểm nào</p>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <nav th:if="${claims != null && claims.totalPages > 1}">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item" th:classappend="${!claims.hasPrevious()} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/admin/insurance(page=${currentPage - 1}, size=${size}, status=${status}, keyword=${keyword})}">
+                                        Trước
+                                    </a>
+                                </li>
+
+                                <li th:each="pageNum : ${#numbers.sequence(0, claims.totalPages - 1)}"
+                                    class="page-item"
+                                    th:classappend="${pageNum == currentPage} ? 'active'">
+                                    <a class="page-link"
+                                       th:href="@{/admin/insurance(page=${pageNum}, size=${size}, status=${status}, keyword=${keyword})}"
+                                       th:text="${pageNum + 1}">1</a>
+                                </li>
+
+                                <li class="page-item" th:classappend="${!claims.hasNext()} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/admin/insurance(page=${currentPage + 1}, size=${size}, status=${status}, keyword=${keyword})}">
+                                        Sau
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Contact Modal -->
+<div class="modal fade" id="contactModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="contactModalTitle">Gửi email liên lạc</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="contactForm">
+                    <input type="hidden" id="claimId" name="claimId">
+                    <input type="hidden" id="recipientId" name="recipientId">
+                    <input type="hidden" id="communicationType" name="communicationType">
+
+                    <div class="mb-3">
+                        <label for="emailSubject" class="form-label">Tiêu đề email</label>
+                        <input type="text" class="form-control" id="emailSubject" name="emailSubject" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="emailContent" class="form-label">Nội dung email</label>
+                        <textarea class="form-control" id="emailContent" name="emailContent" rows="6" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="sendCommunication()">
+                    <i class="fas fa-paper-plane"></i> Gửi email
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    let currentClaimId = null;
+    let currentRecipientId = null;
+    let currentCommunicationType = null;
+
+    function contactCustomer(claimId, customerId, customerName, claimCode) {
+        currentClaimId = claimId;
+        currentRecipientId = customerId;
+        currentCommunicationType = 'ADMIN_TO_CUSTOMER';
+
+        document.getElementById('contactModalTitle').textContent =
+            `Liên hệ khách hàng: ${customerName}`;
+        document.getElementById('claimId').value = claimId;
+        document.getElementById('recipientId').value = customerId;
+        document.getElementById('communicationType').value = currentCommunicationType;
+        document.getElementById('emailSubject').value =
+            `Yêu cầu bồi thường ${claimCode} - Cần thêm thông tin`;
+        document.getElementById('emailContent').value =
+            `Kính chào ${customerName},\n\nChúng tôi đang xem xét yêu cầu bồi thường của bạn (${claimCode}).\n\n`;
+
+        new bootstrap.Modal(document.getElementById('contactModal')).show();
+    }
+
+    function contactAgency(claimId, agencyId, agencyName, claimCode) {
+        currentClaimId = claimId;
+        currentRecipientId = agencyId;
+        currentCommunicationType = 'ADMIN_TO_AGENCY';
+
+        document.getElementById('contactModalTitle').textContent =
+            `Liên hệ Agency: ${agencyName}`;
+        document.getElementById('claimId').value = claimId;
+        document.getElementById('recipientId').value = agencyId;
+        document.getElementById('communicationType').value = currentCommunicationType;
+        document.getElementById('emailSubject').value =
+            `Yêu cầu bồi thường ${claimCode} - Cần thông tin sản phẩm`;
+        document.getElementById('emailContent').value =
+            `Kính chào ${agencyName},\n\nChúng tôi cần thông tin bổ sung về sản phẩm liên quan đến yêu cầu bồi thường ${claimCode}.\n\n`;
+
+        new bootstrap.Modal(document.getElementById('contactModal')).show();
+    }
+
+    function sendCommunication() {
+        const formData = {
+            claimId: parseInt(document.getElementById('claimId').value),
+            recipientId: parseInt(document.getElementById('recipientId').value),
+            emailSubject: document.getElementById('emailSubject').value,
+            emailContent: document.getElementById('emailContent').value,
+            communicationType: document.getElementById('communicationType').value
+        };
+
+        fetch('/admin/insurance/communication', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        })
+            .then(response => response.text())
+            .then(data => {
+                if (data === 'success') {
+                    alert('Gửi email thành công!');
+                    bootstrap.Modal.getInstance(document.getElementById('contactModal')).hide();
+                    location.reload();
+                } else {
+                    alert('Có lỗi xảy ra: ' + data);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi gửi email');
+            });
+    }
+
+    // Auto-refresh every 30 seconds for new claims
+    setInterval(() => {
+        if (window.location.pathname === '/admin/insurance') {
+            location.reload();
+        }
+    }, 30000);
+</script>
+</body>
+</html>
