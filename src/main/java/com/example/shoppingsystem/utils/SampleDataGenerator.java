@@ -86,7 +86,7 @@ public class SampleDataGenerator {
             System.out.println("✓ Đã tạo " + addresses.size() + " addresses");
 
             // 9. Tạo Products
-            List<Product> products = createProducts(categories, accounts, approvalStatuses);
+            List<Product> products = createProducts(categories, agencyInfos, approvalStatuses);
             System.out.println("✓ Đã tạo " + products.size() + " products");
 
             // 10. Tạo Product Variants
@@ -172,8 +172,9 @@ public class SampleDataGenerator {
             // QUAN TRỌNG: Xóa agency_info TRƯỚC account
             agencyInfoRepository.deleteAllInBatch();
             membershipRepository.deleteAllInBatch();
-            refreshTokenRepository.deleteAllInBatch();
+
             accessTokenRepository.deleteAllInBatch();
+            refreshTokenRepository.deleteAllInBatch();
             accountRepository.deleteAllInBatch();  // Xóa account SAU agency_info
 
             categoryRepository.deleteAllInBatch();
@@ -418,11 +419,8 @@ public class SampleDataGenerator {
         return addressRepository.saveAll(addresses);
     }
 
-    private List<Product> createProducts(List<Category> categories, List<Account> accounts, List<ApprovalStatus> approvalStatuses) {
+    private List<Product> createProducts(List<Category> categories, List<AgencyInfo> agencies, List<ApprovalStatus> approvalStatuses) {
         List<Product> products = new ArrayList<>();
-        List<Account> agencies = accounts.stream()
-                .filter(account -> "agency".equals(account.getRole().getRoleCode()))
-                .toList();
 
         if (agencies.isEmpty()) {
             System.out.println("⚠️  Không có agency nào để tạo product!");
@@ -431,7 +429,8 @@ public class SampleDataGenerator {
 
         for (int i = 0; i < 2000; i++) {
             Category category = categories.get(random.nextInt(categories.size()));
-            Account agency = agencies.get(random.nextInt(agencies.size()));
+            AgencyInfo agency = agencies.get(random.nextInt(agencies.size()));
+
             BigDecimal listPrice = BigDecimal.valueOf(50000 + random.nextInt(9950000));
             BigDecimal salePrice = listPrice.multiply(BigDecimal.valueOf(0.7 + random.nextDouble() * 0.3));
 
@@ -444,7 +443,7 @@ public class SampleDataGenerator {
                     .inventoryQuantity(random.nextInt(1000) + 10)
                     .desiredQuantity(random.nextInt(500) + 50)
                     .soldAmount(random.nextInt(200))
-//                    .agencyInfo(agency)
+                    .agencyInfo(agency)
                     .isSale(random.nextBoolean())
                     .approvalStatus(approvalStatuses.get(1)) // APPROVED
                     .build());
