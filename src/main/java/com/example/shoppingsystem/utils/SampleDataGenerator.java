@@ -19,6 +19,9 @@ import java.util.concurrent.TimeUnit;
 public class SampleDataGenerator {
 
     private final AccountRepository accountRepository;
+    private final AccessTokenRepository accessTokenRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
+
     private final RoleRepository roleRepository;
     private final ApprovalStatusRepository approvalStatusRepository;
     private final ParentCategoryRepository parentCategoryRepository;
@@ -169,12 +172,15 @@ public class SampleDataGenerator {
             // QUAN TRỌNG: Xóa agency_info TRƯỚC account
             agencyInfoRepository.deleteAllInBatch();
             membershipRepository.deleteAllInBatch();
+            refreshTokenRepository.deleteAllInBatch();
+            accessTokenRepository.deleteAllInBatch();
             accountRepository.deleteAllInBatch();  // Xóa account SAU agency_info
 
             categoryRepository.deleteAllInBatch();
             parentCategoryRepository.deleteAllInBatch();
             approvalStatusRepository.deleteAllInBatch();
             roleRepository.deleteAllInBatch();
+
 
             System.out.println("✓ Đã xóa dữ liệu cũ");
 
