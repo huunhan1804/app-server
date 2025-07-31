@@ -67,7 +67,7 @@ public class AdminAccountInitializer implements CommandLineRunner {
         // Tạo role admin nếu chưa có
         if (roleRepository.findByRoleCode("ADMIN") == null) {
             Role adminRole = Role.builder()
-                    .roleCode("ADMIN")
+                    .roleCode("admin")
                     .roleName("Administrator")
                     .description("System Administrator")
                     .build();
@@ -101,7 +101,7 @@ public class AdminAccountInitializer implements CommandLineRunner {
     private void initializeAdminAccount() {
         // Kiểm tra xem đã có admin chưa
         if (!accountRepository.existsByUsername("admin")) {
-            Role adminRole = roleRepository.findByRoleCode("Administrator");
+            Role adminRole = roleRepository.findByRoleCode("admin");
             ApprovalStatus approvedStatus = approvalStatusRepository.findApprovalStatusByStatusCode("approved");
 
             if (adminRole != null && approvedStatus != null) {
