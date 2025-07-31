@@ -202,12 +202,12 @@ public class SampleDataGenerator {
                         .build(),
                 Role.builder()
                         .roleCode("customer")
-                        .roleName("Customer")
+                        .roleName("customer")
                         .description("Regular Customer")
                         .build(),
                 Role.builder()
                         .roleCode("agency")
-                        .roleName("Agency")
+                        .roleName("agency")
                         .description("Product Agency/Seller")
                         .build(),
                 Role.builder()
@@ -291,8 +291,8 @@ public class SampleDataGenerator {
 
         // Lấy roles
         Role adminRole = roles.stream().filter(r -> r.getRoleCode().equals("ADMIN")).findFirst().orElse(roles.get(0));
-        Role customerRole = roles.stream().filter(r -> r.getRoleCode().equals("CUSTOMER")).findFirst().orElse(roles.get(1));
-        Role agencyRole = roles.stream().filter(r -> r.getRoleCode().equals("AGENCY")).findFirst().orElse(roles.get(2));
+        Role customerRole = roles.stream().filter(r -> r.getRoleCode().equals("customer")).findFirst().orElse(roles.get(1));
+        Role agencyRole = roles.stream().filter(r -> r.getRoleCode().equals("agency")).findFirst().orElse(roles.get(2));
 
         // Admin accounts (10)
         for (int i = 0; i < 10; i++) {
@@ -339,7 +339,7 @@ public class SampleDataGenerator {
         List<Membership> memberships = new ArrayList<>();
 
         accounts.stream()
-                .filter(account -> "CUSTOMER".equals(account.getRole().getRoleCode()))
+                .filter(account -> "customer".equals(account.getRole().getRoleCode()))
                 .forEach(customer -> {
                     memberships.add(Membership.builder()
                             .account(customer)
@@ -365,7 +365,7 @@ public class SampleDataGenerator {
         List<AgencyInfo> agencyInfos = new ArrayList<>();
 
         accounts.stream()
-                .filter(account -> "AGENCY".equals(account.getRole().getRoleCode()))
+                .filter(account -> "agency".equals(account.getRole().getRoleCode()))
                 .forEach(agency -> {
                     agencyInfos.add(AgencyInfo.builder()
                             .account(agency)
@@ -415,7 +415,7 @@ public class SampleDataGenerator {
     private List<Product> createProducts(List<Category> categories, List<Account> accounts, List<ApprovalStatus> approvalStatuses) {
         List<Product> products = new ArrayList<>();
         List<Account> agencies = accounts.stream()
-                .filter(account -> "AGENCY".equals(account.getRole().getRoleCode()))
+                .filter(account -> "agency".equals(account.getRole().getRoleCode()))
                 .toList();
 
         if (agencies.isEmpty()) {
@@ -564,7 +564,7 @@ public class SampleDataGenerator {
 
         // Lấy danh sách agencies để gán cho coupon
         List<Account> agencies = accountRepository.findAll().stream()
-                .filter(account -> "AGENCY".equals(account.getRole().getRoleCode()))
+                .filter(account -> "agency".equals(account.getRole().getRoleCode()))
                 .toList();
 
         for (int i = 0; i < 200; i++) {
@@ -624,10 +624,10 @@ public class SampleDataGenerator {
     private List<OrderList> createOrders(List<Account> accounts) {
         List<OrderList> orders = new ArrayList<>();
         List<Account> customers = accounts.stream()
-                .filter(account -> "CUSTOMER".equals(account.getRole().getRoleCode()))
+                .filter(account -> "customer".equals(account.getRole().getRoleCode()))
                 .toList();
         List<Account> agencies = accounts.stream()
-                .filter(account -> "AGENCY".equals(account.getRole().getRoleCode()))
+                .filter(account -> "agency".equals(account.getRole().getRoleCode()))
                 .toList();
 
         if (customers.isEmpty() || agencies.isEmpty()) {
@@ -710,7 +710,7 @@ public class SampleDataGenerator {
     private List<Feedback> createFeedbacks(List<Account> accounts, List<Product> products) {
         List<Feedback> feedbacks = new ArrayList<>();
         List<Account> customers = accounts.stream()
-                .filter(account -> "CUSTOMER".equals(account.getRole().getRoleCode()))
+                .filter(account -> "customer".equals(account.getRole().getRoleCode()))
                 .toList();
 
         if (customers.isEmpty() || products.isEmpty()) {
@@ -770,7 +770,7 @@ public class SampleDataGenerator {
             // Tạo products theo batch
             List<Product> allProducts = new ArrayList<>();
             List<Account> agencies = allAccounts.stream()
-                    .filter(account -> "AGENCY".equals(account.getRole().getRoleCode()))
+                    .filter(account -> "agency".equals(account.getRole().getRoleCode()))
                     .toList();
 
             for (int batch = 0; batch < 20; batch++) {
@@ -859,8 +859,8 @@ public class SampleDataGenerator {
     private List<Account> createAccountsBatch(List<Role> roles, List<ApprovalStatus> approvalStatuses, int batchIndex, int batchSize) {
         List<Account> accounts = new ArrayList<>();
 
-        Role customerRole = roles.stream().filter(r -> r.getRoleCode().equals("CUSTOMER")).findFirst().orElse(roles.get(1));
-        Role agencyRole = roles.stream().filter(r -> r.getRoleCode().equals("AGENCY")).findFirst().orElse(roles.get(2));
+        Role customerRole = roles.stream().filter(r -> r.getRoleCode().equals("customer")).findFirst().orElse(roles.get(1));
+        Role agencyRole = roles.stream().filter(r -> r.getRoleCode().equals("agency")).findFirst().orElse(roles.get(2));
 
         for (int i = 0; i < batchSize; i++) {
             int globalIndex = batchIndex * batchSize + i;
@@ -1065,10 +1065,10 @@ public class SampleDataGenerator {
     private List<OrderList> createOrdersBig(List<Account> accounts) {
         List<OrderList> orders = new ArrayList<>();
         List<Account> customers = accounts.stream()
-                .filter(account -> "CUSTOMER".equals(account.getRole().getRoleCode()))
+                .filter(account -> "customer".equals(account.getRole().getRoleCode()))
                 .toList();
         List<Account> agencies = accounts.stream()
-                .filter(account -> "AGENCY".equals(account.getRole().getRoleCode()))
+                .filter(account -> "agency".equals(account.getRole().getRoleCode()))
                 .toList();
 
         if (customers.isEmpty() || agencies.isEmpty()) {
@@ -1158,7 +1158,7 @@ public class SampleDataGenerator {
     private List<Feedback> createFeedbacksBig(List<Account> accounts, List<Product> products) {
         List<Feedback> feedbacks = new ArrayList<>();
         List<Account> customers = accounts.stream()
-                .filter(account -> "CUSTOMER".equals(account.getRole().getRoleCode()))
+                .filter(account -> "customer".equals(account.getRole().getRoleCode()))
                 .toList();
 
         if (customers.isEmpty() || products.isEmpty()) {
