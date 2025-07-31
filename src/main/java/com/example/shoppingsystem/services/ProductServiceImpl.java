@@ -94,7 +94,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ApiResponse<List> getListBestSellerProduct() {
-        List<Product> productList = productRepository.findListBestSellerProduct();
+        List<Product> productList = productRepository.findTop10ByOrderBySoldAmountDesc();
         List<ProductBasicDTO> productBasicDTOS = productList.stream()
                 .map(product -> convertToProductBasicDTO(product)).collect(Collectors.toList());
 
@@ -108,7 +108,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ApiResponse<List> getListBestOrderProduct() {
-        List<Object[]> results = orderDetailRepository.findBestOrderProducts();
+        List<Object[]> results = orderDetailRepository.findBestOrderProductsJPQL();
         List<Product> productList = new ArrayList<>();
         for (Object[] result : results) {
             Long productId = (Long) result[0];
@@ -176,6 +176,19 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ApiResponse<List> getListProductByCategory(Long categoryId) {
+        if (categoryId == 0) {
+            List<Product> allProducts = productRepository.findAll();
+            List<ProductBasicDTO> productBasicDTOs = allProducts.stream()
+                    .map(this::convertToProductBasicDTO)
+                    .collect(Collectors.toList());
+
+            return ApiResponse.<List>builder()
+                    .status(ErrorCode.SUCCESS)
+                    .message(Message.SUCCESS)
+                    .data(productBasicDTOs)
+                    .timestamp(new java.util.Date())
+                    .build();
+        }
         Optional<Category> category = categoryRepository.findById(categoryId);
         if(category.isPresent()){
             return ApiResponse.<List>builder()
@@ -271,14 +284,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public String findImageProduct(Product product) {
-        Optional<Multimedia> multimedia = multimediaRepository.findByProduct_ProductId(product.getProductId());
+        Optional<Multimedia> multimedia = multimediaRepository.findFirstByProduct_ProductId(product.getProductId());
         return multimedia.map(Multimedia::getMultimediaUrl).orElse(null);
     }
 
     public String findImageProductVariant(ProductVariant productVariant) {
-        Optional<Multimedia> multimedia = multimediaRepository.findAllByProductVariant_ProductVariantId(productVariant.getProductVariantId());
+        Optional<Multimedia> multimedia = multimediaRepository.findFirstByProductVariant_ProductVariantId(productVariant.getProductVariantId());
         return multimedia.map(Multimedia::getMultimediaUrl).orElse(null);
     }
-
 
 }

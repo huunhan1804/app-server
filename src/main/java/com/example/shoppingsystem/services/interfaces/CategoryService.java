@@ -9,4 +9,6 @@ import java.util.List;
 @Service
 public interface CategoryService {
     ApiResponse<List<CategoryResponse>> getListCategory(long parentCategoryId);
+
+    ApiResponse<List<CategoryResponse>> getAllCategories();
 }

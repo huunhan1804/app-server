@@ -20,4 +20,8 @@ public interface MultimediaRepository  extends JpaRepository<Multimedia, Long> {
     List<Multimedia> findAllByProduct_ProductId(Long productId);
 
     Optional<Multimedia> findByCategory_CategoryId(Long categoryId);
+
+    Optional<Multimedia> findFirstByProductVariant_ProductVariantId(Long productVariantId);
+
+    Optional<Multimedia> findFirstByProduct_ProductId(Long productId);
 }

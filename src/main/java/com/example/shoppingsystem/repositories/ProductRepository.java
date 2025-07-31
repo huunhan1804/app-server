@@ -22,6 +22,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Modifying
     @Query(value = "SELECT * FROM product ORDER BY SOLD_AMOUNT DESC LIMIT 10", nativeQuery = true)
     List<Product> findListBestSellerProduct();
+    List<Product> findTop10ByOrderBySoldAmountDesc();
     List<Product> findByCategoryAndProductIdNot(Category productCategory, long productId);
 
     List<Product> findByProductNameContainingIgnoreCase(String keyword);

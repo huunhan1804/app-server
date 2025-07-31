@@ -263,34 +263,82 @@ public class SampleDataGenerator {
 
     private List<ParentCategory> createParentCategories() {
         List<ParentCategory> parentCategories = new ArrayList<>();
-        String[] categoryNames = {
-                "Điện tử", "Thời trang", "Nhà cửa & Đời sống", "Sức khỏe & Làm đẹp",
-                "Thể thao & Du lịch", "Ô tô & Xe máy", "Mẹ & Bé", "Sách & Văn phòng phẩm",
-                "Thực phẩm & Đồ uống", "Giải trí & Sở thích", "Thiết bị số", "Máy tính & Laptop",
-                "Điện gia dụng", "Đồ chơi", "Nông nghiệp", "Công nghiệp", "Y tế & Dược phẩm",
-                "Giáo dục & Đào tạo", "Dịch vụ", "Khác"
-        };
 
-        for (String name : categoryNames) {
-            parentCategories.add(ParentCategory.builder()
-                    .parentCategoryName(name)
-                    .parentCategoryDescription(faker.lorem().sentence(10))
-                    .build());
-        }
+        // Chỉ tạo 1 parent category về Thực phẩm chức năng
+        parentCategories.add(ParentCategory.builder()
+                .parentCategoryName("Thực phẩm chức năng")
+                .parentCategoryDescription("Các sản phẩm thực phẩm bổ sung dinh dưỡng, hỗ trợ sức khỏe và phòng ngừa bệnh tật")
+                .build());
+
         return parentCategoryRepository.saveAll(parentCategories);
     }
-
     private List<Category> createCategories(List<ParentCategory> parentCategories) {
         List<Category> categories = new ArrayList<>();
+        ParentCategory thucPhamChucNang = parentCategories.get(0); // Chỉ có 1 parent category
 
-        for (int i = 0; i < 100; i++) {
-            ParentCategory parentCategory = parentCategories.get(random.nextInt(parentCategories.size()));
+        // Các danh mục con của Thực phẩm chức năng
+        String[] categoryNames = {
+                "Thực phẩm chức năng cho mắt",
+                "Thực phẩm chức năng cho gan",
+                "Thực phẩm chức năng cho tim mạch",
+                "Thực phẩm chức năng cho xương khớp",
+                "Thực phẩm chức năng cho não bộ",
+                "Thực phẩm chức năng cho hệ tiêu hóa",
+                "Thực phẩm chức năng cho hệ miễn dịch",
+                "Thực phẩm chức năng cho phụ nữ",
+                "Thực phẩm chức năng cho nam giới",
+                "Thực phẩm chức năng cho người cao tuổi",
+                "Thực phẩm chức năng cho trẻ em",
+                "Vitamin và khoáng chất",
+                "Thực phẩm chức năng giảm cân",
+                "Thực phẩm chức năng tăng cường thể lực",
+                "Thực phẩm chức năng cho da tóc",
+                "Thực phẩm chức năng cho đường huyết",
+                "Thực phẩm chức năng cho huyết áp",
+                "Thực phẩm chức năng cho cholesterol",
+                "Probiotics - Men vi sinh",
+                "Omega 3 và dầu cá",
+                "Collagen và chống lão hóa",
+                "Thực phẩm chức năng cho giấc ngủ",
+                "Thực phẩm chức năng giải độc gan",
+                "Thực phẩm chức năng hỗ trợ ung thư"
+        };
+
+        String[] categoryDescriptions = {
+                "Hỗ trợ cải thiện thị lực, bảo vệ mắt khỏi ánh sáng xanh, giảm mỏi mắt",
+                "Hỗ trợ bảo vệ gan, giải độc gan, cải thiện chức năng gan",
+                "Hỗ trợ tim mạch khỏe mạnh, cải thiện tuần hoàn máu, ổn định nhịp tim",
+                "Hỗ trợ xương chắc khỏe, giảm đau nhức khớp, tăng cường độ dẻo dai",
+                "Hỗ trợ tăng cường trí nhớ, cải thiện tập trung, bảo vệ tế bào não",
+                "Hỗ trợ tiêu hóa tốt, cải thiện hấp thu dinh dưỡng, giảm đầy hơi",
+                "Tăng cường hệ miễn dịch, chống oxy hóa, phòng ngừa bệnh tật",
+                "Hỗ trợ sức khỏe phụ nữ, cân bằng nội tiết tố, làm đẹp da",
+                "Hỗ trợ sức khỏe nam giới, tăng cường sinh lực, cải thiện thể lực",
+                "Chăm sóc sức khỏe người cao tuổi, bổ sung dinh dưỡng thiết yếu",
+                "Hỗ trợ phát triển trí não, tăng cường sức đề kháng cho trẻ em",
+                "Bổ sung vitamin và khoáng chất thiết yếu cho cơ thể",
+                "Hỗ trợ giảm cân an toàn, đốt cháy mỡ thừa, kiểm soát cân nặng",
+                "Tăng cường thể lực, sức bền, hỗ trợ người tập thể thao",
+                "Làm đẹp da, chống lão hóa, nuôi dưỡng tóc chắc khỏe",
+                "Hỗ trợ ổn định đường huyết, phòng ngừa tiểu đường",
+                "Hỗ trợ ổn định huyết áp, cải thiện lưu thông máu",
+                "Hỗ trợ giảm cholesterol xấu, bảo vệ tim mạch",
+                "Cân bằng hệ vi sinh đường ruột, tăng cường tiêu hóa",
+                "Bổ sung Omega 3, DHA, EPA từ dầu cá tự nhiên",
+                "Chống lão hóa, tăng độ đàn hồi da, bổ sung collagen",
+                "Hỗ trợ giấc ngủ ngon, giảm stress, thư giãn tinh thần",
+                "Giải độc gan tự nhiên, thanh lọc cơ thể, bảo vệ tế bào gan",
+                "Hỗ trợ điều trị ung thư, tăng cường sức đề kháng"
+        };
+
+        for (int i = 0; i < categoryNames.length; i++) {
             categories.add(Category.builder()
-                    .parentCategory(parentCategory)
-                    .categoryName(faker.commerce().department() + " " + (i + 1))
-                    .categoryDescription(faker.lorem().sentence(8))
+                    .parentCategory(thucPhamChucNang)
+                    .categoryName(categoryNames[i])
+                    .categoryDescription(categoryDescriptions[i])
                     .build());
         }
+
         return categoryRepository.saveAll(categories);
     }
 
@@ -428,29 +476,96 @@ public class SampleDataGenerator {
             return products;
         }
 
-        for (int i = 0; i < 2000; i++) {
-            Category category = categories.get(random.nextInt(categories.size()));
-            AgencyInfo agency = agencies.get(random.nextInt(agencies.size()));
+        // Tạo sản phẩm cho mỗi category
+        for (Category category : categories) {
+            int numProductsPerCategory = 80 + random.nextInt(40); // 80-120 sản phẩm mỗi category
 
-            BigDecimal listPrice = BigDecimal.valueOf(50000 + random.nextInt(9950000));
-            BigDecimal salePrice = listPrice.multiply(BigDecimal.valueOf(0.7 + random.nextDouble() * 0.3));
+            for (int i = 0; i < numProductsPerCategory; i++) {
+                AgencyInfo agency = agencies.get(random.nextInt(agencies.size()));
 
-            products.add(Product.builder()
-                    .category(category)
-                    .productName(faker.commerce().productName() + " " + (i + 1))
-                    .productDescription(faker.lorem().paragraph(5))
-                    .listPrice(listPrice)
-                    .salePrice(salePrice)
-                    .inventoryQuantity(random.nextInt(1000) + 10)
-                    .desiredQuantity(random.nextInt(500) + 50)
-                    .soldAmount(random.nextInt(200))
-                    .agencyInfo(agency)
-                    .isSale(random.nextBoolean())
-                    .approvalStatus(approvalStatuses.get(1)) // APPROVED
-                    .build());
+                // Tạo tên sản phẩm phù hợp với category
+                String productName = generateProductName(category.getCategoryName(), i + 1);
+
+                BigDecimal listPrice = BigDecimal.valueOf(200000 + random.nextInt(2800000)); // 200k - 3tr
+                BigDecimal salePrice = listPrice.multiply(BigDecimal.valueOf(0.75 + random.nextDouble() * 0.2)); // 75-95% giá gốc
+
+                products.add(Product.builder()
+                        .category(category)
+                        .productName(productName)
+                        .productDescription(generateProductDescription(category.getCategoryName()))
+                        .listPrice(listPrice)
+                        .salePrice(salePrice)
+                        .inventoryQuantity(random.nextInt(500) + 50) // 50-550
+                        .desiredQuantity(random.nextInt(200) + 100) // 100-300
+                        .soldAmount(random.nextInt(100))
+                        .agencyInfo(agency)
+                        .isSale(random.nextBoolean())
+                        .approvalStatus(approvalStatuses.get(1)) // APPROVED
+                        .build());
+            }
         }
 
         return productRepository.saveAll(products);
+    }
+
+    // Helper method để tạo tên sản phẩm
+    private String generateProductName(String categoryName, int index) {
+        Map<String, String[]> productNamesByCategory = new HashMap<>();
+
+        productNamesByCategory.put("Thực phẩm chức năng cho mắt", new String[]{
+                "Viên uống bổ mắt Lutein", "Viên uống Blueberry cho mắt", "Omega 3 bảo vệ thị lực",
+                "Vitamin A bổ mắt", "Anthocyanin từ việt quất", "Astaxanthin chống oxy hóa mắt"
+        });
+
+        productNamesByCategory.put("Thực phẩm chức năng cho gan", new String[]{
+                "Viên uống giải độc gan", "Silymarin bảo vệ gan", "Nghệ nano curcumin",
+                "Artichoke hỗ trợ gan", "Vitamin E bảo vệ tế bào gan", "Phức hệ B-Complex"
+        });
+
+        productNamesByCategory.put("Thực phẩm chức năng cho tim mạch", new String[]{
+                "Omega 3 EPA DHA", "CoQ10 bảo vệ tim", "Nattokinase hỗ trợ tuần hoàn",
+                "Vitamin K2 + D3", "Magnesium cho tim", "L-Carnitine tăng cường tim mạch"
+        });
+
+        // Thêm các category khác...
+        productNamesByCategory.put("Thực phẩm chức năng cho xương khớp", new String[]{
+                "Glucosamine Chondroitin", "Calcium + Vitamin D3", "MSM hỗ trợ khớp",
+                "Collagen Type II", "Boswellia giảm viêm khớp", "Turmeric Curcumin"
+        });
+
+        // Lấy danh sách tên sản phẩm cho category
+        String[] productNames = productNamesByCategory.getOrDefault(categoryName,
+                new String[]{"Thực phẩm chức năng", "Viên uống bổ sung", "Vitamin tổng hợp"});
+
+        String baseName = productNames[random.nextInt(productNames.length)];
+        String[] brands = {"Blackmores", "Nature's Way", "Swisse", "Centrum", "DHC", "Kirkland",
+                "Now Foods", "Solgar", "Garden of Life", "Natrol"};
+        String brand = brands[random.nextInt(brands.length)];
+
+        return brand + " " + baseName + " " + (index <= 99 ? "" : "Plus");
+    }
+
+    // Helper method để tạo mô tả sản phẩm
+    private String generateProductDescription(String categoryName) {
+        Map<String, String[]> descriptionsByCategory = new HashMap<>();
+
+        descriptionsByCategory.put("Thực phẩm chức năng cho mắt", new String[]{
+                "Hỗ trợ cải thiện thị lực, giảm mỏi mắt do ánh sáng xanh",
+                "Bổ sung Lutein, Zeaxanthin bảo vệ võng mạc",
+                "Chống oxy hóa, làm chậm quá trình lão hóa mắt"
+        });
+
+        descriptionsByCategory.put("Thực phẩm chức năng cho gan", new String[]{
+                "Hỗ trợ giải độc gan, tăng cường chức năng gan",
+                "Bảo vệ tế bào gan khỏi tác hại của rượu bia, thuốc lá",
+                "Cải thiện tiêu hóa, giảm mệt mỏi do gan yếu"
+        });
+
+
+        String[] descriptions = descriptionsByCategory.getOrDefault(categoryName,
+                new String[]{"Sản phẩm thực phẩm chức năng chất lượng cao, an toàn cho sức khỏe"});
+
+        return descriptions[random.nextInt(descriptions.length)] + ". " + faker.lorem().sentence(8);
     }
 
     private List<ProductVariant> createProductVariants(List<Product> products) {
@@ -849,17 +964,8 @@ public class SampleDataGenerator {
 
     // Helper methods cho việc tạo dữ liệu lớn
     private List<Category> createCategoriesBig(List<ParentCategory> parentCategories, int count) {
-        List<Category> categories = new ArrayList<>();
-
-        for (int i = 0; i < count; i++) {
-            ParentCategory parentCategory = parentCategories.get(random.nextInt(parentCategories.size()));
-            categories.add(Category.builder()
-                    .parentCategory(parentCategory)
-                    .categoryName(faker.commerce().department() + " " + (i + 1))
-                    .categoryDescription(faker.lorem().sentence(8))
-                    .build());
-        }
-        return categoryRepository.saveAll(categories);
+        // Sử dụng logic tương tự như createCategories() ở trên
+        return createCategories(parentCategories); // Tái sử dụng logic
     }
 
     private List<Account> createAccountsBatch(List<Role> roles, List<ApprovalStatus> approvalStatuses, int batchIndex, int batchSize) {

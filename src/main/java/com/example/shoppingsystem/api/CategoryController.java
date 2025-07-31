@@ -21,6 +21,13 @@ import java.util.List;
 public class CategoryController {
     private final CategoryService categoryService;
 
+    @Operation(summary = "API get all categories", description = "This API gets all categories of functional food.")
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllCategories() {
+        ApiResponse<List<CategoryResponse>> apiResponse = categoryService.getAllCategories();
+        return ResponseEntity.status(apiResponse.getStatus()).body(apiResponse);
+    }
+
     @Operation(summary = "API all category by parent-category", description = "This API get list category by one parent-category.")
     @GetMapping("/all/{parentCategoryId}")
     public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllByParentCategory(@PathVariable Long parentCategoryId) {

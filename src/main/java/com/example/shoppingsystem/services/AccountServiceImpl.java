@@ -341,6 +341,7 @@ public class AccountServiceImpl implements AccountService {
                 .password(passwordEncoder.encode(password))
                 .isBanned(false)
                 .role(roleRepository.findByRoleCode(RoleCode.ROLE_CUSTOMER))
+                .accountStatus(Account.AccountStatus.ACTIVE)
                 .build());
         multimediaRepository.save(Multimedia.builder().multimediaUrl(imageLink).account(savedAccount).multimediaType(MultimediaType.IMAGE).build());
         cartRepository.save(Cart.builder().account(savedAccount).totalItem(0).build());
