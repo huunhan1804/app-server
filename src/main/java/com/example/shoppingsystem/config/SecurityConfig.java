@@ -153,7 +153,9 @@ public class SecurityConfig {
                 "http://localhost:8080",
                 "http://127.0.0.1:3000",
                 "https://app-server-production-f23c.up.railway.app",
-                "https://app-server-production-f23c.up.railway.app:8080"
+                "https://app-server-production-f23c.up.railway.app:8080",
+                "https://admin-shopping-system-production.up.railway.app",
+                "https://admin-shopping-system-production.up.railway.app:3000"
 
         ));
 
