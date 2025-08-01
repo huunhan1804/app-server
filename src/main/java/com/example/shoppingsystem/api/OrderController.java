@@ -4,6 +4,7 @@ import com.example.shoppingsystem.dtos.OrderDTO;
 import com.example.shoppingsystem.dtos.OrderDetailDTO;
 import com.example.shoppingsystem.requests.CheckoutRequest;
 import com.example.shoppingsystem.requests.OrderRequest;
+import com.example.shoppingsystem.requests.ReturnOrderRequest;
 import com.example.shoppingsystem.responses.ApiResponse;
 import com.example.shoppingsystem.services.interfaces.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -81,6 +82,18 @@ public class OrderController {
     @GetMapping("/receive/{orderId}")
     public ResponseEntity<ApiResponse<List<OrderDTO>>> receiveOrder(@Parameter(description = "Order ID") @PathVariable long orderId) {
         ApiResponse<List<OrderDTO>> apiResponse = orderService.receiveOrder(orderId);
+        return ResponseEntity.status(apiResponse.getStatus()).body(apiResponse);
+    }
+
+    @Operation(
+            summary = "Return order",
+            description = "Return order."
+    )
+    @GetMapping("/return/{orderId}")
+    public ResponseEntity<ApiResponse<List<OrderDTO>>> returnOrder(
+            @RequestBody ReturnOrderRequest request
+    ){
+        ApiResponse<List<OrderDTO>> apiResponse = orderService.returnOrder(request);
         return ResponseEntity.status(apiResponse.getStatus()).body(apiResponse);
     }
 }

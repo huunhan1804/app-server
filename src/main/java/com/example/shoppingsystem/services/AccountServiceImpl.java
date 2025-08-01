@@ -415,6 +415,23 @@ public class AccountServiceImpl implements AccountService {
         agencyInfoDTO.setAgency_phone(agencyInfo.getShopPhone());
         agencyInfoDTO.setAgency_address(agencyInfo.getShopAddressDetail());
         agencyInfoDTO.setAgency_tax_code(agencyInfo.getTaxNumber());
+
+        agencyInfoDTO.setFull_name_applicant(agencyInfo.getFullNameApplicant());
+        agencyInfoDTO.setId_card_number_applicant(agencyInfo.getIdCardNumber());
+        agencyInfoDTO.setStatus(agencyInfo.getApprovalStatus().getStatusCode());
+        agencyInfoDTO.setRejectionReason(agencyInfo.getRejectionReason());
+
+        agencyInfoDTO.setBirth_date_applicant(agencyInfo.getBirthdateApplicant());
+        agencyInfoDTO.setGender_applicant(agencyInfo.getGenderApplicant());
+        agencyInfoDTO.setDate_of_issue_card(agencyInfo.getDateOfIssueIdCard());
+        agencyInfoDTO.setPlace_of_issue_card(agencyInfo.getPlaceOfIssueIdCard());
+        agencyInfoDTO.setId_card_front_image_url(agencyInfo.getIdCardFrontImageUrl());
+        agencyInfoDTO.setId_card_back_image_url(agencyInfo.getIdCardBackImageUrl());
+
+        agencyInfoDTO.setBusiness_license_urls(agencyInfo.getBusinessLicenseUrls());
+        agencyInfoDTO.setProfessional_cert_urls(agencyInfo.getProfessionalCertUrls());
+        agencyInfoDTO.setDiploma_cert_urls(agencyInfo.getDiplomaCertUrls());
+
         return agencyInfoDTO;
     }
 

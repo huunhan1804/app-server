@@ -24,4 +24,6 @@ public interface MultimediaRepository  extends JpaRepository<Multimedia, Long> {
     Optional<Multimedia> findFirstByProductVariant_ProductVariantId(Long productVariantId);
 
     Optional<Multimedia> findFirstByProduct_ProductId(Long productId);
+
+    void deleteAllByProduct_ProductId(Long productId);
 }

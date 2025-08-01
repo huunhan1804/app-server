@@ -14,6 +14,7 @@ import com.example.shoppingsystem.responses.ApiResponse;
 import com.example.shoppingsystem.responses.ShipmentResponse;
 import com.example.shoppingsystem.services.interfaces.AccountService;
 import com.example.shoppingsystem.services.interfaces.AgencyService;
+import com.nimbusds.jose.proc.SecurityContext;
 import jakarta.persistence.criteria.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -55,15 +56,16 @@ public class AgencyServiceImpl implements AgencyService {
 
     @Override
     public ApiResponse<ProductInfoDTO> createProduct(AddNewProductRequest request){
-        Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
-        if(account.isPresent()){
+        Optional<AgencyInfo> agencyInfo = agencyInfoRepository.findByApplicationId(request.getAgency_id());
+        if(agencyInfo.isPresent()){
             Product product = new Product();
+            product.setAgencyInfo(agencyInfo.get());
             product.setProductName(request.getProduct_name());
             product.setProductDescription(request.getProduct_description());
             product.setDesiredQuantity(request.getQuantity_in_stock());
             product.setInventoryQuantity(request.getQuantity_in_stock());
             product.setCategory(categoryRepository.findByCategoryId(request.getCategory_id()));
-            product.setCreatedBy(account.get().getUsername());
+            product.setCreatedBy(agencyInfo.get().getFullNameApplicant());
             product.setListPrice(Regex.parseVNDToBigDecimal(request.getProduct_list_price()));
             product.setSalePrice(Regex.parseVNDToBigDecimal(request.getProduct_sale_price()));
             product.setSoldAmount(0);
@@ -72,9 +74,14 @@ public class AgencyServiceImpl implements AgencyService {
             Product saveProduct = productRepository.save(product);
             multimediaRepository.save(Multimedia.builder()
                     .product(product)
-                    .account(account.get())
                     .multimediaType(MultimediaType.IMAGE)
                     .multimediaUrl(request.getImage_url())
+                    .build()
+            );
+            multimediaRepository.save(Multimedia.builder()
+                    .product(product)
+                    .multimediaType(MultimediaType.IMAGE)
+                    .multimediaUrl(request.getProduct_safety_certificate_url())
                     .build()
             );
             for(AddProductVariantsRequest addProductVariantsRequest : request.getProduct_variant_list()){
@@ -124,6 +131,21 @@ public class AgencyServiceImpl implements AgencyService {
                 product.setIsSale(false);
                 product.setApprovalStatus(approvalStatusRepository.findApprovalStatusByStatusCode(StatusCode.STATUS_PENDING));
                 Product saveProduct = productRepository.save(product);
+
+                multimediaRepository.deleteAllByProduct_ProductId(product.getProductId());
+                multimediaRepository.save(Multimedia.builder()
+                        .product(product)
+                        .multimediaType(MultimediaType.IMAGE)
+                        .multimediaUrl(request.getImage_url())
+                        .build()
+                );
+                multimediaRepository.save(Multimedia.builder()
+                        .product(product)
+                        .multimediaType(MultimediaType.IMAGE)
+                        .multimediaUrl(request.getProduct_safety_certificate_url())
+                        .build()
+                );
+
                 for(AddProductVariantsRequest addProductVariantsRequest : request.getProduct_variant_list()){
                     ProductVariant productVariant = new ProductVariant();
                     productVariant.setProduct(product);
@@ -144,7 +166,7 @@ public class AgencyServiceImpl implements AgencyService {
                 .build();
     }
     @Override
-    public ApiResponse<AccountInfoDTO> deleteProduct(Long product_id){
+    public ApiResponse<AgencyInfoDTO> deleteProduct(Long product_id){
         Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         if(account.isPresent()){
             List<Product> products;
@@ -152,22 +174,27 @@ public class AgencyServiceImpl implements AgencyService {
             if (agencyInfo.isPresent()) {
                 products = productRepository.findProductByAgencyInfoAndProductId(agencyInfo.get(), product_id);
                 if (products.isEmpty()) {
-                    return ApiResponse.<AccountInfoDTO>builder()
+                    return ApiResponse.<AgencyInfoDTO>builder()
                             .status(ErrorCode.NOT_FOUND)
                             .message(Message.PRODUCT_NOT_FOUND)
                             .timestamp(new Date())
                             .build();
                 }
                 productRepository.deleteById(product_id);
-                return accountService.getCurrentUserInfo();
+                return ApiResponse.<AgencyInfoDTO>builder()
+                        .status(ErrorCode.SUCCESS)
+                        .data(convertToAgencyInfoDTO(agencyInfo.get()))
+                        .message(Message.DELETE_PRODUCT_SUCCESS)
+                        .timestamp(new Date())
+                        .build();
             }
-            return ApiResponse.<AccountInfoDTO>builder()
+            return ApiResponse.<AgencyInfoDTO>builder()
                     .status(ErrorCode.NOT_FOUND)
                     .message(Message.AGENCY_INFO_NOT_FOUND)
                     .timestamp(new java.util.Date())
                     .build();
         }
-        return ApiResponse.<AccountInfoDTO>builder()
+        return ApiResponse.<AgencyInfoDTO>builder()
                 .status(ErrorCode.FORBIDDEN)
                 .message(Message.ACCOUNT_NOT_FOUND)
                 .timestamp(new Date())
@@ -210,6 +237,34 @@ public class AgencyServiceImpl implements AgencyService {
         return ApiResponse.<List<ProductInfoDTO>>builder()
                 .status(ErrorCode.FORBIDDEN)
                 .message(Message.ACCOUNT_NOT_FOUND)
+                .timestamp(new java.util.Date())
+                .build();
+    }
+
+    @Override
+    public ApiResponse<ProductInfoDTO> disableSellingProduct(Long product_id){
+        Product product = productRepository.findByProductId(product_id);
+        if(product != null){
+            if(product.getIsSale()){
+                product.setIsSale(false);
+                Product savedProduct = productRepository.save(product);
+                ProductInfoDTO productInfoDTO = convertToProductInfoDTO(savedProduct, product.getProductVariants(), null, multimediaRepository.findAllByProduct_ProductId(product.getProductId()));
+                return ApiResponse.<ProductInfoDTO>builder()
+                        .status(ErrorCode.SUCCESS)
+                        .message(Message.DISABLED_PRODUCT_SUCCESS)
+                        .data(productInfoDTO)
+                        .timestamp(new java.util.Date())
+                        .build();
+            }
+            return ApiResponse.<ProductInfoDTO>builder()
+                    .status(ErrorCode.CONFLICT)
+                    .message(Message.PRODUCT_IS_NOT_SELLING)
+                    .timestamp(new java.util.Date())
+                    .build();
+        }
+        return ApiResponse.<ProductInfoDTO>builder()
+                .status(ErrorCode.NOT_FOUND)
+                .message(Message.NOT_FOUND_PRODUCT)
                 .timestamp(new java.util.Date())
                 .build();
     }
@@ -283,6 +338,36 @@ public class AgencyServiceImpl implements AgencyService {
 
         return productInfoDTO;
     }
+
+    public AgencyInfoDTO convertToAgencyInfoDTO(AgencyInfo agencyInfo){
+        AgencyInfoDTO agencyInfoDTO = new AgencyInfoDTO();
+        agencyInfoDTO.setAccount_id(agencyInfo.getAccount().getAccountId());
+        agencyInfoDTO.setAgency_id(agencyInfo.getApplicationId());
+        agencyInfoDTO.setAgency_name(agencyInfo.getShopName());
+        agencyInfoDTO.setAgency_email(agencyInfo.getShopEmail());
+        agencyInfoDTO.setAgency_phone(agencyInfo.getShopPhone());
+        agencyInfoDTO.setAgency_address(agencyInfo.getShopAddressDetail());
+        agencyInfoDTO.setAgency_tax_code(agencyInfo.getTaxNumber());
+
+        agencyInfoDTO.setFull_name_applicant(agencyInfo.getFullNameApplicant());
+        agencyInfoDTO.setId_card_number_applicant(agencyInfo.getIdCardNumber());
+        agencyInfoDTO.setStatus(agencyInfo.getApprovalStatus().getStatusCode());
+        agencyInfoDTO.setRejectionReason(agencyInfo.getRejectionReason());
+
+        agencyInfoDTO.setBirth_date_applicant(agencyInfo.getBirthdateApplicant());
+        agencyInfoDTO.setGender_applicant(agencyInfo.getGenderApplicant());
+        agencyInfoDTO.setDate_of_issue_card(agencyInfo.getDateOfIssueIdCard());
+        agencyInfoDTO.setPlace_of_issue_card(agencyInfo.getPlaceOfIssueIdCard());
+        agencyInfoDTO.setId_card_front_image_url(agencyInfo.getIdCardFrontImageUrl());
+        agencyInfoDTO.setId_card_back_image_url(agencyInfo.getIdCardBackImageUrl());
+
+        agencyInfoDTO.setBusiness_license_urls(agencyInfo.getBusinessLicenseUrls());
+        agencyInfoDTO.setProfessional_cert_urls(agencyInfo.getProfessionalCertUrls());
+        agencyInfoDTO.setDiploma_cert_urls(agencyInfo.getDiplomaCertUrls());
+
+        return agencyInfoDTO;
+    }
+
     private double calculateAverageRating(Product product) {
         List<Feedback> feedbacks = feedbackRepository.findByProduct_ProductId(product.getProductId());
         if (feedbacks.isEmpty()) {
@@ -407,7 +492,7 @@ public class AgencyServiceImpl implements AgencyService {
     }
 
     @Override
-    public ShipmentResponse shipOrder(Long order_id, String agency_email) throws AccessDeniedException {
+    public ApiResponse<OrderDTO> shipOrder(ShippingRequest request){
 //        OrderList orderList = orderRepository.findByOrderId(order_id);
 //        if(orderList != null) {
 //            boolean ownsProduct = orderList.getOrderDetails().stream().anyMatch(item -> item.getProduct().getAccount().getEmail().equals(agency_email));
@@ -416,8 +501,161 @@ public class AgencyServiceImpl implements AgencyService {
 //            }
 //            ShippingRequest shippingRequest;
 //        }
-        return null;
+        OrderList orderList = orderRepository.findByOrderId(request.getOrderId());
+        if(orderList != null) {
+            if(orderList.getAgency().getApplicationId().equals(request.getAgencyId())) {
+                if(orderList.getOrderStatus().equals(OrderStatus.PENDING)) {
+                    orderList.setOrderStatus(OrderStatus.SHIPPING);
+                    OrderList savedOrder = orderRepository.save(orderList);
+                    return ApiResponse.<OrderDTO>builder()
+                            .status(ErrorCode.SUCCESS)
+                            .message(Message.ORDER_IS_SHIPPING)
+                            .data(convertOrderToDTO(savedOrder,savedOrder.getOrderDetails().stream().toList()))
+                            .build();
+                }
+                return ApiResponse.<OrderDTO>builder()
+                        .status(ErrorCode.BAD_REQUEST)
+                        .message(Message.ORDER_IS_NOT_PENDING)
+                        .timestamp(new Date())
+                        .build();
+            }
+            return ApiResponse.<OrderDTO>builder()
+                    .status(ErrorCode.UNAUTHORIZED)
+                    .message(Message.AGENCY_NOT_ALLOWED)
+                    .timestamp(new Date())
+                    .build();
+        }
+        return ApiResponse.<OrderDTO>builder()
+                .status(ErrorCode.NOT_FOUND)
+                .message(Message.NOT_FOUND_ORDER)
+                .timestamp(new Date())
+                .build();
     }
+    @Override
+    public ApiResponse<OrderDTO> completeOrder(CompleteOrderRequest request){
+        OrderList orderList = orderRepository.findByOrderId(request.getOrderId());
+        if(orderList != null) {
+            if(orderList.getAgency().getApplicationId().equals(request.getAgencyId())) {
+                if(orderList.getOrderStatus().equals(OrderStatus.DELIVERED)) {
+                    orderList.setOrderStatus(OrderStatus.COMPLETED);
+                    OrderList savedOrder = orderRepository.save(orderList);
+                    return ApiResponse.<OrderDTO>builder()
+                            .status(ErrorCode.SUCCESS)
+                            .message(Message.ORDER_IS_COMPLETED)
+                            .data(convertOrderToDTO(savedOrder,savedOrder.getOrderDetails().stream().toList()))
+                            .build();
+                }
+                return ApiResponse.<OrderDTO>builder()
+                        .status(ErrorCode.BAD_REQUEST)
+                        .message(Message.ORDER_IS_NOT_DELIVERED)
+                        .timestamp(new Date())
+                        .build();
+            }
+            return ApiResponse.<OrderDTO>builder()
+                    .status(ErrorCode.UNAUTHORIZED)
+                    .message(Message.AGENCY_NOT_ALLOWED)
+                    .timestamp(new Date())
+                    .build();
+        }
+        return ApiResponse.<OrderDTO>builder()
+                .status(ErrorCode.NOT_FOUND)
+                .message(Message.NOT_FOUND_ORDER)
+                .timestamp(new Date())
+                .build();
+    }
+
+    @Override
+    public ApiResponse<OrderDTO> confirmReturnOrder(Long orderId){
+        OrderList orderList = orderRepository.findByOrderId(orderId);
+        if(orderList != null) {
+            if(orderList.getOrderStatus().equals(OrderStatus.DELIVERED)) {
+                orderList.setOrderStatus(OrderStatus.RETURNED);
+                //orderList.setReturnReason(request.getReturnReason());
+                OrderList savedOrder = orderRepository.save(orderList);
+                return ApiResponse.<OrderDTO>builder()
+                        .status(ErrorCode.SUCCESS)
+                        .message(Message.ORDER_IS_SHIPPING)
+                        .data(convertOrderToDTO(savedOrder,savedOrder.getOrderDetails().stream().toList()))
+                        .build();
+            }
+            return ApiResponse.<OrderDTO>builder()
+                    .status(ErrorCode.BAD_REQUEST)
+                    .message(Message.ORDER_IS_NOT_DELIVERED)
+                    .timestamp(new Date())
+                    .build();
+        }
+        return ApiResponse.<OrderDTO>builder()
+                .status(ErrorCode.NOT_FOUND)
+                .message(Message.NOT_FOUND_ORDER)
+                .timestamp(new Date())
+                .build();
+    }
+
+    @Override
+    public ApiResponse<OrderDTO> cancelOrder(AgencyCancelOrderRequest request){
+        Optional<AgencyInfo> agencyInfo = agencyInfoRepository.findByApplicationId(request.getAgencyId());
+        if(agencyInfo.isPresent()) {
+            OrderList orderList = orderRepository.findByOrderId(request.getOrderId());
+            if(orderList == null) {
+                return ApiResponse.<OrderDTO>builder()
+                        .status(ErrorCode.NOT_FOUND)
+                        .message(Message.NOT_FOUND_ORDER)
+                        .timestamp(new java.util.Date())
+                        .build();
+            }
+            if(!orderList.getOrderStatus().equals(OrderStatus.PENDING)) {
+                return ApiResponse.<OrderDTO>builder()
+                        .status(ErrorCode.BAD_REQUEST)
+                        .message(Message.ORDER_IS_NOT_PENDING)
+                        .timestamp(new java.util.Date())
+                        .build();
+            }
+
+            orderList.setOrderStatus(OrderStatus.CANCELLED);
+            orderRepository.save(orderList);
+
+            return ApiResponse.<OrderDTO>builder()
+                    .status(ErrorCode.SUCCESS)
+                    .message(Message.ORDER_CANCELLED_BY_AGENCY)
+                    .data(convertOrderToDTO(orderList, (List<OrderDetail>) orderList.getOrderDetails()))
+                    .timestamp(new java.util.Date())
+                    .build();
+        }
+        return ApiResponse.<OrderDTO>builder()
+                .status(ErrorCode.NOT_FOUND)
+                .message(Message.AGENCY_NOT_FOUND)
+                .timestamp(new java.util.Date())
+                .build();
+    }
+
+    @Override
+    public ApiResponse<AgencyInfoDTO> getAgencyInfo(){
+        Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        if (account.isPresent()) {
+            Account acc = account.get();
+            Optional<AgencyInfo> agencyInfo = agencyInfoRepository.findByAccount(acc);
+            if (agencyInfo.isPresent() && agencyInfo.get().getApprovalStatus().getStatusCode().equals(StatusCode.STATUS_APPROVED)) {
+                AgencyInfoDTO agencyInfoDTO = convertToAgencyInfoDTO(agencyInfo.get());
+                return ApiResponse.<AgencyInfoDTO>builder()
+                        .status(ErrorCode.SUCCESS)
+                        .message(Message.SUCCESS)
+                        .data(agencyInfoDTO)
+                        .timestamp(new java.util.Date())
+                        .build();
+            }
+            return ApiResponse.<AgencyInfoDTO>builder()
+                    .status(ErrorCode.NOT_FOUND)
+                    .message(Message.ACCOUNT_IS_NOT_AGENCY)
+                    .timestamp(new java.util.Date())
+                    .build();
+        }
+        return ApiResponse.<AgencyInfoDTO>builder()
+                .status(ErrorCode.NOT_FOUND)
+                .message(Message.AGENCY_NOT_FOUND)
+                .timestamp(new java.util.Date())
+                .build();
+    }
+
 
 //    private ShippingRequest createShippingRequest(OrderList orderList){
 //        List<OrderDetail> orderDetails = (List<OrderDetail>) orderList.getOrderDetails();
@@ -431,26 +669,26 @@ public class AgencyServiceImpl implements AgencyService {
 //        return null;
 //    }
 
-    public ShippingRequest convertToShippingRequest(OrderDTO orderDTO) {
-        AddressInfoDTO address = orderDTO.getAddress_info();
-
-        List<ShippingItem> items = orderDTO.getOrder_detail().stream().map(detail -> {
-            ShippingItem item = new ShippingItem();
-            item.setName(detail.getProductInfoDTO().getProduct_name());
-            item.setQuantity(detail.getQuantity());
-            item.setPrice(new BigDecimal(detail.getPrice()));
-            return item;
-        }).collect(Collectors.toList());
-
-        return ShippingRequest.builder()
-                .order_code("ORDER-" + orderDTO.getOrder_id())
-                .receiver_name(address.getFullname())
-                .receiver_phone(address.getPhone())
-                .receiver_address(address.getAddress_detail())
-                .total_amount(new BigDecimal(orderDTO.getTotalBill()))
-                .items(items)
-                .build();
-    }
+//    public ShippingRequest convertToShippingRequest(OrderDTO orderDTO) {
+//        AddressInfoDTO address = orderDTO.getAddress_info();
+//
+//        List<ShippingItem> items = orderDTO.getOrder_detail().stream().map(detail -> {
+//            ShippingItem item = new ShippingItem();
+//            item.setName(detail.getProductInfoDTO().getProduct_name());
+//            item.setQuantity(detail.getQuantity());
+//            item.setPrice(new BigDecimal(detail.getPrice()));
+//            return item;
+//        }).collect(Collectors.toList());
+//
+//        return ShippingRequest.builder()
+//                .order_code("ORDER-" + orderDTO.getOrder_id())
+//                .receiver_name(address.getFullname())
+//                .receiver_phone(address.getPhone())
+//                .receiver_address(address.getAddress_detail())
+//                .total_amount(new BigDecimal(orderDTO.getTotalBill()))
+//                .items(items)
+//                .build();
+//    }
 
     public OrderDetailDTO convertOrderDetailToDTO(OrderDetail orderDetail) {
         ProductVariant productVariant = orderDetail.getProductVariant();

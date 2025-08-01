@@ -10,4 +10,6 @@ import java.util.List;
 public interface SupportArticleRepository extends JpaRepository<SupportArticle, Long> {
     List<SupportArticle> findBySupportCategory_SupportCategoryIdAndIsVisibleIsTrue(Long supportCategoryId);
     List<SupportArticle> findByIsVisibleTrue();
+    List<SupportArticle> findByIsVisibleFalse();
+    List<SupportArticle> findBySupportCategory_SupportCategoryId(Long supportCategoryId);
 }

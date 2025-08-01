@@ -20,5 +20,6 @@ public class UpdateProductRequest {
     private int quantity_in_stock;
     private long category_id;
     private String image_url;
+    private String product_safety_certificate_url;
     private List<AddProductVariantsRequest> product_variant_list;
 }

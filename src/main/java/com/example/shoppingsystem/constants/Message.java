@@ -58,7 +58,31 @@ public class Message {
     public static final String FETCHING_ORDER_FAILURE = "Fetching order failed!";
     public static final String NOT_FOUND_ARTICLE = "Not found article";
     public static final String ACCOUNT_IS_AGENCY = "Account ID %d is agency, can't not register!";
+    public static final String ACCOUNT_IS_NOT_AGENCY = "Account is not agency!";
     public static final String AGENCY_IS_PENDING = "Agency is pending!";
     public static final String AGENCY_REGISTER_SUCCESS = "Agency register successfully!";
+    public static final String DELETE_PRODUCT_SUCCESS = "Delete product successfully!";
+    public static final String DELETE_PRODUCT_FAILURE = "Delete product failed!";
+    public static final String DISABLED_PRODUCT_SUCCESS = "Disabled product successfully!";
+    public static final String DISABLED_PRODUCT_FAILURE = "Disabled product failed!";
+    public static final String PRODUCT_IS_NOT_SELLING = "Product is not selling!";
+    public static final String PRODUCT_IS_SELLING= "Product is selling!";
+    public static final String ORDER_IS_SHIPPING = "Order is shipping!";
+    public static final String ORDER_IS_NOT_SHIPPING = "Order is not shipping!";
+    public static final String ORDER_IS_SHIPPED = "Order is shipped!";
+    public static final String ORDER_IS_COMPLETED = "Order is completed!";
+    public static final String ORDER_IS_NOT_COMPLETED = "Order is not completed!";
+    public static final String ORDER_IS_DELIVERED = "Order is delivered!";
+    public static final String ORDER_IS_NOT_DELIVERED = "Order is not delivered!";
+    public static final String ORDER_IS_CANCELLED = "Order is cancelled!";
+    public static final String ORDER_CANCELLED = "Order cancelled!";
+    public static final String ORDER_CANCELLED_BY_AGENCY = "Order cancelled by agency!";
+    public static final String FETCHING_SUPPORT_ARTICLE_SUCCESS = "Fetching article successfully!";
+    public static final String FETCHING_SUPPORT_ARTICLE_FAILURE = "Fetching article failed!";
+    public static final String FETCHING_SUPPORT_CATEGORY_SUCCESS = "Fetching category successfully!";
+    public static final String FETCHING_SUPPORT_CATEGORY_FAILURE = "Fetching category failed!";
+    public static final String HIDE_ARTICLE_SUCCESS = "Hide article successfully!";
+    public static final String HIDE_ARTICLE_FAILURE = "Hide article failed!";
+
 
 }

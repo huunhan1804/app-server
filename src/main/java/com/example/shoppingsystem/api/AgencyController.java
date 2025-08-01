@@ -1,12 +1,10 @@
 package com.example.shoppingsystem.api;
 
 import com.example.shoppingsystem.dtos.AccountInfoDTO;
+import com.example.shoppingsystem.dtos.AgencyInfoDTO;
 import com.example.shoppingsystem.dtos.OrderDTO;
 import com.example.shoppingsystem.dtos.ProductInfoDTO;
-import com.example.shoppingsystem.requests.AddNewProductRequest;
-import com.example.shoppingsystem.requests.ConfirmOrderRequest;
-import com.example.shoppingsystem.requests.ListOrderByStatusRequest;
-import com.example.shoppingsystem.requests.UpdateProductRequest;
+import com.example.shoppingsystem.requests.*;
 import com.example.shoppingsystem.responses.ApiResponse;
 import com.example.shoppingsystem.services.interfaces.AgencyService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,10 +43,19 @@ public class AgencyController {
 
     @Operation(summary = "Agency Delete Product", description = "Agency Delete Product")
     @PostMapping("/product/delete/{product_id}")
-    public ResponseEntity<ApiResponse<AccountInfoDTO>> deleteProduct(
+    public ResponseEntity<ApiResponse<AgencyInfoDTO>> deleteProduct(
             @Parameter(description = "Product ID") @PathVariable long product_id
     ) {
-        ApiResponse<AccountInfoDTO> response = agencyService.deleteProduct(product_id);
+        ApiResponse<AgencyInfoDTO> response = agencyService.deleteProduct(product_id);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @Operation(summary = "Disable product", description = "Disable product")
+    @PostMapping("/product/disable/{product_id}")
+    public ResponseEntity<ApiResponse<ProductInfoDTO>> disableSellingProduct(
+            @PathVariable Long product_id
+    ){
+        ApiResponse<ProductInfoDTO> response = agencyService.disableSellingProduct(product_id);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
@@ -62,7 +69,7 @@ public class AgencyController {
     }
 
     @Operation(summary = "Confirm order", description = "Confirm order")
-    @PostMapping("/order/confirm/")
+    @PostMapping("/order/confirm")
     public ResponseEntity<ApiResponse<OrderDTO>> confirmOrder(
             @RequestBody ConfirmOrderRequest request
     ){
@@ -80,11 +87,54 @@ public class AgencyController {
     }
 
     @Operation(summary = "Get list of order by status", description = "Get list of order by status")
-    @PostMapping("/order/")
+    @PostMapping("/order/all-order-by-status")
     public ResponseEntity<ApiResponse<List<OrderDTO>>> getListOrderByStatus(
             @RequestBody ListOrderByStatusRequest request
     ){
         ApiResponse<List<OrderDTO>> response = agencyService.getListOfOrdersByStatus(request);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @Operation(summary = "Agency cancel order", description = "Agency cancel order")
+    @PostMapping("/order/cancel")
+    public ResponseEntity<ApiResponse<OrderDTO>> cancelOrder(
+            @RequestBody AgencyCancelOrderRequest request
+    ){
+        ApiResponse<OrderDTO> response = agencyService.cancelOrder(request);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @Operation(summary = "Complete order", description = "Complete order")
+    @PostMapping("/order/complete")
+    public ResponseEntity<ApiResponse<OrderDTO>> completeOrder(
+            @RequestBody CompleteOrderRequest request
+    ){
+        ApiResponse<OrderDTO> response = agencyService.completeOrder(request);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @Operation(summary = "Shipping order", description = "Shipping order")
+    @PostMapping("/order/shipping")
+    public ResponseEntity<ApiResponse<OrderDTO>> shipOrder(
+            @RequestBody ShippingRequest request
+    ){
+        ApiResponse<OrderDTO> response = agencyService.shipOrder(request);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @Operation(summary = "Shipping order", description = "Shipping order")
+    @PostMapping("/order/return/{order_id}")
+    public ResponseEntity<ApiResponse<OrderDTO>> confirmReturnOrder(
+            @PathVariable Long order_id
+    ){
+        ApiResponse<OrderDTO> response = agencyService.confirmReturnOrder(order_id);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @Operation(summary = "Get Agency information", description = "Get agency information")
+    @PostMapping("/info")
+    public ResponseEntity<ApiResponse<AgencyInfoDTO>> getAgencyInfo(){
+        ApiResponse<AgencyInfoDTO> response = agencyService.getAgencyInfo();
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
