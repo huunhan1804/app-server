@@ -15,10 +15,12 @@ import com.itextpdf.text.pdf.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,6 +33,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class AgencyReportServiceImpl implements AgencyReportService {
+    private static final String REPORT_TYPE_QUARTERLY = "quarterly";
+    private static final String REPORT_TYPE_MONTHLY = "monthly";
+    private static final String REPORT_TYPE_YEARLY = "yearly";
 
     private final AccountService accountService;
     private final OrderRepository orderRepository;
@@ -126,7 +131,6 @@ public class AgencyReportServiceImpl implements AgencyReportService {
 
         return generateExcelReport(reportData, summary, request);
     }
-
     @Override
     public ApiResponse<RevenueTrendDTO> getRevenueTrend(String period, int year) {
         try {
@@ -570,78 +574,100 @@ public class AgencyReportServiceImpl implements AgencyReportService {
                 .build();
     }
 
+    // PDF Generation Methods
     private byte[] generatePdfReport(List<AgencyReportDTO> reportData, ReportSummaryDTO summary,
                                      GenerateReportRequest request) throws Exception {
         Document document = new Document(PageSize.A4);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PdfWriter.getInstance(document, baos);
 
-        document.open();
+        try {
+            PdfWriter writer = PdfWriter.getInstance(document, baos);
+            document.open();
 
-        // Add title
-        Font titleFont = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD);
-        Font headerFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
-        Font normalFont = new Font(Font.FontFamily.HELVETICA, 10);
+            // Create fonts using iText Font
+            com.itextpdf.text.Font titleFont = new com.itextpdf.text.Font(
+                    com.itextpdf.text.Font.FontFamily.HELVETICA, 18, com.itextpdf.text.Font.BOLD);
+            com.itextpdf.text.Font headerFont = new com.itextpdf.text.Font(
+                    com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.BOLD);
+            com.itextpdf.text.Font normalFont = new com.itextpdf.text.Font(
+                    com.itextpdf.text.Font.FontFamily.HELVETICA, 10);
 
-        Paragraph title = new Paragraph("BÁO CÁO DOANH THU AGENCY", titleFont);
-        title.setAlignment(Element.ALIGN_CENTER);
-        document.add(title);
-        document.add(new Paragraph("\n"));
+            // Add title
+            Paragraph title = new Paragraph("BÁO CÁO DOANH THU AGENCY", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            document.add(title);
+            document.add(new Paragraph("\n"));
 
-        // Add report info
-        document.add(new Paragraph("Loại báo cáo: " + request.getReportType().toUpperCase(), headerFont));
-        document.add(new Paragraph("Năm: " + request.getYear(), headerFont));
-        document.add(new Paragraph("Ngày tạo: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")), normalFont));
-        document.add(new Paragraph("\n"));
+            // Add report info
+            document.add(new Paragraph("Loại báo cáo: " + request.getReportType().toUpperCase(), headerFont));
+            document.add(new Paragraph("Năm: " + request.getYear(), headerFont));
+            document.add(new Paragraph("Ngày tạo: " +
+                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")), normalFont));
+            document.add(new Paragraph("\n"));
 
-        // Add summary
-        document.add(new Paragraph("TỔNG KẾT", headerFont));
-        document.add(new Paragraph("Tổng doanh thu: " + String.format("%,.0f VNĐ", summary.getTotalRevenue()), normalFont));
-        document.add(new Paragraph("Doanh thu trung bình: " + String.format("%,.0f VNĐ", summary.getAverageRevenue()), normalFont));
-        document.add(new Paragraph("Tổng đơn hàng: " + summary.getTotalOrders(), normalFont));
-        document.add(new Paragraph("Tỷ lệ tăng trưởng: " + String.format("%.2f%%", summary.getGrowthRate()), normalFont));
-        document.add(new Paragraph("\n"));
+            // Add summary
+            document.add(new Paragraph("TỔNG KẾT", headerFont));
+            document.add(new Paragraph("Tổng doanh thu: " +
+                    String.format("%,.0f VNĐ", summary.getTotalRevenue()), normalFont));
+            document.add(new Paragraph("Doanh thu trung bình: " +
+                    String.format("%,.0f VNĐ", summary.getAverageRevenue()), normalFont));
+            document.add(new Paragraph("Tổng đơn hàng: " + summary.getTotalOrders(), normalFont));
+            document.add(new Paragraph("Tỷ lệ tăng trưởng: " +
+                    String.format("%.2f%%", summary.getGrowthRate()), normalFont));
+            document.add(new Paragraph("\n"));
 
-        // Add data table
-        PdfPTable table = new PdfPTable(3);
-        table.setWidthPercentage(100);
-        table.setWidths(new float[]{40f, 30f, 30f});
+            // Add data table
+            PdfPTable table = new PdfPTable(3);
+            table.setWidthPercentage(100);
+            table.setWidths(new float[]{40f, 30f, 30f});
 
-        // Table headers
-        PdfPCell headerCell1 = new PdfPCell(new Phrase("Kỳ", headerFont));
-        PdfPCell headerCell2 = new PdfPCell(new Phrase("Doanh thu (VNĐ)", headerFont));
-        PdfPCell headerCell3 = new PdfPCell(new Phrase("Số đơn hàng", headerFont));
+            // Table headers
+            PdfPCell headerCell1 = new PdfPCell(new com.itextpdf.text.Phrase("Kỳ", headerFont));
+            PdfPCell headerCell2 = new PdfPCell(new com.itextpdf.text.Phrase("Doanh thu (VNĐ)", headerFont));
+            PdfPCell headerCell3 = new PdfPCell(new com.itextpdf.text.Phrase("Số đơn hàng", headerFont));
 
-        headerCell1.setBackgroundColor(BaseColor.LIGHT_GRAY);
-        headerCell2.setBackgroundColor(BaseColor.LIGHT_GRAY);
-        headerCell3.setBackgroundColor(BaseColor.LIGHT_GRAY);
+            headerCell1.setBackgroundColor(BaseColor.LIGHT_GRAY);
+            headerCell2.setBackgroundColor(BaseColor.LIGHT_GRAY);
+            headerCell3.setBackgroundColor(BaseColor.LIGHT_GRAY);
 
-        table.addCell(headerCell1);
-        table.addCell(headerCell2);
-        table.addCell(headerCell3);
+            table.addCell(headerCell1);
+            table.addCell(headerCell2);
+            table.addCell(headerCell3);
 
-        // Table data
-        for (AgencyReportDTO data : reportData) {
-            table.addCell(new PdfPCell(new Phrase(data.getPeriod(), normalFont)));
-            table.addCell(new PdfPCell(new Phrase(String.format("%,.0f", data.getRevenue()), normalFont)));
-            table.addCell(new PdfPCell(new Phrase(String.valueOf(data.getOrderCount()), normalFont)));
+            // Table data
+            for (AgencyReportDTO data : reportData) {
+                table.addCell(new PdfPCell(new com.itextpdf.text.Phrase(data.getPeriod(), normalFont)));
+                table.addCell(new PdfPCell(new com.itextpdf.text.Phrase(
+                        String.format("%,.0f", data.getRevenue()), normalFont)));
+                table.addCell(new PdfPCell(new com.itextpdf.text.Phrase(
+                        String.valueOf(data.getOrderCount()), normalFont)));
+            }
+
+            document.add(table);
+            document.close();
+
+            return baos.toByteArray();
+
+        } catch (DocumentException e) {
+            throw new Exception("Lỗi khi tạo PDF: " + e.getMessage(), e);
         }
-
-        document.add(table);
-        document.close();
-
-        return baos.toByteArray();
     }
 
+    // Excel Generation Methods
     private byte[] generateExcelReport(List<AgencyReportDTO> reportData, ReportSummaryDTO summary,
                                        GenerateReportRequest request) throws Exception {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Báo cáo doanh thu");
 
-            // Create styles
+            // Create styles using Apache POI
             CellStyle headerStyle = workbook.createCellStyle();
             headerStyle.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex());
             headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+            org.apache.poi.ss.usermodel.Font headerFont = workbook.createFont();
+            headerFont.setBold(true);
+            headerFont.setFontHeightInPoints((short) 12);
+            headerStyle.setFont(headerFont);
 
             CellStyle currencyStyle = workbook.createCellStyle();
             currencyStyle.setDataFormat(workbook.createDataFormat().getFormat("#,##0"));
@@ -660,7 +686,8 @@ public class AgencyReportServiceImpl implements AgencyReportService {
 
             Row infoRow3 = sheet.createRow(4);
             infoRow3.createCell(0).setCellValue("Ngày tạo:");
-            infoRow3.createCell(1).setCellValue(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+            infoRow3.createCell(1).setCellValue(
+                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
 
             // Add summary section
             Row summaryHeaderRow = sheet.createRow(6);
@@ -719,6 +746,9 @@ public class AgencyReportServiceImpl implements AgencyReportService {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             workbook.write(outputStream);
             return outputStream.toByteArray();
+
+        } catch (IOException e) {
+            throw new Exception("Lỗi khi tạo Excel: " + e.getMessage(), e);
         }
     }
 
