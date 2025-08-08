@@ -1,9 +1,6 @@
 package com.example.shoppingsystem.services.interfaces;
 
-import com.example.shoppingsystem.dtos.AccountInfoDTO;
-import com.example.shoppingsystem.dtos.AgencyInfoDTO;
-import com.example.shoppingsystem.dtos.OrderDTO;
-import com.example.shoppingsystem.dtos.ProductInfoDTO;
+import com.example.shoppingsystem.dtos.*;
 import com.example.shoppingsystem.requests.*;
 import com.example.shoppingsystem.responses.ApiResponse;
 import com.example.shoppingsystem.responses.ShipmentResponse;
@@ -15,8 +12,8 @@ import java.util.List;
 @Service
 public interface AgencyService {
     ApiResponse<AgencyInfoDTO> getAgencyInfo();
-    ApiResponse<ProductInfoDTO> createProduct(AddNewProductRequest request);
-    ApiResponse<ProductInfoDTO> updateProduct(UpdateProductRequest request);
+    ApiResponse<ProductFullDTO> createProduct(AddNewProductRequest request);
+    ApiResponse<ProductFullDTO> updateProduct(UpdateProductRequest request);
     ApiResponse<AgencyInfoDTO> deleteProduct(Long product_id);
     ApiResponse<OrderDTO> shipOrder(ShippingRequest request);
     ApiResponse<OrderDTO> completeOrder(CompleteOrderRequest request);

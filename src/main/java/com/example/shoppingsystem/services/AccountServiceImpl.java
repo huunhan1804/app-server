@@ -209,6 +209,7 @@ public class AccountServiceImpl implements AccountService {
             account.get().setFullname(request.getFullname());
             account.get().setGender(request.getGender());
             account.get().setBirthdate(request.getBirthday());
+            account.get().setPhone(request.getPhone());
             updateAccount(account.get());
             AccountInfoDTO accountInfoDTO = getAccountInfoDTO(account.get());
             if (accountInfoDTO != null) {
@@ -348,26 +349,26 @@ public class AccountServiceImpl implements AccountService {
         return savedAccount;
     }
 
-    private AgencyInfo regiesterAgencyInfo(String shopName, String shopAddress, String shopEmail, String shopPhone, String taxCode, String idCardNumber, String frontIdCardImageUrl, String backIdCardImageUrl, String professionalCertUrl, String businessLicenseUrl) {
-        Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
-        AgencyInfo saveAgencyInfo = agencyInfoRepository.save(AgencyInfo.builder()
-                .account(account.get())
-                .shopName(shopName)
-                .shopEmail(shopEmail)
-                .shopPhone(shopPhone)
-                .shopAddressDetail(shopAddress)
-                .taxNumber(taxCode)
-                .idCardNumber(idCardNumber)
-                .idCardBackImageUrl(backIdCardImageUrl)
-                .idCardFrontImageUrl(frontIdCardImageUrl)
-                .businessLicenseUrls(businessLicenseUrl)
-                .professionalCertUrls(professionalCertUrl)
-                .genderApplicant(account.get().getGender())
-                .submittedDate(new java.util.Date())
-                .approvalStatus(approvalStatusRepository.findApprovalStatusByStatusCode(StatusCode.STATUS_PENDING))
-                .build());
-        return saveAgencyInfo;
-    }
+//    private AgencyInfo regiesterAgencyInfo(String shopName, String shopAddress, String shopEmail, String shopPhone, String taxCode, String idCardNumber, String frontIdCardImageUrl, String backIdCardImageUrl, String professionalCertUrl, String businessLicenseUrl) {
+//        Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+//        AgencyInfo saveAgencyInfo = agencyInfoRepository.save(AgencyInfo.builder()
+//                .account(account.get())
+//                .shopName(shopName)
+//                .shopEmail(shopEmail)
+//                .shopPhone(shopPhone)
+//                .shopAddressDetail(shopAddress)
+//                .taxNumber(taxCode)
+//                .idCardNumber(idCardNumber)
+//                .idCardBackImageUrl(backIdCardImageUrl)
+//                .idCardFrontImageUrl(frontIdCardImageUrl)
+//                .businessLicenseUrls(businessLicenseUrl)
+//                .professionalCertUrls(professionalCertUrl)
+//                .genderApplicant(account.get().getGender())
+//                .submittedDate(new java.util.Date())
+//                .approvalStatus(approvalStatusRepository.findApprovalStatusByStatusCode(StatusCode.STATUS_PENDING))
+//                .build());
+//        return saveAgencyInfo;
+//    }
 
     private String generateUsername(String loginId) {
         if (Regex.isValidEmail(loginId)) {
@@ -406,7 +407,7 @@ public class AccountServiceImpl implements AccountService {
         );
     }
 
-    public AgencyInfoDTO convertToAgencyInfoDTO(AgencyInfo agencyInfo){
+    private AgencyInfoDTO convertToAgencyInfoDTO(AgencyInfo agencyInfo){
         AgencyInfoDTO agencyInfoDTO = new AgencyInfoDTO();
         agencyInfoDTO.setAccount_id(agencyInfo.getAccount().getAccountId());
         agencyInfoDTO.setAgency_id(agencyInfo.getApplicationId());

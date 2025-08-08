@@ -55,48 +55,45 @@ public class AgencyServiceImpl implements AgencyService {
     }
 
     @Override
-    public ApiResponse<ProductInfoDTO> createProduct(AddNewProductRequest request){
-        Optional<AgencyInfo> agencyInfo = agencyInfoRepository.findByApplicationId(request.getAgency_id());
-        if(agencyInfo.isPresent()){
+    public ApiResponse<ProductFullDTO> createProduct(AddNewProductRequest request){
+        Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        if(account.isPresent()){
+            AgencyInfo agencyInfo = agencyInfoRepository.findByAccount_AccountId(account.get().getAccountId()).get();
             Product product = new Product();
-            product.setAgencyInfo(agencyInfo.get());
+            product.setAgencyInfo(agencyInfo);
             product.setProductName(request.getProduct_name());
             product.setProductDescription(request.getProduct_description());
             product.setDesiredQuantity(request.getQuantity_in_stock());
             product.setInventoryQuantity(request.getQuantity_in_stock());
             product.setCategory(categoryRepository.findByCategoryId(request.getCategory_id()));
-            product.setCreatedBy(agencyInfo.get().getFullNameApplicant());
+            product.setCreatedBy(agencyInfo.getFullNameApplicant());
             product.setListPrice(Regex.parseVNDToBigDecimal(request.getProduct_list_price()));
             product.setSalePrice(Regex.parseVNDToBigDecimal(request.getProduct_sale_price()));
             product.setSoldAmount(0);
             product.setIsSale(false);
             product.setApprovalStatus(approvalStatusRepository.findApprovalStatusByStatusCode(StatusCode.STATUS_PENDING));
             Product saveProduct = productRepository.save(product);
-            multimediaRepository.save(Multimedia.builder()
-                    .product(product)
-                    .multimediaType(MultimediaType.IMAGE)
-                    .multimediaUrl(request.getImage_url())
-                    .build()
-            );
-            multimediaRepository.save(Multimedia.builder()
-                    .product(product)
-                    .multimediaType(MultimediaType.IMAGE)
-                    .multimediaUrl(request.getProduct_safety_certificate_url())
-                    .build()
-            );
+            for(String image_url : request.getImage_urls()){
+                multimediaRepository.save(Multimedia.builder()
+                        .product(product)
+                        .multimediaType(MultimediaType.IMAGE)
+                        .multimediaUrl(image_url)
+                        .build()
+                );
+            }
             for(AddProductVariantsRequest addProductVariantsRequest : request.getProduct_variant_list()){
                 ProductVariant productVariant = new ProductVariant();
                 productVariant.setProduct(product);
-                productVariant.setListPrice(Regex.parseVNDToBigDecimal(addProductVariantsRequest.getOrigin_price()));
-                productVariant.setSalePrice(Regex.parseVNDToBigDecimal(addProductVariantsRequest.getSale_price()));
+                productVariant.setListPrice(Regex.parseVNDToBigDecimal(addProductVariantsRequest.getProduct_list_price()));
+                productVariant.setSalePrice(Regex.parseVNDToBigDecimal(addProductVariantsRequest.getProduct_sale_price()));
                 productVariant.setProductVariantName(addProductVariantsRequest.getProduct_variant_name());
-                productVariant.setDesiredQuantity(addProductVariantsRequest.getQuantity_in_stock());
-                productVariant.setInventoryQuantity(addProductVariantsRequest.getQuantity_in_stock());
+                productVariant.setDesiredQuantity(addProductVariantsRequest.getInventory_quantity());
+                productVariant.setInventoryQuantity(addProductVariantsRequest.getInventory_quantity());
                 productVariantRepository.save(productVariant);
             }
-            return getInfoProduct(saveProduct.getProductId());
+            return getFullInfoProduct(saveProduct.getProductId());
         }
-        return ApiResponse.<ProductInfoDTO>builder()
+        return ApiResponse.<ProductFullDTO>builder()
                 .status(ErrorCode.FORBIDDEN)
                 .message(Message.ACCOUNT_NOT_FOUND)
                 .timestamp(new Date())
@@ -104,7 +101,7 @@ public class AgencyServiceImpl implements AgencyService {
     }
 
     @Override
-    public ApiResponse<ProductInfoDTO> updateProduct(UpdateProductRequest request){
+    public ApiResponse<ProductFullDTO> updateProduct(UpdateProductRequest request){
         Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         if(account.isPresent()){
             List<Product> products = new ArrayList<Product>();
@@ -113,7 +110,7 @@ public class AgencyServiceImpl implements AgencyService {
                 products = productRepository.findProductByAgencyInfoAndProductId(agency.get(), request.getProduct_id());
             }
             if(products.isEmpty()){
-                return ApiResponse.<ProductInfoDTO>builder()
+                return ApiResponse.<ProductFullDTO>builder()
                         .status(ErrorCode.NOT_FOUND)
                         .message(Message.PRODUCT_NOT_FOUND)
                         .timestamp(new Date())
@@ -149,17 +146,17 @@ public class AgencyServiceImpl implements AgencyService {
                 for(AddProductVariantsRequest addProductVariantsRequest : request.getProduct_variant_list()){
                     ProductVariant productVariant = new ProductVariant();
                     productVariant.setProduct(product);
-                    productVariant.setListPrice(Regex.parseVNDToBigDecimal(addProductVariantsRequest.getOrigin_price()));
-                    productVariant.setSalePrice(Regex.parseVNDToBigDecimal(addProductVariantsRequest.getSale_price()));
+                    productVariant.setListPrice(Regex.parseVNDToBigDecimal(addProductVariantsRequest.getProduct_list_price()));
+                    productVariant.setSalePrice(Regex.parseVNDToBigDecimal(addProductVariantsRequest.getProduct_sale_price()));
                     productVariant.setProductVariantName(addProductVariantsRequest.getProduct_variant_name());
-                    productVariant.setDesiredQuantity(addProductVariantsRequest.getQuantity_in_stock());
-                    productVariant.setInventoryQuantity(addProductVariantsRequest.getQuantity_in_stock());
+                    productVariant.setDesiredQuantity(addProductVariantsRequest.getInventory_quantity());
+                    productVariant.setInventoryQuantity(addProductVariantsRequest.getInventory_quantity());
                     productVariantRepository.save(productVariant);
                 }
-                return getInfoProduct(saveProduct.getProductId());
+                return getFullInfoProduct(saveProduct.getProductId());
             }
         }
-        return ApiResponse.<ProductInfoDTO>builder()
+        return ApiResponse.<ProductFullDTO>builder()
                 .status(ErrorCode.FORBIDDEN)
                 .message(Message.ACCOUNT_NOT_FOUND)
                 .timestamp(new Date())
@@ -287,12 +284,37 @@ public class AgencyServiceImpl implements AgencyService {
         }
     }
 
+    public ApiResponse<ProductFullDTO> getFullInfoProduct(long productId) {
+        Optional<Product> product = productRepository.findById(productId);
+        if(product.isPresent()){
+            return ApiResponse.<ProductFullDTO>builder()
+                    .status(ErrorCode.SUCCESS)
+                    .message(Message.SUCCESS)
+                    .data(convertToProductFullDTO(product.get()))
+                    .timestamp(new java.util.Date())
+                    .build();
+        } else {
+            return ApiResponse.<ProductFullDTO>builder()
+                    .status(ErrorCode.NOT_FOUND)
+                    .message(Message.NOT_FOUND)
+                    .timestamp(new java.util.Date())
+                    .build();
+        }
+    }
+
     public ProductInfoDTO getProductInformation(Product product){
         List<ProductVariant> productVariants = productVariantRepository.findAllByProduct_ProductId(product.getProductId());
         List<Feedback> feedbacks = feedbackRepository.findByProduct_ProductId(product.getProductId());
         List<Multimedia> multimediaProduct = multimediaRepository.  findAllByProduct_ProductId(product.getProductId());
         return convertToProductInfoDTO(product, productVariants, feedbacks, multimediaProduct);
     }
+    public ProductFullDTO getFullProductInformation(Product product){
+        List<ProductVariant> productVariants = productVariantRepository.findAllByProduct_ProductId(product.getProductId());
+        List<Feedback> feedbacks = feedbackRepository.findByProduct_ProductId(product.getProductId());
+        List<Multimedia> multimediaProduct = multimediaRepository.  findAllByProduct_ProductId(product.getProductId());
+        return convertToProductFullDTO(product);
+    }
+
 
     private ProductInfoDTO convertToProductInfoDTO(Product product, List<ProductVariant> productVariants, List<Feedback> feedbacks, List<Multimedia> multimediaProduct) {
         ProductInfoDTO productInfoDTO = new ProductInfoDTO();
@@ -339,7 +361,64 @@ public class AgencyServiceImpl implements AgencyService {
         return productInfoDTO;
     }
 
-    public AgencyInfoDTO convertToAgencyInfoDTO(AgencyInfo agencyInfo){
+    private ProductFullDTO convertToProductFullDTO(Product product) {
+        ProductFullDTO productFullDTO = new ProductFullDTO();
+        productFullDTO.setProduct_id(product.getProductId());
+        productFullDTO.setProduct_name(product.getProductName());
+        productFullDTO.setProduct_description(product.getProductDescription());
+        productFullDTO.setRating(calculateAverageRating(product));
+        productFullDTO.setQuantity_in_stock(product.getDesiredQuantity());
+        productFullDTO.setApproval_status(ApprovalStatusDTO.builder()
+                .statusId(product.getApprovalStatus().getStatusId())
+                .statusCode(product.getApprovalStatus().getStatusCode())
+                .statusName(product.getApprovalStatus().getStatusName())
+                .build());
+        productFullDTO.setCategory(CategoryDTO.builder()
+                .categoryId(product.getCategory().getCategoryId())
+                .categoryName(product.getCategory().getCategoryName())
+                .categoryDescription(product.getCategory().getCategoryDescription())
+                .build());
+        productFullDTO.setSold_amount(product.getSoldAmount());
+        productFullDTO.setProduct_list_price(Regex.formatPriceToVND(product.getListPrice()));
+        productFullDTO.setProduct_sale_price(Regex.formatPriceToVND(product.getSalePrice()));
+
+        List<String> mediaUrls = multimediaRepository.findAllByProduct_ProductId(product.getProductId()).stream()
+                .map(Multimedia::getMultimediaUrl)
+                .toList();
+
+        productFullDTO.setMedia_url(mediaUrls);
+
+        List<ProductVariantDTO> productVariantDTOS = productVariantRepository.findAllByProduct_ProductId(product.getProductId()).stream()
+                .map(productVariant -> {
+                    ProductVariantDTO productVariantDTO = new ProductVariantDTO();
+                    productVariantDTO.setProduct_variant_id(productVariant.getProductVariantId());
+                    productVariantDTO.setProduct_variant_name(productVariant.getProductVariantName());
+                    productVariantDTO.setProduct_variant_image_url(findImageProductVariant(productVariant));
+                    productVariantDTO.setOrigin_price(Regex.formatPriceToVND(productVariant.getListPrice()));
+                    productVariantDTO.setSale_price(Regex.formatPriceToVND(productVariant.getSalePrice()));
+                    productVariantDTO.setQuantity_in_stock(productVariant.getDesiredQuantity());
+                    return productVariantDTO;
+                })
+                .toList();
+
+        productFullDTO.setProduct_variant_list(productVariantDTOS);
+
+        List<FeedbackDTO> feedbackDTOs = feedbackRepository.findByProduct_ProductId(product.getProductId()).stream()
+                .map(feedback -> {
+                    FeedbackDTO feedbackDTO = new FeedbackDTO();
+                    feedbackDTO.setUser_name(feedback.getAccount().getFullname());
+                    feedbackDTO.setRating(feedback.getRating().getValue());
+                    feedbackDTO.setComment(feedback.getComment());
+                    return feedbackDTO;
+                })
+                .toList();
+
+        productFullDTO.setFeedback_list(feedbackDTOs);
+
+        return productFullDTO;
+    }
+
+    private AgencyInfoDTO convertToAgencyInfoDTO(AgencyInfo agencyInfo){
         AgencyInfoDTO agencyInfoDTO = new AgencyInfoDTO();
         agencyInfoDTO.setAccount_id(agencyInfo.getAccount().getAccountId());
         agencyInfoDTO.setAgency_id(agencyInfo.getApplicationId());

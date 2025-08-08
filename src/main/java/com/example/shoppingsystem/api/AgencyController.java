@@ -1,9 +1,6 @@
 package com.example.shoppingsystem.api;
 
-import com.example.shoppingsystem.dtos.AccountInfoDTO;
-import com.example.shoppingsystem.dtos.AgencyInfoDTO;
-import com.example.shoppingsystem.dtos.OrderDTO;
-import com.example.shoppingsystem.dtos.ProductInfoDTO;
+import com.example.shoppingsystem.dtos.*;
 import com.example.shoppingsystem.requests.*;
 import com.example.shoppingsystem.responses.ApiResponse;
 import com.example.shoppingsystem.services.interfaces.AgencyService;
@@ -12,6 +9,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,25 +17,26 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/agency/")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('AGENCY')")
 @Tag(name = "Agency")
 public class AgencyController {
     private final AgencyService agencyService;
 
     @Operation(summary = "Agency Add Product", description = "Agency Add New Product")
     @PostMapping("/product/add")
-    public ResponseEntity<ApiResponse<ProductInfoDTO>> createProduct(
+    public ResponseEntity<ApiResponse<ProductFullDTO>> createProduct(
             @RequestBody AddNewProductRequest request
     ) {
-        ApiResponse<ProductInfoDTO> response = agencyService.createProduct(request);
+        ApiResponse<ProductFullDTO> response = agencyService.createProduct(request);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @Operation(summary = "Agency Update Product", description = "Agency Update Product")
     @PostMapping("/product/update")
-    public ResponseEntity<ApiResponse<ProductInfoDTO>> updateProduct(
+    public ResponseEntity<ApiResponse<ProductFullDTO>> updateProduct(
             @RequestBody UpdateProductRequest request
     ) {
-        ApiResponse<ProductInfoDTO> response = agencyService.updateProduct(request);
+        ApiResponse<ProductFullDTO> response = agencyService.updateProduct(request);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 

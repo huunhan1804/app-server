@@ -15,15 +15,13 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AddNewProductRequest {
-    private long agency_id;
     private String product_name;
+    private String product_description;
+    private long category_id;
+    private int quantity_in_stock;
+    private List<String> image_urls;
+    private List<AddProductVariantsRequest> product_variant_list;
     private String product_list_price;
     private String product_sale_price;
-    private String product_description;
-    private int quantity_in_stock;
-    private long category_id;
-    private String image_url;
-    private String product_safety_certificate_url;
-    private List<AddProductVariantsRequest> product_variant_list;
 
 }

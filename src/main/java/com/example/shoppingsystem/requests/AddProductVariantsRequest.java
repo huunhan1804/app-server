@@ -13,7 +13,8 @@ public class AddProductVariantsRequest {
     private Long product_variant_id;
     private String product_variant_name;
     //private String product_variant_image_url;
-    private String origin_price;
-    private String sale_price;
-    private int quantity_in_stock;
+    private String product_list_price;
+    private String product_sale_price;
+    private int inventory_quantity;
+    private int sold_amount;
 }
