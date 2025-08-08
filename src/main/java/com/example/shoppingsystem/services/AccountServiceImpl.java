@@ -349,27 +349,6 @@ public class AccountServiceImpl implements AccountService {
         return savedAccount;
     }
 
-//    private AgencyInfo regiesterAgencyInfo(String shopName, String shopAddress, String shopEmail, String shopPhone, String taxCode, String idCardNumber, String frontIdCardImageUrl, String backIdCardImageUrl, String professionalCertUrl, String businessLicenseUrl) {
-//        Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
-//        AgencyInfo saveAgencyInfo = agencyInfoRepository.save(AgencyInfo.builder()
-//                .account(account.get())
-//                .shopName(shopName)
-//                .shopEmail(shopEmail)
-//                .shopPhone(shopPhone)
-//                .shopAddressDetail(shopAddress)
-//                .taxNumber(taxCode)
-//                .idCardNumber(idCardNumber)
-//                .idCardBackImageUrl(backIdCardImageUrl)
-//                .idCardFrontImageUrl(frontIdCardImageUrl)
-//                .businessLicenseUrls(businessLicenseUrl)
-//                .professionalCertUrls(professionalCertUrl)
-//                .genderApplicant(account.get().getGender())
-//                .submittedDate(new java.util.Date())
-//                .approvalStatus(approvalStatusRepository.findApprovalStatusByStatusCode(StatusCode.STATUS_PENDING))
-//                .build());
-//        return saveAgencyInfo;
-//    }
-
     private String generateUsername(String loginId) {
         if (Regex.isValidEmail(loginId)) {
             int atIndex = loginId.indexOf('@');
@@ -397,13 +376,28 @@ public class AccountServiceImpl implements AccountService {
     }
 
     private AccountInfoDTO changeToAccountDTO(Account account, Cart cart, Multimedia multimedia) {
+        Optional<AgencyInfo> agencyInfo = agencyInfoRepository.findByAccount(account);
+        if (agencyInfo.isPresent()) {
+            return new AccountInfoDTO(
+                    account.getAccountId(),
+                    account.getUsername(),
+                    multimedia.getMultimediaUrl(),
+                    account.getRole().getRoleCode(),
+                    account.getApprovalStatus().getStatusCode(),
+                    new CartDTO(cart.getCartId(), cart.getTotalItem(), getCartItemList(cart.getCartId())),
+                    new AccountProfileDTO(account.getFullname(), account.getEmail(), account.getPhone(), account.getGender(), account.getBirthdate()),
+                    agencyInfo.get().getRejectionReason()
+            );
+        }
         return new AccountInfoDTO(
                 account.getAccountId(),
                 account.getUsername(),
                 multimedia.getMultimediaUrl(),
                 account.getRole().getRoleCode(),
+                account.getApprovalStatus().getStatusCode(),
                 new CartDTO(cart.getCartId(), cart.getTotalItem(), getCartItemList(cart.getCartId())),
-                new AccountProfileDTO(account.getFullname(), account.getEmail(), account.getPhone(), account.getGender(), account.getBirthdate())
+                new AccountProfileDTO(account.getFullname(), account.getEmail(), account.getPhone(), account.getGender(), account.getBirthdate()),
+                null
         );
     }
 

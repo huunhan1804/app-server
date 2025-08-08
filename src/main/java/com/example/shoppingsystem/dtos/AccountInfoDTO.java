@@ -12,6 +12,8 @@ public class AccountInfoDTO {
     private String username;
     private String avatar_url;
     private String role_code;
+    private String status;
     private CartDTO cart_info;
     private AccountProfileDTO accountProfileDTO;
+    private String rejectReason;
 }

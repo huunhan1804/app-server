@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -67,6 +68,7 @@ public class AgencyServiceImpl implements AgencyService {
             product.setInventoryQuantity(request.getQuantity_in_stock());
             product.setCategory(categoryRepository.findByCategoryId(request.getCategory_id()));
             product.setCreatedBy(agencyInfo.getFullNameApplicant());
+            product.setCreatedDate(LocalDateTime.now());
             product.setListPrice(Regex.parseVNDToBigDecimal(request.getProduct_list_price()));
             product.setSalePrice(Regex.parseVNDToBigDecimal(request.getProduct_sale_price()));
             product.setSoldAmount(0);
@@ -94,7 +96,7 @@ public class AgencyServiceImpl implements AgencyService {
             return getFullInfoProduct(saveProduct.getProductId());
         }
         return ApiResponse.<ProductFullDTO>builder()
-                .status(ErrorCode.FORBIDDEN)
+                .status(ErrorCode.NOT_FOUND)
                 .message(Message.ACCOUNT_NOT_FOUND)
                 .timestamp(new Date())
                 .build();
@@ -108,56 +110,57 @@ public class AgencyServiceImpl implements AgencyService {
             Optional<AgencyInfo> agency = agencyInfoRepository.findByAccount(account.get());
             if(agency.isPresent()){
                 products = productRepository.findProductByAgencyInfoAndProductId(agency.get(), request.getProduct_id());
-            }
-            if(products.isEmpty()){
-                return ApiResponse.<ProductFullDTO>builder()
-                        .status(ErrorCode.NOT_FOUND)
-                        .message(Message.PRODUCT_NOT_FOUND)
-                        .timestamp(new Date())
-                        .build();
-            }else{
-                Product product = products.get(0);
-                product.setProductName(request.getProduct_name());
-                product.setProductDescription(request.getProduct_description());
-                product.setDesiredQuantity(request.getQuantity_in_stock());
-                product.setInventoryQuantity(request.getQuantity_in_stock());
-                product.setCategory(categoryRepository.findByCategoryId(request.getCategory_id()));
-                product.setCreatedBy(account.get().getUsername());
-                product.setListPrice(Regex.parseVNDToBigDecimal(request.getProduct_list_price()));
-                product.setSalePrice(Regex.parseVNDToBigDecimal(request.getProduct_sale_price()));
-                product.setIsSale(false);
-                product.setApprovalStatus(approvalStatusRepository.findApprovalStatusByStatusCode(StatusCode.STATUS_PENDING));
-                Product saveProduct = productRepository.save(product);
+                if(products.isEmpty()){
+                    return ApiResponse.<ProductFullDTO>builder()
+                            .status(ErrorCode.NOT_FOUND)
+                            .message(Message.PRODUCT_NOT_FOUND)
+                            .timestamp(new Date())
+                            .build();
+                }else{
+                    Product product = products.get(0);
+                    product.setProductName(request.getProduct_name());
+                    product.setProductDescription(request.getProduct_description());
+                    //product.setDesiredQuantity(request.getQuantity_in_stock());
+                    product.setInventoryQuantity(request.getQuantity_in_stock());
+                    product.setCategory(categoryRepository.findByCategoryId(request.getCategory_id()));
+                    product.setCreatedBy(account.get().getUsername());
+                    product.setListPrice(Regex.parseVNDToBigDecimal(request.getProduct_list_price()));
+                    product.setSalePrice(Regex.parseVNDToBigDecimal(request.getProduct_sale_price()));
+                    product.setIsSale(false);
+                    product.setApprovalStatus(approvalStatusRepository.findApprovalStatusByStatusCode(StatusCode.STATUS_PENDING));
+                    Product saveProduct = productRepository.save(product);
 
-                multimediaRepository.deleteAllByProduct_ProductId(product.getProductId());
-                multimediaRepository.save(Multimedia.builder()
-                        .product(product)
-                        .multimediaType(MultimediaType.IMAGE)
-                        .multimediaUrl(request.getImage_url())
-                        .build()
-                );
-                multimediaRepository.save(Multimedia.builder()
-                        .product(product)
-                        .multimediaType(MultimediaType.IMAGE)
-                        .multimediaUrl(request.getProduct_safety_certificate_url())
-                        .build()
-                );
+                    multimediaRepository.deleteAllByProduct_ProductId(product.getProductId());
+                    for(String image_url : request.getImage_urls()){
+                        multimediaRepository.save(Multimedia.builder()
+                                .product(product)
+                                .multimediaType(MultimediaType.IMAGE)
+                                .multimediaUrl(image_url)
+                                .build()
+                        );
+                    }
 
-                for(AddProductVariantsRequest addProductVariantsRequest : request.getProduct_variant_list()){
-                    ProductVariant productVariant = new ProductVariant();
-                    productVariant.setProduct(product);
-                    productVariant.setListPrice(Regex.parseVNDToBigDecimal(addProductVariantsRequest.getProduct_list_price()));
-                    productVariant.setSalePrice(Regex.parseVNDToBigDecimal(addProductVariantsRequest.getProduct_sale_price()));
-                    productVariant.setProductVariantName(addProductVariantsRequest.getProduct_variant_name());
-                    productVariant.setDesiredQuantity(addProductVariantsRequest.getInventory_quantity());
-                    productVariant.setInventoryQuantity(addProductVariantsRequest.getInventory_quantity());
-                    productVariantRepository.save(productVariant);
+                    for(AddProductVariantsRequest addProductVariantsRequest : request.getProduct_variant_list()){
+                        ProductVariant productVariant = new ProductVariant();
+                        productVariant.setProduct(product);
+                        productVariant.setListPrice(Regex.parseVNDToBigDecimal(addProductVariantsRequest.getProduct_list_price()));
+                        productVariant.setSalePrice(Regex.parseVNDToBigDecimal(addProductVariantsRequest.getProduct_sale_price()));
+                        productVariant.setProductVariantName(addProductVariantsRequest.getProduct_variant_name());
+                        productVariant.setDesiredQuantity(addProductVariantsRequest.getInventory_quantity());
+                        productVariant.setInventoryQuantity(addProductVariantsRequest.getInventory_quantity());
+                        productVariantRepository.save(productVariant);
+                    }
+                    return getFullInfoProduct(saveProduct.getProductId());
                 }
-                return getFullInfoProduct(saveProduct.getProductId());
             }
+            return ApiResponse.<ProductFullDTO>builder()
+                    .status(ErrorCode.NOT_FOUND)
+                    .message(Message.AGENCY_NOT_FOUND)
+                    .timestamp(new Date())
+                    .build();
         }
         return ApiResponse.<ProductFullDTO>builder()
-                .status(ErrorCode.FORBIDDEN)
+                .status(ErrorCode.NOT_FOUND)
                 .message(Message.ACCOUNT_NOT_FOUND)
                 .timestamp(new Date())
                 .build();
@@ -192,7 +195,7 @@ public class AgencyServiceImpl implements AgencyService {
                     .build();
         }
         return ApiResponse.<AgencyInfoDTO>builder()
-                .status(ErrorCode.FORBIDDEN)
+                .status(ErrorCode.NOT_FOUND)
                 .message(Message.ACCOUNT_NOT_FOUND)
                 .timestamp(new Date())
                 .build();
@@ -225,14 +228,14 @@ public class AgencyServiceImpl implements AgencyService {
             }
 
             return ApiResponse.<List<ProductInfoDTO>>builder()
-                    .status(ErrorCode.FORBIDDEN)
+                    .status(ErrorCode.NOT_FOUND)
                     .message(Message.AGENCY_INFO_NOT_FOUND)
                     .timestamp(new java.util.Date())
                     .build();
 
         }
         return ApiResponse.<List<ProductInfoDTO>>builder()
-                .status(ErrorCode.FORBIDDEN)
+                .status(ErrorCode.NOT_FOUND)
                 .message(Message.ACCOUNT_NOT_FOUND)
                 .timestamp(new java.util.Date())
                 .build();
