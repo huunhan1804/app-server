@@ -83,6 +83,8 @@ public class Message {
     public static final String FETCHING_SUPPORT_CATEGORY_FAILURE = "Fetching category failed!";
     public static final String HIDE_ARTICLE_SUCCESS = "Hide article successfully!";
     public static final String HIDE_ARTICLE_FAILURE = "Hide article failed!";
+    public static final String NOT_FOUND_CHAT_SESSION = "Not found chat session!";
+    public static final String NOT_FOUND_CHAT_MESSAGE = "Not found message!";
 
 
 }

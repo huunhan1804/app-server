@@ -71,6 +71,11 @@ public class ProductController {
         return ResponseEntity.status(apiResponse.getStatus()).body(apiResponse);
     }
 
-
+    @Operation(summary = "API get list product by agency", description = "This API get list product by agency")
+    @GetMapping("/all-by-agency/{agencyId}")
+    public ResponseEntity<ApiResponse<List>> getListProductByAgency(@PathVariable long agencyId) {
+        ApiResponse<List> apiResponse = productService.getListProductByAgency(agencyId);
+        return ResponseEntity.status(apiResponse.getStatus()).body(apiResponse);
+    }
 
 }

@@ -383,7 +383,7 @@ public class AccountServiceImpl implements AccountService {
                     account.getUsername(),
                     multimedia.getMultimediaUrl(),
                     account.getRole().getRoleCode(),
-                    account.getApprovalStatus().getStatusCode(),
+                    agencyInfo.get().getApprovalStatus().getStatusCode(),
                     new CartDTO(cart.getCartId(), cart.getTotalItem(), getCartItemList(cart.getCartId())),
                     new AccountProfileDTO(account.getFullname(), account.getEmail(), account.getPhone(), account.getGender(), account.getBirthdate()),
                     agencyInfo.get().getRejectionReason()

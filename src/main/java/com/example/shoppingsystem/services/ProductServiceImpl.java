@@ -3,14 +3,13 @@ package com.example.shoppingsystem.services;
 import com.example.shoppingsystem.constants.ErrorCode;
 import com.example.shoppingsystem.constants.Message;
 import com.example.shoppingsystem.constants.Regex;
-import com.example.shoppingsystem.dtos.FeedbackDTO;
-import com.example.shoppingsystem.dtos.ProductBasicDTO;
-import com.example.shoppingsystem.dtos.ProductInfoDTO;
-import com.example.shoppingsystem.dtos.ProductVariantDTO;
+import com.example.shoppingsystem.constants.StatusCode;
+import com.example.shoppingsystem.dtos.*;
 import com.example.shoppingsystem.entities.*;
 import com.example.shoppingsystem.repositories.*;
 import com.example.shoppingsystem.responses.ApiResponse;
 import com.example.shoppingsystem.services.interfaces.ProductService;
+import net.sf.ehcache.util.ProductInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,15 +29,17 @@ public class ProductServiceImpl implements ProductService {
     private final FeedbackRepository feedbackRepository;
     private final MultimediaRepository multimediaRepository;
     private final OrderDetailRepository orderDetailRepository;
+    private final AgencyInfoRepository agencyInfoRepository;
     private final Random random = new Random();
     @Autowired
-    public ProductServiceImpl(ProductRepository productRepository, ProductVariantRepository productVariantRepository, CategoryRepository categoryRepository, FeedbackRepository feedbackRepository, MultimediaRepository multimediaRepository, OrderDetailRepository orderDetailRepository) {
+    public ProductServiceImpl(ProductRepository productRepository, ProductVariantRepository productVariantRepository, CategoryRepository categoryRepository, FeedbackRepository feedbackRepository, MultimediaRepository multimediaRepository, OrderDetailRepository orderDetailRepository, AgencyInfoRepository agencyInfoRepository) {
         this.productRepository = productRepository;
         this.productVariantRepository = productVariantRepository;
         this.categoryRepository = categoryRepository;
         this.feedbackRepository = feedbackRepository;
         this.multimediaRepository = multimediaRepository;
         this.orderDetailRepository = orderDetailRepository;
+        this.agencyInfoRepository = agencyInfoRepository;
     }
 
 
@@ -224,6 +225,24 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
+    @Override
+    public ApiResponse<List> getListProductByAgency(Long agencyId){
+        Optional<AgencyInfo> agencyInfo = agencyInfoRepository.findByApplicationId(agencyId);
+        if(agencyInfo.isPresent()){
+            return ApiResponse.<List>builder()
+                    .status(ErrorCode.SUCCESS)
+                    .message(Message.SUCCESS)
+                    .data(getProductBasicDTOsByAgency(agencyInfo.get()).toList())
+                    .timestamp(new java.util.Date())
+                    .build();
+        }
+        return ApiResponse.<List>builder()
+                .status(ErrorCode.BAD_REQUEST)
+                .message(Message.AGENCY_NOT_FOUND)
+                .timestamp(new java.util.Date())
+                .build();
+    }
+
 
     private ProductInfoDTO convertToProductInfoDTO(Product product, List<ProductVariant> productVariants, List<Feedback> feedbacks, List<Multimedia> multimediaProduct) {
         ProductInfoDTO productInfoDTO = new ProductInfoDTO();
@@ -266,13 +285,43 @@ public class ProductServiceImpl implements ProductService {
                 .collect(Collectors.toList());
 
         productInfoDTO.setFeedback_list(feedbackDTOs);
+        productInfoDTO.setShop_info(convertToShopInfoDTO(product.getAgencyInfo()));
 
         return productInfoDTO;
+    }
+
+    private ShopInfoDTO convertToShopInfoDTO(AgencyInfo agencyInfo) {
+        ShopInfoDTO shopInfoDTO = new ShopInfoDTO();
+        shopInfoDTO.setShopId(agencyInfo.getApplicationId());
+        shopInfoDTO.setShopName(agencyInfo.getShopName());
+        shopInfoDTO.setShopPhone(agencyInfo.getShopPhone());
+        shopInfoDTO.setShopEmail(agencyInfo.getShopEmail());
+        shopInfoDTO.setShopAddress(agencyInfo.getShopAddressDetail());
+
+        Optional<Multimedia> multimedia = multimediaRepository.findByAccount(agencyInfo.getAccount());
+        shopInfoDTO.setShopAvatar(multimedia.map(Multimedia::getMultimediaUrl).orElse(null));
+
+//        List<Product> products = productRepository.findAllByAgencyInfoAndAgencyInfo_ApprovalStatus_StatusCode(agencyInfo, StatusCode.STATUS_APPROVED);
+//        List<ProductInfoDTO> productInfos = new ArrayList<>();
+//        for(Product product : products){
+//            if (product.getIsSale()){
+//                ProductInfoDTO productInfoDTO = convertToProductInfoDTO(product, product.getProductVariants(),feedbackRepository.findByProduct_ProductId(product.getProductId()), multimediaRepository.findAllByProduct_ProductId(product.getProductId()));
+//                productInfos.add(productInfoDTO);
+//            }
+//        }
+//        shopInfoDTO.setProducts(productInfos);
+        return shopInfoDTO;
     }
 
     private Stream<ProductBasicDTO> getProductBasicDTOsByCategory(Category category) {
         List<Product> productsInCategory = productRepository.findByCategory_CategoryId(category.getCategoryId());
         return productsInCategory.stream()
+                .map(this::convertToProductBasicDTO);
+    }
+
+    private Stream<ProductBasicDTO> getProductBasicDTOsByAgency(AgencyInfo agencyInfo) {
+        List<Product> productInsAgency = productRepository.findAllByAgencyInfoAndAgencyInfo_ApprovalStatus_StatusCode(agencyInfo, StatusCode.STATUS_APPROVED);
+        return productInsAgency.stream()
                 .map(this::convertToProductBasicDTO);
     }
 

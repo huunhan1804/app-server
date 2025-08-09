@@ -29,6 +29,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     List<Product> findByApprovalStatus_StatusCode(String statusCode);
     List<Product> findProductByAgencyInfoAndProductId(AgencyInfo agencyInfo, long productId);
     List<Product> findByAgencyInfo(AgencyInfo agencyInfo);
+    List<Product> findAllByAgencyInfoAndAgencyInfo_ApprovalStatus_StatusCode(AgencyInfo agencyInfo, String statusCode);
 
     Page<Product> findByApprovalStatus_StatusCode(String statusCode, Pageable pageable);
 

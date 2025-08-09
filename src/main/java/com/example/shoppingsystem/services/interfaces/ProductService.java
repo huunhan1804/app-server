@@ -28,4 +28,5 @@ public interface ProductService {
     ApiResponse<List<ProductBasicDTO>> searchProductsByKeyword(String keyword);
 
     ApiResponse<List> getListProductByCategory(Long categoryId);
+    ApiResponse<List> getListProductByAgency(Long agencyId);
 }

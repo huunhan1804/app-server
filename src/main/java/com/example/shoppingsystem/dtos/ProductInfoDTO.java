@@ -21,4 +21,5 @@ public class ProductInfoDTO {
     private List<String> media_url;
     private List<ProductVariantDTO> product_variant_list;
     private List<FeedbackDTO> feedback_list;
+    private ShopInfoDTO shop_info;
 }
