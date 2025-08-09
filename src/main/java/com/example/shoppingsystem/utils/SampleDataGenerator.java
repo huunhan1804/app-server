@@ -115,7 +115,7 @@ public class SampleDataGenerator {
             System.out.println("✓ Đã tạo " + accountCoupons.size() + " account coupons");
 
             // 16. Tạo Orders
-            List<OrderList> orders = createOrders(accounts, agencyInfos);
+            List<OrderList> orders = createOrders(accounts);
             System.out.println("✓ Đã tạo " + orders.size() + " orders");
 
             // 17. Tạo Order Details
@@ -742,14 +742,15 @@ public class SampleDataGenerator {
         return accountCouponRepository.saveAll(accountCoupons);
     }
 
-    private List<OrderList> createOrders(List<Account> accounts, List<AgencyInfo> agencies) {
+    private List<OrderList> createOrders(List<Account> accounts) {
         List<OrderList> orders = new ArrayList<>();
         List<Account> customers = accounts.stream()
                 .filter(account -> "customer".equals(account.getRole().getRoleCode()))
                 .toList();
-//        List<AgencyInfo> agencies = accounts.stream()
-//                .filter(account -> "agency".equals(account.getRole().getRoleCode()))
-//                .toList();
+        List<Account> agencies = accounts.stream()
+                .filter(account -> "agency".equals(account.getRole().getRoleCode()))
+                .toList();
+
 
         if (customers.isEmpty() || agencies.isEmpty()) {
             System.out.println("⚠️  Không có customer hoặc agency để tạo orders!");
@@ -758,7 +759,7 @@ public class SampleDataGenerator {
 
         for (int i = 0; i < 1500; i++) {
             Account customer = customers.get(random.nextInt(customers.size()));
-            AgencyInfo agency = agencies.get(random.nextInt(agencies.size()));
+            Account agency = agencies.get(random.nextInt(agencies.size()));
 
             orders.add(OrderList.builder()
                     .account(customer)
@@ -925,7 +926,7 @@ public class SampleDataGenerator {
             System.out.println("✓ Đã tạo " + accountCoupons.size() + " account coupons");
 
             // Tạo orders
-            List<OrderList> orders = createOrdersBig(allAccounts,agencyInfos);
+            List<OrderList> orders = createOrdersBig(allAccounts);
             System.out.println("✓ Đã tạo " + orders.size() + " orders");
 
             // Tạo order details
@@ -1197,14 +1198,14 @@ public class SampleDataGenerator {
         return accountCouponRepository.saveAll(accountCoupons);
     }
 
-    private List<OrderList> createOrdersBig(List<Account> accounts, List<AgencyInfo> agencies) {
+    private List<OrderList> createOrdersBig(List<Account> accounts) {
         List<OrderList> orders = new ArrayList<>();
         List<Account> customers = accounts.stream()
                 .filter(account -> "customer".equals(account.getRole().getRoleCode()))
                 .toList();
-//        List<Account> agencies = accounts.stream()
-//                .filter(account -> "agency".equals(account.getRole().getRoleCode()))
-//                .toList();
+        List<Account> agencies = accounts.stream()
+                .filter(account -> "agency".equals(account.getRole().getRoleCode()))
+                .toList();
 
         if (customers.isEmpty() || agencies.isEmpty()) {
             return orders;
@@ -1212,7 +1213,7 @@ public class SampleDataGenerator {
 
         for (int i = 0; i < 2000; i++) {
             Account customer = customers.get(random.nextInt(customers.size()));
-            AgencyInfo agency = agencies.get(random.nextInt(agencies.size()));
+            Account agency = agencies.get(random.nextInt(agencies.size()));
 
             orders.add(OrderList.builder()
                     .account(customer)

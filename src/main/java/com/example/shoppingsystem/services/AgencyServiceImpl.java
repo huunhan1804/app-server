@@ -585,7 +585,7 @@ public class AgencyServiceImpl implements AgencyService {
 //        }
         OrderList orderList = orderRepository.findByOrderId(request.getOrderId());
         if(orderList != null) {
-            if(orderList.getAgency().getApplicationId().equals(request.getAgencyId())) {
+            if(orderList.getAccount().getAccountId().equals(request.getAgencyId())) {
                 if(orderList.getOrderStatus().equals(OrderStatus.PENDING)) {
                     orderList.setOrderStatus(OrderStatus.SHIPPING);
                     OrderList savedOrder = orderRepository.save(orderList);
@@ -617,7 +617,7 @@ public class AgencyServiceImpl implements AgencyService {
     public ApiResponse<OrderDTO> completeOrder(CompleteOrderRequest request){
         OrderList orderList = orderRepository.findByOrderId(request.getOrderId());
         if(orderList != null) {
-            if(orderList.getAgency().getApplicationId().equals(request.getAgencyId())) {
+            if(orderList.getAccount().getAccountId().equals(request.getAgencyId())) {
                 if(orderList.getOrderStatus().equals(OrderStatus.DELIVERED)) {
                     orderList.setOrderStatus(OrderStatus.COMPLETED);
                     OrderList savedOrder = orderRepository.save(orderList);
