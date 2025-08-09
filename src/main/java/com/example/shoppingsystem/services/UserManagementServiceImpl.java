@@ -354,8 +354,7 @@ public class UserManagementServiceImpl implements UserManagementService {
                 .createdDate(account.getCreatedDate())
                 .lastLogin(account.getLastLogin())
                 .businessName(agencyInfo.map(AgencyInfo::getShopName).orElse("Chưa đăng ký"))
-                .approvalStatus(account.getApprovalStatus() != null ?
-                        account.getApprovalStatus().getStatusName() : "Chưa nộp hồ sơ")
+                .approvalStatus(account.getApprovalStatus().getStatusCode())
                 .totalRevenue(totalRevenue)
                 .storeRating(agencyInfo.map(info -> 0.0).orElse(0.0)) // Default rating
                 .totalReviews(agencyInfo.map(info -> 0).orElse(0)) // Default reviews

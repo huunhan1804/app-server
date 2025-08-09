@@ -24,4 +24,7 @@ public interface AgencyInfoRepository extends JpaRepository<AgencyInfo, Long> {
 
     // Tìm đơn đăng ký mới nhất của một tài khoản, sắp xếp theo ngày gửi giảm dần
     Optional<AgencyInfo> findTopByAccountOrderBySubmittedDateDesc(Account account);
+    // AgencyInfoRepository.java
+    long countByApprovalStatus_StatusCode(String statusCode);
+
 }
