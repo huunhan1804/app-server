@@ -50,4 +50,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     List<Product> findTop3ByOrderByProductIdDesc();
 
     Product findByProductId(long productId);
+    long countByApprovalStatus_StatusCode(String status);
+
 }
