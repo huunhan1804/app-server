@@ -48,4 +48,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     List<Product> findTop3ByOrderBySoldAmountDesc();
 
     List<Product> findTop3ByOrderByProductIdDesc();
+
+    long countByApprovalStatus_StatusCode(String status);
+
 }

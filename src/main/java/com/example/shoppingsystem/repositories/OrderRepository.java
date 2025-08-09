@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -37,4 +38,15 @@ public interface OrderRepository extends JpaRepository<OrderList, Long> {
     OrderList findByOrderId(Long orderId);
     List<OrderList> findByOrderStatus(OrderStatus status);
     List<OrderList> findByAgency_AccountId(Long agencyId);
+    @Query("SELECT COALESCE(SUM(o.totalPrice), 0) FROM OrderList o")
+    BigDecimal sumAllRevenue();
+    @Query("""
+   SELECT FUNCTION('DATE', o.orderDate) AS d, COALESCE(SUM(o.totalPrice),0)
+   FROM OrderList o
+   WHERE o.orderDate BETWEEN :start AND :end
+   GROUP BY FUNCTION('DATE', o.orderDate)
+   ORDER BY d
+""")
+    List<Object[]> sumRevenueByDate(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
 }

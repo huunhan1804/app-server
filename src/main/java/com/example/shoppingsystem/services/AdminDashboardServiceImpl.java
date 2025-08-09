@@ -31,39 +31,17 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
 
     @Override
     public List<RevenueDataDTO> getRevenueLast30Days() {
-        try {
-            LocalDateTime endDate = LocalDateTime.now();
-            LocalDateTime startDate = endDate.minusDays(30);
+        LocalDateTime end = LocalDateTime.now();
+        LocalDateTime start = end.minusDays(30);
+        var rows = orderRepository.sumRevenueByDate(start, end); // ít row, nhẹ network
+        Map<LocalDate, BigDecimal> map = new HashMap<>();
+        for (Object[] r : rows) map.put(((java.sql.Date) r[0]).toLocalDate(), (BigDecimal) r[1]);
 
-            List<com.example.shoppingsystem.entities.OrderList> orders =
-                    orderRepository.findOrdersInDateRange(startDate, endDate);
-
-            // Group orders by date and sum revenue
-            Map<LocalDate, BigDecimal> dailyRevenue = orders.stream()
-                    .collect(Collectors.groupingBy(
-                            order -> order.getOrderDate().toLocalDate(),
-                            Collectors.reducing(BigDecimal.ZERO,
-                                    com.example.shoppingsystem.entities.OrderList::getTotalPrice,
-                                    BigDecimal::add)
-                    ));
-
-            List<RevenueDataDTO> result = new ArrayList<>();
-            LocalDate currentDate = startDate.toLocalDate();
-
-            while (!currentDate.isAfter(endDate.toLocalDate())) {
-                BigDecimal revenue = dailyRevenue.getOrDefault(currentDate, BigDecimal.ZERO);
-                result.add(new RevenueDataDTO(
-                        currentDate.format(DateTimeFormatter.ofPattern("dd/MM")),
-                        revenue
-                ));
-                currentDate = currentDate.plusDays(1);
-            }
-
-            return result;
-        } catch (Exception e) {
-            log.error("Error getting revenue data for last 30 days", e);
-            return new ArrayList<>();
+        List<RevenueDataDTO> result = new ArrayList<>();
+        for (LocalDate d = start.toLocalDate(); !d.isAfter(end.toLocalDate()); d = d.plusDays(1)) {
+            result.add(new RevenueDataDTO(d.format(DateTimeFormatter.ofPattern("dd/MM")), map.getOrDefault(d, BigDecimal.ZERO)));
         }
+        return result;
     }
 
     @Override
@@ -215,7 +193,7 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     @Override
     public int getPendingProductsCount() {
         try {
-            return (int) productRepository.findByApprovalStatus_StatusCode("pending").size();
+            return (int) productRepository.countByApprovalStatus_StatusCode("pending");
         } catch (Exception e) {
             log.error("Error getting pending products count", e);
             return 0;
@@ -225,14 +203,13 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     @Override
     public int getPendingApplicationsCount() {
         try {
-            return (int) agencyInfoRepository.findByApprovalStatus_StatusCode("pending")
-                    .map(page -> 1)
-                    .orElse(0);
+            return (int) agencyInfoRepository.countByApprovalStatus_StatusCode("pending");
         } catch (Exception e) {
             log.error("Error getting pending applications count", e);
             return 0;
         }
     }
+
 
     @Override
     public Map<String, Object> getDashboardStats() {
@@ -281,19 +258,18 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
         }
     }
 
+    // AdminDashboardServiceImpl.java
     @Override
     public String getTotalRevenue() {
         try {
-            BigDecimal totalRevenue = orderRepository.findAll().stream()
-                    .map(com.example.shoppingsystem.entities.OrderList::getTotalPrice)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-            return formatCurrency(totalRevenue);
+            BigDecimal total = orderRepository.sumAllRevenue();
+            return formatCurrency(total);
         } catch (Exception e) {
             log.error("Error getting total revenue", e);
             return "0 VND";
         }
     }
+
 
     private String formatCurrency(BigDecimal amount) {
         if (amount == null) {

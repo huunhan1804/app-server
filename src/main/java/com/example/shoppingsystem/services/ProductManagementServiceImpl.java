@@ -212,7 +212,7 @@ public class ProductManagementServiceImpl implements ProductManagementService {
 
     @Override
     public List<AgencyResponse> getAllAgencies() {
-        return accountRepository.findByRoleRoleCode("agency").stream() 
+        return accountRepository.findByRoleRoleCode("agency").stream()
                 .map(account -> new AgencyResponse(
                         account.getAccountId(),
                         account.getFullname(),
