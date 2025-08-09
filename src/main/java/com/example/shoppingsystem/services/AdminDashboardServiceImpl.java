@@ -69,33 +69,17 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     @Override
     public List<CategoryStatDTO> getCategoryStatistics() {
         try {
-            List<com.example.shoppingsystem.entities.Category> categories = categoryRepository.findAll();
-            List<CategoryStatDTO> stats = new ArrayList<>();
-
-            for (com.example.shoppingsystem.entities.Category category : categories) {
-                long productCount = productRepository.findByCategory_CategoryId(category.getCategoryId()).size();
-
-                // Calculate total sales for this category
-                BigDecimal totalSales = orderDetailRepository.findAll().stream()
-                        .filter(od -> od.getProduct() != null &&
-                                od.getProduct().getCategory().getCategoryId().equals(category.getCategoryId()))
-                        .map(com.example.shoppingsystem.entities.OrderDetail::getSubtotal)
-                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-                stats.add(new CategoryStatDTO(
-                        category.getCategoryName(),
-                        (int) productCount,
-                        totalSales
-                ));
-            }
-
-            return stats.stream()
-                    .sorted((a, b) -> b.getTotalSales().compareTo(a.getTotalSales()))
-                    .limit(10)
+            var rows = categoryRepository.getCategoryStats();
+            return rows.stream()
+                    .map(r -> new CategoryStatDTO(
+                            r.getCategoryName(),
+                            r.getProductCount() == null ? 0 : r.getProductCount().intValue(),
+                            r.getTotalSales() == null ? BigDecimal.ZERO : r.getTotalSales()
+                    ))
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            log.error("Error getting category statistics", e);
-            return new ArrayList<>();
+            log.error("Error getting category stats", e);
+            return Collections.emptyList();
         }
     }
 
