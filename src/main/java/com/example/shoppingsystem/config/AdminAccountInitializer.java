@@ -65,7 +65,7 @@ public class AdminAccountInitializer implements CommandLineRunner {
 
     private void initializeRoles() {
         // Tạo role admin nếu chưa có
-        if (roleRepository.findByRoleCode("ADMIN") == null) {
+        if (roleRepository.findByRoleCode("admin") == null) {
             Role adminRole = Role.builder()
                     .roleCode("admin")
                     .roleName("Administrator")

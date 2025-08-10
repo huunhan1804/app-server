@@ -196,7 +196,7 @@ public class SampleDataGenerator {
         System.out.println("Tạo roles...");
 
         // Kiểm tra xem đã có ADMIN role chưa
-        Optional<Role> adminRole = Optional.ofNullable(roleRepository.findByRoleCode("ADMIN"));
+        Optional<Role> adminRole = Optional.ofNullable(roleRepository.findByRoleCode("admin"));
         if (adminRole.isPresent()) {
             System.out.println("Roles đã tồn tại, lấy từ database");
             return roleRepository.findAll();
@@ -346,7 +346,7 @@ public class SampleDataGenerator {
         List<Account> accounts = new ArrayList<>();
 
         // Lấy roles
-        Role adminRole = roles.stream().filter(r -> r.getRoleCode().equals("ADMIN")).findFirst().orElse(roles.get(0));
+        Role adminRole = roles.stream().filter(r -> r.getRoleCode().equals("admin")).findFirst().orElse(roles.get(0));
         Role customerRole = roles.stream().filter(r -> r.getRoleCode().equals("customer")).findFirst().orElse(roles.get(1));
         Role agencyRole = roles.stream().filter(r -> r.getRoleCode().equals("agency")).findFirst().orElse(roles.get(2));
 
