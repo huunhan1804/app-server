@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Builder
 @Entity
 @NoArgsConstructor
@@ -41,26 +39,5 @@ public class SupportArticle extends BaseEntity {
     @Column(name = "article_images", columnDefinition = "json")
     private String articleImages;
 
-    @Transient
-    public List<String> getArticleImages() {
-        try {
-            if (articleImages == null || articleImages.isBlank()) return List.of();
-            return new com.fasterxml.jackson.databind.ObjectMapper()
-                    .readValue(articleImages, new com.fasterxml.jackson.core.type.TypeReference<List<String>>() {});
-        } catch (Exception e) {
-            return List.of();
-        }
-    }
-
-    @Transient
-    public void setArticleImages(List<String> images) {
-        try {
-            this.articleImages = (images == null)
-                    ? null
-                    : new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(images);
-        } catch (Exception e) {
-            this.articleImages = null;
-        }
-    }
 
 }
