@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Builder
 @Entity
 @NoArgsConstructor
@@ -35,4 +37,30 @@ public class SupportArticle extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SUPPORT_CATEGORY_ID")
     private SupportCategory supportCategory;
+
+    @Column(name = "article_images", columnDefinition = "json")
+    private String articleImagesJson;
+
+    @Transient
+    public List<String> getArticleImages() {
+        try {
+            if (articleImagesJson == null || articleImagesJson.isBlank()) return List.of();
+            return new com.fasterxml.jackson.databind.ObjectMapper()
+                    .readValue(articleImagesJson, new com.fasterxml.jackson.core.type.TypeReference<List<String>>() {});
+        } catch (Exception e) {
+            return List.of();
+        }
+    }
+
+    @Transient
+    public void setArticleImages(List<String> images) {
+        try {
+            this.articleImagesJson = (images == null)
+                    ? null
+                    : new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(images);
+        } catch (Exception e) {
+            this.articleImagesJson = null;
+        }
+    }
+
 }

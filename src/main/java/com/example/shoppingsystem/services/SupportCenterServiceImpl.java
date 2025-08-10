@@ -300,7 +300,7 @@ public class SupportCenterServiceImpl implements SupportCenterService {
             SupportArticle article = articleOpt.get();
             article.setArticleTitle(request.getArticleTitle());
             article.setArticleContent(request.getArticleContent());
-
+            article.setArticleImages(request.getArticleImages());
             // Cập nhật danh mục nếu có
             if (request.getCategoryId() != null) {
                 Optional<SupportCategory> newCategory = supportCategoryRepository
