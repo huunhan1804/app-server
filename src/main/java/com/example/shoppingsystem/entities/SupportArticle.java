@@ -12,20 +12,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 @Table(name = "support_article")
-public class SupportArticle extends BaseEntity{
+public class SupportArticle extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ARTICLE_ID")
     private Long articleId;
-
-    @ManyToOne
-    @JoinColumn(name = "SUPPORT_CATEGORY_ID", nullable = false)
-    private SupportCategory supportCategory;
 
     @Column(name = "ARTICLE_TITLE", nullable = false)
     private String articleTitle;
 
-    @Column(name = "ARTICLE_CONTENT", nullable = false)
+    @Column(name = "ARTICLE_CONTENT", columnDefinition = "TEXT")
     private String articleContent;
 
     @Column(name = "IS_VISIBLE")
@@ -34,4 +29,10 @@ public class SupportArticle extends BaseEntity{
     @Column(name = "VIEW_COUNT")
     private Integer viewCount = 0;
 
+    @Column(name = "SORT_ORDER")
+    private Integer sortOrder;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "SUPPORT_CATEGORY_ID")
+    private SupportCategory supportCategory;
 }

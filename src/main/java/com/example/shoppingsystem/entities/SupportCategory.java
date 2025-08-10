@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.util.List;
+
 @Builder
 @Entity
 @NoArgsConstructor
@@ -16,7 +18,6 @@ import org.hibernate.annotations.CreationTimestamp;
 public class SupportCategory extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "SUPPORT_CATEGORY_ID")
     private Long supportCategoryId;
 
     @Column(name = "SUPPORT_CATEGORY_NAME", nullable = false)
@@ -24,4 +25,7 @@ public class SupportCategory extends BaseEntity {
 
     @Column(name = "SUPPORT_CATEGORY_DESCRIPTION")
     private String supportCategoryDescription;
+
+    @OneToMany(mappedBy = "supportCategory", cascade = CascadeType.ALL)
+    private List<SupportArticle> articles;
 }

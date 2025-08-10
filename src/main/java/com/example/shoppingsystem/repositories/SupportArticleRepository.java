@@ -8,8 +8,8 @@ import java.util.List;
 
 @Repository
 public interface SupportArticleRepository extends JpaRepository<SupportArticle, Long> {
-    List<SupportArticle> findBySupportCategory_SupportCategoryIdAndIsVisibleIsTrue(Long supportCategoryId);
-    List<SupportArticle> findByIsVisibleTrue();
-    List<SupportArticle> findByIsVisibleFalse();
-    List<SupportArticle> findBySupportCategory_SupportCategoryId(Long supportCategoryId);
+    List<SupportArticle> findBySupportCategory_SupportCategoryId(Long categoryId);
+    List<SupportArticle> findBySupportCategory_SupportCategoryIdOrderBySortOrderAsc(Long categoryId);
+    int countBySupportCategory_SupportCategoryId(Long categoryId);
+    List<SupportArticle> findByIsVisibleTrueOrderByViewCountDesc();
 }
