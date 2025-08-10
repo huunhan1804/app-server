@@ -543,8 +543,8 @@ public class AgencyServiceImpl implements AgencyService {
     public ApiResponse<List<OrderDTO>> getListOfOrdersByStatus(ListOrderByStatusRequest request){
         Optional<AgencyInfo> agencyInfo = agencyInfoRepository.findByApplicationId(request.getAgencyId());
         if(agencyInfo.isPresent()) {
-            Account account = agencyInfo.get().getAccount();
-            List<OrderList> orderLists = orderRepository.findAllByAccount_AccountId(account.getAccountId());
+//            Account account = agencyInfo.get().getAccount();
+            List<OrderList> orderLists = orderRepository.findAllByAgency_ApplicationId(agencyInfo.get().getApplicationId());
             if(orderLists.isEmpty()) {
                 return ApiResponse.<List<OrderDTO>>builder()
                         .status(ErrorCode.NOT_FOUND)
@@ -585,21 +585,24 @@ public class AgencyServiceImpl implements AgencyService {
 //        }
         OrderList orderList = orderRepository.findByOrderId(request.getOrderId());
         if(orderList != null) {
-            if(agencyInfoRepository.findByAccount_AccountId(orderList.getAgency().getAccountId()).get().getApplicationId().equals(request.getAgencyId())) {
-                if(orderList.getOrderStatus().equals(OrderStatus.PENDING)) {
-                    orderList.setOrderStatus(OrderStatus.SHIPPING);
-                    OrderList savedOrder = orderRepository.save(orderList);
+            Optional<AgencyInfo> agency = agencyInfoRepository.findByApplicationId(orderList.getAgency().getApplicationId());
+            if(agency.isPresent()) {
+                if(agency.get().getApplicationId().equals(request.getAgencyId())) {
+                    if(orderList.getOrderStatus().equals(OrderStatus.PENDING)) {
+                        orderList.setOrderStatus(OrderStatus.SHIPPING);
+                        OrderList savedOrder = orderRepository.save(orderList);
+                        return ApiResponse.<OrderDTO>builder()
+                                .status(ErrorCode.SUCCESS)
+                                .message(Message.ORDER_IS_SHIPPING)
+                                .data(convertOrderToDTO(savedOrder,savedOrder.getOrderDetails().stream().toList()))
+                                .build();
+                    }
                     return ApiResponse.<OrderDTO>builder()
-                            .status(ErrorCode.SUCCESS)
-                            .message(Message.ORDER_IS_SHIPPING)
-                            .data(convertOrderToDTO(savedOrder,savedOrder.getOrderDetails().stream().toList()))
+                            .status(ErrorCode.BAD_REQUEST)
+                            .message(Message.ORDER_IS_NOT_PENDING)
+                            .timestamp(new Date())
                             .build();
                 }
-                return ApiResponse.<OrderDTO>builder()
-                        .status(ErrorCode.BAD_REQUEST)
-                        .message(Message.ORDER_IS_NOT_PENDING)
-                        .timestamp(new Date())
-                        .build();
             }
             return ApiResponse.<OrderDTO>builder()
                     .status(ErrorCode.UNAUTHORIZED)
@@ -617,16 +620,20 @@ public class AgencyServiceImpl implements AgencyService {
     public ApiResponse<OrderDTO> completeOrder(CompleteOrderRequest request){
         OrderList orderList = orderRepository.findByOrderId(request.getOrderId());
         if(orderList != null) {
-            if(agencyInfoRepository.findByAccount_AccountId(orderList.getAgency().getAccountId()).get().getApplicationId().equals(request.getAgencyId())) {
-                if(orderList.getOrderStatus().equals(OrderStatus.DELIVERED)) {
-                    orderList.setOrderStatus(OrderStatus.COMPLETED);
-                    OrderList savedOrder = orderRepository.save(orderList);
-                    return ApiResponse.<OrderDTO>builder()
-                            .status(ErrorCode.SUCCESS)
-                            .message(Message.ORDER_IS_COMPLETED)
-                            .data(convertOrderToDTO(savedOrder,savedOrder.getOrderDetails().stream().toList()))
-                            .build();
-                }
+            Optional<AgencyInfo> agency = agencyInfoRepository.findByApplicationId(orderList.getAgency().getApplicationId());
+            if(agency.isPresent()) {
+
+                if(agency.get().getApplicationId().equals(request.getAgencyId()) && orderList.getOrderStatus().equals(OrderStatus.DELIVERED)) {
+                        orderList.setOrderStatus(OrderStatus.COMPLETED);
+                        OrderList savedOrder = orderRepository.save(orderList);
+                        return ApiResponse.<OrderDTO>builder()
+                                .status(ErrorCode.SUCCESS)
+                                .message(Message.ORDER_IS_COMPLETED)
+                                .data(convertOrderToDTO(savedOrder,savedOrder.getOrderDetails().stream().toList()))
+                                .build();
+                    }
+
+
                 return ApiResponse.<OrderDTO>builder()
                         .status(ErrorCode.BAD_REQUEST)
                         .message(Message.ORDER_IS_NOT_DELIVERED)

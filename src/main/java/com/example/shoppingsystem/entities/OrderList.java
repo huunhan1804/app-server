@@ -54,6 +54,6 @@ public class OrderList extends BaseEntity{
     private Set<OrderDetail> orderDetails = new HashSet<>();
 
     @ManyToOne
-    @JoinColumn(name = "AGENCY_ID", referencedColumnName = "ACCOUNT_ID")
-    private Account agency;
+    @JoinColumn(name = "AGENCY_ID", referencedColumnName = "APPLICATION_ID")
+    private AgencyInfo agency;
 }

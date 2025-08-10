@@ -139,7 +139,7 @@ public class AgencyReportServiceImpl implements AgencyReportService {
                 return buildErrorResponse(ErrorCode.FORBIDDEN, Message.ACCOUNT_NOT_FOUND);
             }
 
-            List<OrderList> orders = orderRepository.findByAgency_AccountId(currentAgency.get().getAccountId());
+            List<OrderList> orders = orderRepository.findByAgency_Account_AccountId(currentAgency.get().getAccountId());
             RevenueTrendDTO trendData = calculateRevenueTrend(orders, period, year);
 
             return ApiResponse.<RevenueTrendDTO>builder()
@@ -193,7 +193,7 @@ public class AgencyReportServiceImpl implements AgencyReportService {
                 return buildErrorResponse(ErrorCode.FORBIDDEN, Message.ACCOUNT_NOT_FOUND);
             }
 
-            List<OrderList> orders = orderRepository.findByAgency_AccountId(currentAgency.get().getAccountId());
+            List<OrderList> orders = orderRepository.findByAgency_Account_AccountId(currentAgency.get().getAccountId());
             OrderAnalyticsDTO analytics = calculateOrderAnalytics(orders, period, year);
 
             return ApiResponse.<OrderAnalyticsDTO>builder()
@@ -218,7 +218,7 @@ public class AgencyReportServiceImpl implements AgencyReportService {
         LocalDateTime startOfWeek = now.minusDays(7);
         LocalDateTime startOfMonth = now.minusDays(30);
 
-        List<OrderList> allOrders = orderRepository.findByAgency_AccountId(agency.getAccountId());
+        List<OrderList> allOrders = orderRepository.findByAgency_Account_AccountId(agency.getAccountId());
 
         // Calculate revenue metrics
         double revenueToday = calculateRevenue(allOrders, startOfToday, now);
@@ -275,7 +275,7 @@ public class AgencyReportServiceImpl implements AgencyReportService {
     }
 
     private List<AgencyReportDTO> generateReportData(Account agency, GenerateReportRequest request) {
-        List<OrderList> orders = orderRepository.findByAgency_AccountId(agency.getAccountId());
+        List<OrderList> orders = orderRepository.findByAgency_Account_AccountId(agency.getAccountId());
 
         switch (request.getReportType().toLowerCase()) {
             case "quarterly":
