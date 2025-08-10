@@ -379,7 +379,7 @@ public class SampleDataGenerator {
                 .username(username)
                 .email(username + "@example.com")
                 .phone("09" + String.format("%8d", random.nextInt(100000000)))
-                .password(passwordEncoder.encode("password123"))
+                .password(passwordEncoder.encode("Password123@"))
                 .fullname(firstName + " " + lastName)
                 .birthdate(faker.date().birthday(18, 65))
                 .gender(random.nextBoolean() ? "Nam" : "Nữ")
