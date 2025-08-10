@@ -51,8 +51,8 @@ public class SupportCenterServiceImpl implements SupportCenterService {
                     .build();
         }
         return ApiResponse.<List<SupportCategoryDTO>>builder()
-                .status(ErrorCode.NOT_FOUND)
-                .message(Message.FETCHING_SUPPORT_CATEGORY_FAILURE)
+                .status(ErrorCode.SUCCESS)
+                .message(Message.FETCHING_SUPPORT_CATEGORY_SUCCESS)
                 .timestamp(new java.util.Date())
                 .build();
     }
@@ -76,8 +76,8 @@ public class SupportCenterServiceImpl implements SupportCenterService {
                         .build();
             }
             return ApiResponse.<List<SupportArticleDTO>>builder()
-                    .status(ErrorCode.NOT_FOUND)
-                    .message(Message.NOT_FOUND_ARTICLE)
+                    .status(ErrorCode.SUCCESS)
+                    .message(Message.FETCHING_SUPPORT_ARTICLE_SUCCESS)
                     .timestamp(new java.util.Date())
                     .build();
         }
