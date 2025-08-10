@@ -220,11 +220,7 @@ public class SupportCenterServiceImpl implements SupportCenterService {
                     .findBySupportCategory_SupportCategoryId(categoryId);
 
             if (!articles.isEmpty()) {
-                return ApiResponse.<String>builder()
-                        .status(ErrorCode.CONFLICT)
-                        .message("Không thể xóa danh mục có chứa bài viết")
-                        .timestamp(new Date())
-                        .build();
+                supportArticleRepository.deleteAll(articles);
             }
 
             supportCategoryRepository.delete(category.get());
