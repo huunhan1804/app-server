@@ -39,14 +39,14 @@ public class SupportArticle extends BaseEntity {
     private SupportCategory supportCategory;
 
     @Column(name = "article_images", columnDefinition = "json")
-    private String articleImagesJson;
+    private String articleImages;
 
     @Transient
     public List<String> getArticleImages() {
         try {
-            if (articleImagesJson == null || articleImagesJson.isBlank()) return List.of();
+            if (articleImages == null || articleImages.isBlank()) return List.of();
             return new com.fasterxml.jackson.databind.ObjectMapper()
-                    .readValue(articleImagesJson, new com.fasterxml.jackson.core.type.TypeReference<List<String>>() {});
+                    .readValue(articleImages, new com.fasterxml.jackson.core.type.TypeReference<List<String>>() {});
         } catch (Exception e) {
             return List.of();
         }
@@ -55,11 +55,11 @@ public class SupportArticle extends BaseEntity {
     @Transient
     public void setArticleImages(List<String> images) {
         try {
-            this.articleImagesJson = (images == null)
+            this.articleImages = (images == null)
                     ? null
                     : new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(images);
         } catch (Exception e) {
-            this.articleImagesJson = null;
+            this.articleImages = null;
         }
     }
 

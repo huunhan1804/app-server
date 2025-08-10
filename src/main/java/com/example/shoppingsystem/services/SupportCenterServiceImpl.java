@@ -13,6 +13,8 @@ import com.example.shoppingsystem.repositories.SupportCategoryRepository;
 import com.example.shoppingsystem.requests.*;
 import com.example.shoppingsystem.responses.ApiResponse;
 import com.example.shoppingsystem.services.interfaces.SupportCenterService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -300,7 +302,15 @@ public class SupportCenterServiceImpl implements SupportCenterService {
             SupportArticle article = articleOpt.get();
             article.setArticleTitle(request.getArticleTitle());
             article.setArticleContent(request.getArticleContent());
-            article.setArticleImages(request.getArticleImages());
+            if (request.getArticleImages() != null) {
+                // Nếu cột articleImages kiểu JSON (String) thì:
+                try {
+                    String jsonImages = new ObjectMapper().writeValueAsString(request.getArticleImages());
+                    article.setArticleImages(jsonImages);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException("Error processing article images", e);
+                }
+            }
             // Cập nhật danh mục nếu có
             if (request.getCategoryId() != null) {
                 Optional<SupportCategory> newCategory = supportCategoryRepository
