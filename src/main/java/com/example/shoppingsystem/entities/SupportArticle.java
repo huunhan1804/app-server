@@ -35,9 +35,12 @@ public class SupportArticle extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SUPPORT_CATEGORY_ID")
     private SupportCategory supportCategory;
+<<<<<<< HEAD
 
     @Column(name = "article_images", columnDefinition = "json")
     private String articleImages;
 
 
+=======
+>>>>>>> parent of 4586147 (ok 2231)
 }
