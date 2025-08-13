@@ -302,19 +302,6 @@ public class SupportCenterServiceImpl implements SupportCenterService {
             SupportArticle article = articleOpt.get();
             article.setArticleTitle(request.getArticleTitle());
             article.setArticleContent(request.getArticleContent());
-<<<<<<< HEAD
-            if (request.getArticleImages() != null) {
-                // Nếu cột articleImages kiểu JSON (String) thì:
-                try {
-                    String jsonImages = new ObjectMapper().writeValueAsString(request.getArticleImages());
-                    article.setArticleImages(jsonImages);
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException("Error processing article images", e);
-                }
-            }
-=======
-
->>>>>>> parent of 4586147 (ok 2231)
             // Cập nhật danh mục nếu có
             if (request.getCategoryId() != null) {
                 Optional<SupportCategory> newCategory = supportCategoryRepository
