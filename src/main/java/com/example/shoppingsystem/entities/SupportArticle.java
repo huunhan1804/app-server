@@ -35,3 +35,4 @@ public class SupportArticle extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SUPPORT_CATEGORY_ID")
     private SupportCategory supportCategory;
+}
