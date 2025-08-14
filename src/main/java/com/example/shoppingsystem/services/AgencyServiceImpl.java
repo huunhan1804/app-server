@@ -94,7 +94,7 @@ public class AgencyServiceImpl implements AgencyService {
             if (request.getProduct_variant_list() != null && !request.getProduct_variant_list().isEmpty()) {
                 AddProductVariantsRequest firstVariant = request.getProduct_variant_list().get(0);
                 product.setListPrice(BigDecimal.valueOf(firstVariant.getList_price()));
-                product.setSalePrice(BigDecimal.valueOf(firstVariant.getSale_price()));
+                product.setSalePrice(getSalePrice(firstVariant.getList_price(), firstVariant.getSale_price()));
             } else {
                 return ApiResponse.<ProductFullDTO>builder()
                         .status(ErrorCode.BAD_REQUEST)
@@ -124,7 +124,7 @@ public class AgencyServiceImpl implements AgencyService {
                 ProductVariant productVariant = new ProductVariant();
                 productVariant.setProduct(saveProduct);
                 productVariant.setListPrice(BigDecimal.valueOf(addProductVariantsRequest.getList_price()));
-                productVariant.setSalePrice(BigDecimal.valueOf(addProductVariantsRequest.getSale_price()));
+                productVariant.setSalePrice(getSalePrice(addProductVariantsRequest.getList_price(), addProductVariantsRequest.getSale_price()));
                 productVariant.setProductVariantName(addProductVariantsRequest.getProduct_variant_name());
                 productVariant.setDesiredQuantity(addProductVariantsRequest.getInventory_quantity());
                 productVariant.setInventoryQuantity(addProductVariantsRequest.getInventory_quantity());
@@ -184,7 +184,7 @@ public class AgencyServiceImpl implements AgencyService {
                     product.setListPrice(BigDecimal.valueOf(firstVariant.getList_price()));
                 }
                 if (firstVariant.getSale_price() != null) {
-                    product.setSalePrice(BigDecimal.valueOf(firstVariant.getSale_price()));
+                    product.setSalePrice(getSalePrice(firstVariant.getSale_price(), firstVariant.getSale_price()));
                 }
             }
 
@@ -223,7 +223,7 @@ public class AgencyServiceImpl implements AgencyService {
                     variant.setListPrice(BigDecimal.valueOf(variantRequest.getList_price()));
                 }
                 if (variantRequest.getSale_price() != null) {
-                    variant.setSalePrice(BigDecimal.valueOf(variantRequest.getSale_price()));
+                    variant.setSalePrice(getSalePrice(variantRequest.getSale_price(), variantRequest.getSale_price()));
                 }
                 variant.setInventoryQuantity(variantRequest.getInventory_quantity());
                 // variant.(variantRequest.getSold_amount());
@@ -997,5 +997,12 @@ public class AgencyServiceImpl implements AgencyService {
                 .totalBill(Regex.formatPriceToVND(orderList.getTotalPrice()))
                 .order_detail(orderDetailDTOS)
                 .build();
+    }
+
+    public BigDecimal getSalePrice(double listPrice, double salePrice) {
+        if(salePrice != 0){
+            return BigDecimal.valueOf(salePrice);
+        }
+        return BigDecimal.valueOf(listPrice);
     }
 }
