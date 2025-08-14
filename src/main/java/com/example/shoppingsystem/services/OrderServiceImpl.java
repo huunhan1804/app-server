@@ -21,10 +21,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -38,9 +35,10 @@ public class OrderServiceImpl implements OrderService {
     private final ProductRepository productRepository;
     private final ProductVariantRepository productVariantRepository;
     private final ProductServiceImpl productService;
+    private final AgencyInfoRepository agencyInfoRepository;
 
     @Autowired
-    public OrderServiceImpl(OrderRepository orderRepository, OrderDetailRepository orderDetailRepository, CartItemRepository cartItemRepository, CartRepository cartRepository, AccountRepository accountRepository, ProductRepository productRepository, ProductVariantRepository productVariantRepository, ProductServiceImpl productService) {
+    public OrderServiceImpl(OrderRepository orderRepository, OrderDetailRepository orderDetailRepository, CartItemRepository cartItemRepository, CartRepository cartRepository, AccountRepository accountRepository, ProductRepository productRepository, ProductVariantRepository productVariantRepository, ProductServiceImpl productService, AgencyInfoRepository agencyInfoRepository) {
         this.orderRepository = orderRepository;
         this.orderDetailRepository = orderDetailRepository;
         this.cartItemRepository = cartItemRepository;
@@ -49,7 +47,55 @@ public class OrderServiceImpl implements OrderService {
         this.productRepository = productRepository;
         this.productVariantRepository = productVariantRepository;
         this.productService = productService;
+        this.agencyInfoRepository = agencyInfoRepository;
     }
+
+//    @Override
+//    public ApiResponse<OrderDTO> createOrder(OrderRequest orderRequest) {
+//        Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+//        if (account.isPresent()) {
+//            OrderList orderList = new OrderList();
+//            orderList.setOrderDate(LocalDateTime.now());
+//            orderList.setAddressDetail(orderRequest.getAddress_detail());
+//            System.out.println(Regex.parseVNDToBigDecimal(orderRequest.getTotal_bill()));
+//            orderList.setTotalPrice(Regex.parseVNDToBigDecimal(orderRequest.getTotal_bill()));
+//            orderList.setOrderStatus(OrderStatus.SHIPPED);
+//            orderList.setAccount(account.get());
+//            OrderList savedOrder = orderRepository.save(orderList);
+//
+//            for (OrderDetailRequest orderDetailRequest : orderRequest.getOrder_items()) {
+//                OrderDetail orderDetail = new OrderDetail();
+//                orderDetail.setOrderList(savedOrder);
+//
+//                Optional<Product> product = productRepository.findById(orderDetailRequest.getProductId());
+//                product.ifPresent(orderDetail::setProduct);
+//                Optional<ProductVariant> productVariant = productVariantRepository.findById(orderDetailRequest.getProductVariantId());
+//                productVariant.ifPresent(orderDetail::setProductVariant);
+//
+//                orderDetail.setPrice(Regex.parseVNDToBigDecimal(orderDetailRequest.getPrice()));
+//                orderDetail.setQuantity(orderDetailRequest.getQuantity());
+//                orderDetail.setSubtotal(Regex.parseVNDToBigDecimal(orderDetailRequest.getSubtotal()));
+//                orderDetailRepository.save(orderDetail);
+//
+//                Optional<Cart> cart = cartRepository.findByAccount_AccountId(account.get().getAccountId());
+//                if (cart.isPresent()) {
+//                    if (product.isPresent() && productVariant.isPresent()) {
+//                        Optional<CartItem> existCartItem = cartItemRepository.findByCartAndProductAndProductVariantAndQuantity(cart.get(), product.get(), productVariant.get(), orderDetailRequest.getQuantity());
+//                        existCartItem.ifPresent(cartItemRepository::delete);
+//                        cart.get().setTotalItem(cart.get().getTotalItem() - 1);
+//                        cartRepository.save(cart.get());
+//                    }
+//
+//                }
+//            }
+//            return getOrderInformation(savedOrder.getOrderId());
+//        }
+//        return ApiResponse.<OrderDTO>builder()
+//                .status(ErrorCode.FORBIDDEN)
+//                .message(Message.ACCOUNT_NOT_FOUND)
+//                .timestamp(new java.util.Date())
+//                .build();
+//    }
 
     @Override
     public ApiResponse<OrderDTO> createOrder(OrderRequest orderRequest) {
@@ -60,8 +106,11 @@ public class OrderServiceImpl implements OrderService {
             orderList.setAddressDetail(orderRequest.getAddress_detail());
             System.out.println(Regex.parseVNDToBigDecimal(orderRequest.getTotal_bill()));
             orderList.setTotalPrice(Regex.parseVNDToBigDecimal(orderRequest.getTotal_bill()));
-            orderList.setOrderStatus(OrderStatus.SHIPPED);
+            orderList.setOrderStatus(OrderStatus.PENDING);
             orderList.setAccount(account.get());
+            Optional<AgencyInfo> agencyInfo = agencyInfoRepository.findByApplicationId(productRepository.findByProductId(orderRequest.getOrder_items().get(0).getProductId()).getAgencyInfo().getApplicationId());
+            assert agencyInfo.orElse(null) != null;
+            orderList.setAgency(agencyInfo.orElse(null).getAccount());
             OrderList savedOrder = orderRepository.save(orderList);
 
             for (OrderDetailRequest orderDetailRequest : orderRequest.getOrder_items()) {
@@ -186,6 +235,13 @@ public class OrderServiceImpl implements OrderService {
         if (account.isPresent()) {
             Optional<OrderList> order = orderRepository.findById(request.getOrderId());
             if(order.isPresent()){
+                if(order.get().getUpdatedDate().isBefore(LocalDateTime.now().minusDays(7))){
+                    return ApiResponse.<List<OrderDTO>>builder()
+                            .status(ErrorCode.BAD_REQUEST)
+                            .message("Đơn hàng đã qua 7 ngày.")
+                            .timestamp(new java.util.Date())
+                            .build();
+                }
                 order.get().setOrderStatus(OrderStatus.RETURNED);
                 order.get().setReturnReason(request.getReturnReason());
                 orderRepository.save(order.get());
@@ -288,6 +344,61 @@ public class OrderServiceImpl implements OrderService {
                 .message("Successfully fetched order information")
                 .timestamp(new java.util.Date())
                 .build();
+    }
+
+    @Override
+    public ApiResponse<OrderDTO> reorder(long orderId){
+        Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        if (account.isEmpty()) {
+            return ApiResponse.<OrderDTO>builder()
+                    .status(ErrorCode.FORBIDDEN)
+                    .message(Message.ACCOUNT_NOT_FOUND)
+                    .timestamp(new java.util.Date())
+                    .build();
+        }
+
+        Optional<OrderList> oldOrderOptional = orderRepository.findById(orderId);
+        if (oldOrderOptional.isEmpty()) {
+            return ApiResponse.<OrderDTO>builder()
+                    .status(ErrorCode.NOT_FOUND)
+                    .message(Message.NOT_FOUND_ORDER)
+                    .timestamp(new java.util.Date())
+                    .build();
+        }
+        OrderList oldOrder = oldOrderOptional.get();
+
+        if (!oldOrder.getAccount().getAccountId().equals(account.get().getAccountId())) {
+            return ApiResponse.<OrderDTO>builder()
+                    .status(ErrorCode.FORBIDDEN)
+                    .message("Bạn không phải người mua đơn hàng này.")
+                    .timestamp(new java.util.Date())
+                    .build();
+        }
+
+        OrderList newOrder = new OrderList();
+        newOrder.setAccount(oldOrder.getAccount());
+        newOrder.setOrderDate(LocalDateTime.now());
+        newOrder.setAddressDetail(oldOrder.getAddressDetail());
+        newOrder.setTotalPrice(oldOrder.getTotalPrice());
+        newOrder.setOrderStatus(OrderStatus.PENDING);
+        newOrder.setAgency(oldOrder.getAgency());
+
+        OrderList savedNewOrder = orderRepository.save(newOrder);
+
+        Set<OrderDetail> newOrderDetails = new HashSet<>();
+        for (OrderDetail oldDetail : oldOrder.getOrderDetails()) {
+            OrderDetail newDetail = new OrderDetail();
+            newDetail.setOrderList(savedNewOrder);
+            newDetail.setProduct(oldDetail.getProduct());
+            newDetail.setProductVariant(oldDetail.getProductVariant());
+            newDetail.setQuantity(oldDetail.getQuantity());
+            newDetail.setPrice(oldDetail.getPrice());
+            newDetail.setSubtotal(oldDetail.getSubtotal());
+            newOrderDetails.add(newDetail);
+        }
+        orderDetailRepository.saveAll(newOrderDetails);
+
+        return getOrderInformation(savedNewOrder.getOrderId());
     }
 
 }

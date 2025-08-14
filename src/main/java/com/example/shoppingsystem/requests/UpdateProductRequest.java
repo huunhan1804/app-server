@@ -17,8 +17,6 @@ public class UpdateProductRequest {
     private String product_description;
     private long category_id;
     private List<String> image_urls;
-    private List<AddProductVariantsRequest> product_variant_list;
-    private String product_list_price;
-    private String product_sale_price;
+    private List<UpdateProductVariantsRequest> product_variant_list;
     private int quantity_in_stock;
 }

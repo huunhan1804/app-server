@@ -343,6 +343,7 @@ public class AccountServiceImpl implements AccountService {
                 .isBanned(false)
                 .role(roleRepository.findByRoleCode(RoleCode.ROLE_CUSTOMER))
                 .accountStatus(Account.AccountStatus.ACTIVE)
+                .approvalStatus(approvalStatusRepository.findApprovalStatusByStatusCode(StatusCode.STATUS_APPROVED))
                 .build());
         multimediaRepository.save(Multimedia.builder().multimediaUrl(imageLink).account(savedAccount).multimediaType(MultimediaType.IMAGE).build());
         cartRepository.save(Cart.builder().account(savedAccount).totalItem(0).build());

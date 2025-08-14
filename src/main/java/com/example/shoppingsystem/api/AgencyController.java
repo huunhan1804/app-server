@@ -22,8 +22,28 @@ import java.util.List;
 public class AgencyController {
     private final AgencyService agencyService;
 
+    @Operation(summary = "Get products by status", description = "Get list of product by status")
+    @GetMapping("/products")
+    public ResponseEntity<ApiResponse<List<ProductInfoDTO>>> getProductsByStatus(
+            @Parameter(description = "Status Code (APPROVED, PENDING, REJECTED)")
+            @RequestParam(name = "status_code", required = false) String statusCode
+    ) {
+        ApiResponse<List<ProductInfoDTO>> response = agencyService.getListProductByStatus(statusCode);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @Operation(summary = "Get product details", description = "Get full details of a single product")
+    @GetMapping("/products/{productId}")
+    public ResponseEntity<ApiResponse<ProductFullDTO>> getProductDetails(
+            @Parameter(description = "Product ID")
+            @PathVariable Long productId
+    ) {
+        ApiResponse<ProductFullDTO> response = agencyService.getFullInfoProduct(productId);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
     @Operation(summary = "Agency Add Product", description = "Agency Add New Product")
-    @PostMapping("/product/add")
+    @PostMapping("/products")
     public ResponseEntity<ApiResponse<ProductFullDTO>> createProduct(
             @RequestBody AddNewProductRequest request
     ) {
@@ -32,40 +52,42 @@ public class AgencyController {
     }
 
     @Operation(summary = "Agency Update Product", description = "Agency Update Product")
-    @PostMapping("/product/update")
+    @PostMapping("/products/{productId}")
     public ResponseEntity<ApiResponse<ProductFullDTO>> updateProduct(
+            @Parameter(description = "Product ID") @PathVariable Long productId,
             @RequestBody UpdateProductRequest request
     ) {
+        request.setProduct_id(productId);
         ApiResponse<ProductFullDTO> response = agencyService.updateProduct(request);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @Operation(summary = "Agency Delete Product", description = "Agency Delete Product")
-    @PostMapping("/product/delete/{product_id}")
-    public ResponseEntity<ApiResponse<AgencyInfoDTO>> deleteProduct(
-            @Parameter(description = "Product ID") @PathVariable long product_id
+    @DeleteMapping("/products/{productId}")
+    public ResponseEntity<ApiResponse<Void>> deleteProduct(
+            @Parameter(description = "Product ID") @PathVariable Long productId
     ) {
-        ApiResponse<AgencyInfoDTO> response = agencyService.deleteProduct(product_id);
+        ApiResponse<Void> response = agencyService.deleteProduct(productId);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @Operation(summary = "Disable product", description = "Disable product")
-    @PostMapping("/product/disable/{product_id}")
-    public ResponseEntity<ApiResponse<ProductInfoDTO>> disableSellingProduct(
-            @PathVariable Long product_id
-    ){
-        ApiResponse<ProductInfoDTO> response = agencyService.disableSellingProduct(product_id);
+    @Operation(summary = "Toggle product sale status", description = "Toggle product sale status")
+    @PostMapping("/products/{productId}/toggle-sale-status")
+    public ResponseEntity<ApiResponse<ProductInfoDTO>> toggleSellingProduct(
+            @PathVariable Long productId
+    ) {
+        ApiResponse<ProductInfoDTO> response = agencyService.toggleProductSaleStatus(productId);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @Operation(summary = "Get products by status", description = "Get list of product by status")
-    @PostMapping("/product/status/{status_code}")
-    public ResponseEntity<ApiResponse<List<ProductInfoDTO>>> getProductsByStatus(
-            @Parameter(description = "Status Code") @PathVariable String status_code
-    ){
-        ApiResponse<List<ProductInfoDTO>> response = agencyService.getListProductByStatus(status_code);
-        return ResponseEntity.status(response.getStatus()).body(response);
-    }
+//    @Operation(summary = "Get products by status", description = "Get list of product by status")
+//    @PostMapping("/product/status/{status_code}")
+//    public ResponseEntity<ApiResponse<List<ProductInfoDTO>>> getProductsByStatus(
+//            @Parameter(description = "Status Code") @PathVariable String status_code
+//    ){
+//        ApiResponse<List<ProductInfoDTO>> response = agencyService.getListProductByStatus(status_code);
+//        return ResponseEntity.status(response.getStatus()).body(response);
+//    }
 
     @Operation(summary = "Confirm order", description = "Confirm order")
     @PostMapping("/order/confirm")

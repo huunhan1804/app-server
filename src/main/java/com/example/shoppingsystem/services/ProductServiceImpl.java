@@ -6,11 +6,15 @@ import com.example.shoppingsystem.constants.Regex;
 import com.example.shoppingsystem.constants.StatusCode;
 import com.example.shoppingsystem.dtos.*;
 import com.example.shoppingsystem.entities.*;
+import com.example.shoppingsystem.enums.Rating;
 import com.example.shoppingsystem.repositories.*;
+import com.example.shoppingsystem.requests.AddFeedbackRequest;
 import com.example.shoppingsystem.responses.ApiResponse;
 import com.example.shoppingsystem.services.interfaces.ProductService;
 import net.sf.ehcache.util.ProductInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigInteger;
@@ -31,8 +35,10 @@ public class ProductServiceImpl implements ProductService {
     private final OrderDetailRepository orderDetailRepository;
     private final AgencyInfoRepository agencyInfoRepository;
     private final Random random = new Random();
+    private final AccountRepository accountRepository;
+
     @Autowired
-    public ProductServiceImpl(ProductRepository productRepository, ProductVariantRepository productVariantRepository, CategoryRepository categoryRepository, FeedbackRepository feedbackRepository, MultimediaRepository multimediaRepository, OrderDetailRepository orderDetailRepository, AgencyInfoRepository agencyInfoRepository) {
+    public ProductServiceImpl(ProductRepository productRepository, ProductVariantRepository productVariantRepository, CategoryRepository categoryRepository, FeedbackRepository feedbackRepository, MultimediaRepository multimediaRepository, OrderDetailRepository orderDetailRepository, AgencyInfoRepository agencyInfoRepository, AccountRepository accountRepository) {
         this.productRepository = productRepository;
         this.productVariantRepository = productVariantRepository;
         this.categoryRepository = categoryRepository;
@@ -40,6 +46,7 @@ public class ProductServiceImpl implements ProductService {
         this.multimediaRepository = multimediaRepository;
         this.orderDetailRepository = orderDetailRepository;
         this.agencyInfoRepository = agencyInfoRepository;
+        this.accountRepository = accountRepository;
     }
 
 
@@ -62,6 +69,21 @@ public class ProductServiceImpl implements ProductService {
     public ApiResponse<ProductInfoDTO> getInfoProduct(long productId) {
         Optional<Product> product = productRepository.findById(productId);
         if(product.isPresent()){
+            if(product.get().getIsSale() == false){
+                return ApiResponse.<ProductInfoDTO>builder()
+                        .status(ErrorCode.NOT_FOUND)
+                        .message(Message.NOT_FOUND)
+                        .timestamp(new java.util.Date())
+                        .build();
+            }
+
+            if (!product.get().getApprovalStatus().getStatusCode().equals(StatusCode.STATUS_APPROVED)) {
+                return ApiResponse.<ProductInfoDTO>builder()
+                        .status(ErrorCode.NOT_FOUND)
+                        .message(Message.NOT_FOUND)
+                        .timestamp(new java.util.Date())
+                        .build();
+            }
             return ApiResponse.<ProductInfoDTO>builder()
                     .status(ErrorCode.SUCCESS)
                     .message(Message.SUCCESS)
@@ -243,6 +265,40 @@ public class ProductServiceImpl implements ProductService {
                 .build();
     }
 
+    @Override
+    public ApiResponse<FeedbackDTO> addFeedback(AddFeedbackRequest request) {
+        // Logic giả định lấy người dùng từ context bảo mật, bạn cần tùy chỉnh theo cách bạn quản lý Authentication
+        Account account = getLoggedInUser();
+
+        // 1. Kiểm tra sản phẩm có tồn tại không
+        Product product = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        // 2. Tạo entity Feedback mới
+        Feedback newFeedback = new Feedback();
+        newFeedback.setProduct(product);
+        newFeedback.setAccount(account);
+        newFeedback.setRating(Rating.fromValue(request.getRating())); // SỬ DỤNG ENUM RATING
+        newFeedback.setComment(request.getComment());
+
+        // 3. Lưu feedback vào database
+        Feedback savedFeedback = feedbackRepository.save(newFeedback);
+
+
+        // 5. Trả về response
+        FeedbackDTO feedbackDTO = new FeedbackDTO();
+        feedbackDTO.setUser_name(savedFeedback.getAccount().getFullname());
+        feedbackDTO.setRating(savedFeedback.getRating().getValue());
+        feedbackDTO.setComment(savedFeedback.getComment());
+
+        return ApiResponse.<FeedbackDTO>builder()
+                .status(ErrorCode.SUCCESS)
+                .message(Message.SUCCESS)
+                .data(feedbackDTO)
+                .timestamp(new java.util.Date())
+                .build();
+    }
+
 
     private ProductInfoDTO convertToProductInfoDTO(Product product, List<ProductVariant> productVariants, List<Feedback> feedbacks, List<Multimedia> multimediaProduct) {
         ProductInfoDTO productInfoDTO = new ProductInfoDTO();
@@ -314,13 +370,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private Stream<ProductBasicDTO> getProductBasicDTOsByCategory(Category category) {
-        List<Product> productsInCategory = productRepository.findByCategory_CategoryId(category.getCategoryId());
+        List<Product> productsInCategory = productRepository.findByCategory_CategoryIdAndApprovalStatus_StatusCode(category.getCategoryId(), StatusCode.STATUS_APPROVED);
         return productsInCategory.stream()
                 .map(this::convertToProductBasicDTO);
     }
 
     private Stream<ProductBasicDTO> getProductBasicDTOsByAgency(AgencyInfo agencyInfo) {
-        List<Product> productInsAgency = productRepository.findAllByAgencyInfoAndAgencyInfo_ApprovalStatus_StatusCode(agencyInfo, StatusCode.STATUS_APPROVED);
+        List<Product> productInsAgency = productRepository.findAllByAgencyInfoAndApprovalStatus_StatusCode(agencyInfo, StatusCode.STATUS_APPROVED);
         return productInsAgency.stream()
                 .map(this::convertToProductBasicDTO);
     }
@@ -358,6 +414,17 @@ public class ProductServiceImpl implements ProductService {
     public String findImageProductVariant(ProductVariant productVariant) {
         Optional<Multimedia> multimedia = multimediaRepository.findFirstByProductVariant_ProductVariantId(productVariant.getProductVariantId());
         return multimedia.map(Multimedia::getMultimediaUrl).orElse(null);
+    }
+
+    private Account getLoggedInUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("User is not authenticated");
+        }
+
+        String username = authentication.getName();
+        return accountRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Account not found for authenticated user: " + username));
     }
 
 }

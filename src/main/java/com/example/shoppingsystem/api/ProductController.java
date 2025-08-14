@@ -1,8 +1,10 @@
 package com.example.shoppingsystem.api;
 
+import com.example.shoppingsystem.dtos.FeedbackDTO;
 import com.example.shoppingsystem.dtos.ProductBasicDTO;
 import com.example.shoppingsystem.dtos.ProductInfoDTO;
 import com.example.shoppingsystem.filter.FilterService;
+import com.example.shoppingsystem.requests.AddFeedbackRequest;
 import com.example.shoppingsystem.requests.SearchRequest;
 import com.example.shoppingsystem.responses.ApiResponse;
 import com.example.shoppingsystem.services.interfaces.ProductService;
@@ -75,6 +77,13 @@ public class ProductController {
     @GetMapping("/all-by-agency/{agencyId}")
     public ResponseEntity<ApiResponse<List>> getListProductByAgency(@PathVariable long agencyId) {
         ApiResponse<List> apiResponse = productService.getListProductByAgency(agencyId);
+        return ResponseEntity.status(apiResponse.getStatus()).body(apiResponse);
+    }
+
+    @Operation(summary = "API add feedback for product", description = "This API allows a user to add a rating and feedback for a specific product they have purchased.")
+    @PostMapping("/feedback/add")
+    public ResponseEntity<ApiResponse<FeedbackDTO>> addFeedback(@RequestBody AddFeedbackRequest request) {
+        ApiResponse<FeedbackDTO> apiResponse = productService.addFeedback(request);
         return ResponseEntity.status(apiResponse.getStatus()).body(apiResponse);
     }
 

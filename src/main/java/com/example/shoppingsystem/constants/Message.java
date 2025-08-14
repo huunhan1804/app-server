@@ -85,6 +85,7 @@ public class Message {
     public static final String HIDE_ARTICLE_FAILURE = "Hide article failed!";
     public static final String NOT_FOUND_CHAT_SESSION = "Not found chat session!";
     public static final String NOT_FOUND_CHAT_MESSAGE = "Not found message!";
+    public static final String PRODUCT_IS_NOT_APPROVED ="Product is not approved!" ;
 
 
 }

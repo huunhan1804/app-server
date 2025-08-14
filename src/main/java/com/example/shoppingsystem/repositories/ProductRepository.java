@@ -18,6 +18,7 @@ import java.util.List;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
     List<Product> findByCategory_CategoryId(Long categoryId);
+    List<Product> findByCategory_CategoryIdAndApprovalStatus_StatusCode(Long categoryId, String status);
 
     @Modifying
     @Query(value = "SELECT * FROM product ORDER BY SOLD_AMOUNT DESC LIMIT 10", nativeQuery = true)
@@ -29,7 +30,9 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     List<Product> findByApprovalStatus_StatusCode(String statusCode);
     List<Product> findProductByAgencyInfoAndProductId(AgencyInfo agencyInfo, long productId);
     List<Product> findByAgencyInfo(AgencyInfo agencyInfo);
-    List<Product> findAllByAgencyInfoAndAgencyInfo_ApprovalStatus_StatusCode(AgencyInfo agencyInfo, String statusCode);
+    List<Product> findAllByAgencyInfoAndApprovalStatus_StatusCode(AgencyInfo agencyInfo, String statusCode);
+    @Query("SELECT p FROM Product p WHERE p.agencyInfo = :agencyInfo AND (:statusCode IS NULL OR p.approvalStatus.statusCode = :statusCode)")
+    List<Product> findByAgencyInfoAndStatus(@Param("agencyInfo") AgencyInfo agencyInfo, @Param("statusCode") String statusCode);
 
     Page<Product> findByApprovalStatus_StatusCode(String statusCode, Pageable pageable);
 

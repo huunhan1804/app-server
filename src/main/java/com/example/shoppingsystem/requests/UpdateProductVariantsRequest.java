@@ -5,16 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AddProductVariantsRequest implements Serializable {
+public class UpdateProductVariantsRequest {
+    private Long product_variant_id;
     private String product_variant_name;
-    private double list_price;
-    private double sale_price;
+    private Double list_price;
+    private Double sale_price;
     private int inventory_quantity;
     private int sold_amount;
 }

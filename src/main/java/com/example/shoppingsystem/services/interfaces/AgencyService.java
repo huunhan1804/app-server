@@ -14,7 +14,8 @@ public interface AgencyService {
     ApiResponse<AgencyInfoDTO> getAgencyInfo();
     ApiResponse<ProductFullDTO> createProduct(AddNewProductRequest request);
     ApiResponse<ProductFullDTO> updateProduct(UpdateProductRequest request);
-    ApiResponse<AgencyInfoDTO> deleteProduct(Long product_id);
+    ApiResponse<Void> deleteProduct(Long product_id);
+    ApiResponse<List<OrderDTO>> getOrders();
     ApiResponse<OrderDTO> shipOrder(ShippingRequest request);
     ApiResponse<OrderDTO> completeOrder(CompleteOrderRequest request);
     ApiResponse<OrderDTO> confirmReturnOrder(Long order_id);
@@ -22,10 +23,11 @@ public interface AgencyService {
     ApiResponse<OrderDTO> cancelOrder(AgencyCancelOrderRequest request);
     ApiResponse<String> getOrderStatus(Long order_id);
     ApiResponse<List<OrderDTO>> getListOfOrdersByStatus(ListOrderByStatusRequest request);
-//    ApiResponse<OrderDTO> sendOrderToShipping(Long orderId);
+    //    ApiResponse<OrderDTO> sendOrderToShipping(Long orderId);
 //    ApiResponse<OrderDTO> trackShippingStatus(String trackingCode);
-    ApiResponse<ProductInfoDTO> disableSellingProduct(Long product_id);
-
-
+//    ApiResponse<ProductInfoDTO> disableSellingProduct(Long product_id);
     ApiResponse<List<ProductInfoDTO>> getListProductByStatus(String status_code);
+    ApiResponse<ProductFullDTO> getFullInfoProduct(long productId);
+    ApiResponse<ProductInfoDTO> toggleProductSaleStatus(Long productId);
+    ApiResponse<ShopInfoDTO> getShopInfo();
 }

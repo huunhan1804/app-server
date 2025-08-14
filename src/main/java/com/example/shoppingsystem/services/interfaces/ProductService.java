@@ -1,9 +1,11 @@
 package com.example.shoppingsystem.services.interfaces;
 
+import com.example.shoppingsystem.dtos.FeedbackDTO;
 import com.example.shoppingsystem.dtos.ProductBasicDTO;
 import com.example.shoppingsystem.dtos.ProductInfoDTO;
 import com.example.shoppingsystem.entities.Product;
 import com.example.shoppingsystem.entities.ProductVariant;
+import com.example.shoppingsystem.requests.AddFeedbackRequest;
 import com.example.shoppingsystem.requests.ListProductByParentCategoryRequest;
 import com.example.shoppingsystem.responses.ApiResponse;
 import com.example.shoppingsystem.responses.SimplifiedResponse;
@@ -29,4 +31,5 @@ public interface ProductService {
 
     ApiResponse<List> getListProductByCategory(Long categoryId);
     ApiResponse<List> getListProductByAgency(Long agencyId);
+    ApiResponse<FeedbackDTO> addFeedback(AddFeedbackRequest request);
 }

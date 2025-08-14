@@ -18,4 +18,5 @@ public interface OrderService {
     ApiResponse<List<OrderDTO>> cancelOrder(long orderId);
     ApiResponse<List<OrderDTO>> receiveOrder(long orderId);
     ApiResponse<List<OrderDTO>> returnOrder(ReturnOrderRequest request);
+    ApiResponse<OrderDTO> reorder(long orderId);
 }

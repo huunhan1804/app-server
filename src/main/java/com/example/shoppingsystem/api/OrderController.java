@@ -89,11 +89,25 @@ public class OrderController {
             summary = "Return order",
             description = "Return order."
     )
-    @GetMapping("/return/{orderId}")
+    @PutMapping("/return/{orderId}")
     public ResponseEntity<ApiResponse<List<OrderDTO>>> returnOrder(
+            @PathVariable("orderId") Long orderId,
             @RequestBody ReturnOrderRequest request
     ){
+        request.setOrderId(orderId);
         ApiResponse<List<OrderDTO>> apiResponse = orderService.returnOrder(request);
+        return ResponseEntity.status(apiResponse.getStatus()).body(apiResponse);
+    }
+
+    @Operation(
+            summary = "Reorder",
+            description = "Create a new order from an existing order."
+    )
+    @PostMapping("/reorder/{orderId}")
+    public ResponseEntity<ApiResponse<OrderDTO>> reorder(
+            @Parameter(description = "ID of the order to reorder") @PathVariable("orderId") long orderId
+    ) {
+        ApiResponse<OrderDTO> apiResponse = orderService.reorder(orderId);
         return ResponseEntity.status(apiResponse.getStatus()).body(apiResponse);
     }
 }

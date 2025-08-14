@@ -1,5 +1,7 @@
 package com.example.shoppingsystem.enums;
 
+import java.util.stream.Stream;
+
 public enum Rating {
     ONE_STAR(1),
     TWO_STARS(2),
@@ -15,5 +17,12 @@ public enum Rating {
 
     public int getValue() {
         return value;
+    }
+
+    public static Rating fromValue(int value) {
+        return Stream.of(Rating.values())
+                .filter(rating -> rating.getValue() == value)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid rating value: " + value));
     }
 }
