@@ -111,7 +111,7 @@ public class AccountServiceImpl implements AccountService {
         if (account.isPresent()) {
             if(account.get().getRole().getRoleCode().equals(RoleCode.ROLE_AGENCY)) {
                 return ApiResponse.<AgencyInfoDTO>builder()
-                        .status(ErrorCode.CONFLICT)
+                        .status(ErrorCode.FORBIDDEN)
                         .message(Message.ACCOUNT_IS_AGENCY)
                         .timestamp(new java.util.Date())
                         .build();
@@ -120,7 +120,7 @@ public class AccountServiceImpl implements AccountService {
             Optional<AgencyInfo> existingAgency = agencyInfoRepository.findTopByAccountOrderBySubmittedDateDesc(account.get());
             if (existingAgency.isPresent()) {
                 return ApiResponse.<AgencyInfoDTO>builder()
-                        .status(ErrorCode.CONFLICT)
+                        .status(ErrorCode.FORBIDDEN)
                         .message(Message.AGENCY_IS_PENDING)
                         .data(convertToAgencyInfoDTO(existingAgency.get()))
                         .timestamp(new java.util.Date())

@@ -607,8 +607,16 @@ public class AgencyServiceImpl implements AgencyService {
 
     @Override
     public ApiResponse<OrderDTO> confirmOrder(ConfirmOrderRequest request){
-        Optional<AgencyInfo> agencyInfo = agencyInfoRepository.findByApplicationId(request.getAgencyId());
-        if(agencyInfo.isPresent()) {
+        Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        if(account.isPresent()) {
+            Optional<AgencyInfo> agencyInfo = agencyInfoRepository.findByAccount(account.get());
+            if(agencyInfo.isEmpty() || !agencyInfo.get().getApprovalStatus().getStatusCode().equals(StatusCode.STATUS_APPROVED)) {
+                return ApiResponse.<OrderDTO>builder()
+                        .status(ErrorCode.NOT_FOUND)
+                        .message(Message.ACCOUNT_IS_NOT_AGENCY)
+                        .timestamp(new java.util.Date())
+                        .build();
+            }
             OrderList orderList = orderRepository.findByOrderId(request.getOrderId());
 
             if(orderList == null) {
@@ -638,7 +646,7 @@ public class AgencyServiceImpl implements AgencyService {
         }
         return ApiResponse.<OrderDTO>builder()
                 .status(ErrorCode.NOT_FOUND)
-                .message(Message.AGENCY_NOT_FOUND)
+                .message(Message.ACCOUNT_NOT_FOUND)
                 .timestamp(new java.util.Date())
                 .build();
     }
