@@ -618,7 +618,6 @@ public class AgencyServiceImpl implements AgencyService {
                         .build();
             }
             OrderList orderList = orderRepository.findByOrderId(request.getOrderId());
-
             if(orderList == null) {
                 return ApiResponse.<OrderDTO>builder()
                         .status(ErrorCode.NOT_FOUND)
@@ -626,6 +625,14 @@ public class AgencyServiceImpl implements AgencyService {
                         .timestamp(new java.util.Date())
                         .build();
             }
+            if(!isAgencyOrders(orderList, account.get())){
+                return ApiResponse.<OrderDTO>builder()
+                        .status(ErrorCode.FORBIDDEN)
+                        .message(Message.AGENCY_NOT_ALLOWED)
+                        .timestamp(new Date())
+                        .build();
+            }
+
             if(!orderList.getOrderStatus().equals(OrderStatus.PENDING)) {
                 return ApiResponse.<OrderDTO>builder()
                         .status(ErrorCode.BAD_REQUEST)
@@ -636,11 +643,11 @@ public class AgencyServiceImpl implements AgencyService {
 
             orderList.setOrderStatus(OrderStatus.CONFIRMED);
             orderRepository.save(orderList);
-
+            List<OrderDetail> orderDetails = orderDetailRepository.findAllByOrderList_OrderId(orderList.getOrderId());
             return ApiResponse.<OrderDTO>builder()
                     .status(ErrorCode.SUCCESS)
                     .message(Message.CONFIRM_ORDER_SUCCESS)
-                    .data(convertOrderToDTO(orderList, (List<OrderDetail>) orderList.getOrderDetails()))
+                    .data(convertOrderToDTO(orderList, orderDetails))
                     .timestamp(new java.util.Date())
                     .build();
         }
@@ -672,10 +679,17 @@ public class AgencyServiceImpl implements AgencyService {
 
     @Override
     public ApiResponse<List<OrderDTO>> getListOfOrdersByStatus(ListOrderByStatusRequest request){
-        Optional<AgencyInfo> agencyInfo = agencyInfoRepository.findByApplicationId(request.getAgencyId());
-        if(agencyInfo.isPresent()) {
-            Account account = agencyInfo.get().getAccount();
-            List<OrderList> orderLists = orderRepository.findAllByAccount_AccountId(account.getAccountId());
+        Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        if(account.isPresent()) {
+            Optional<AgencyInfo> agencyInfo = agencyInfoRepository.findByAccount(account.get());
+            if(agencyInfo.isEmpty() || !agencyInfo.get().getApprovalStatus().getStatusCode().equals(StatusCode.STATUS_APPROVED)) {
+                return ApiResponse.<List<OrderDTO>>builder()
+                        .status(ErrorCode.FORBIDDEN)
+                        .message(Message.ACCOUNT_IS_NOT_AGENCY)
+                        .timestamp(new java.util.Date())
+                        .build();
+            }
+            List<OrderList> orderLists = orderRepository.findByAgency_AccountId(account.get().getAccountId());
             if(orderLists.isEmpty()) {
                 return ApiResponse.<List<OrderDTO>>builder()
                         .status(ErrorCode.NOT_FOUND)
@@ -686,7 +700,7 @@ public class AgencyServiceImpl implements AgencyService {
             List<OrderDTO> orderDTOS = new ArrayList<>();
             for(OrderList orderList : orderLists) {
                 if(orderList.getOrderStatus().equals(OrderStatus.valueOf(request.getStatus()))) {
-                    OrderDTO orderDTO = convertOrderToDTO(orderList, (List<OrderDetail>) orderList.getOrderDetails());
+                    OrderDTO orderDTO = convertOrderToDTO(orderList, orderDetailRepository.findAllByOrderList_OrderId(orderList.getOrderId()));
                     orderDTOS.add(orderDTO);
                 }
             }
@@ -698,35 +712,92 @@ public class AgencyServiceImpl implements AgencyService {
                     .build();
         }
         return ApiResponse.<List<OrderDTO>>builder()
-                .status(ErrorCode.FORBIDDEN)
-                .message(Message.AGENCY_NOT_FOUND)
+                .status(ErrorCode.NOT_FOUND)
+                .message(Message.ACCOUNT_NOT_FOUND)
                 .timestamp(new java.util.Date())
                 .build();
     }
 
+//    @Override
+//    public ApiResponse<OrderDTO> shipOrders(ShippingRequest request){
+//        Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+//        if(account.isEmpty()) {
+//            return ApiResponse.<OrderDTO>builder()
+//                    .status(ErrorCode.NOT_FOUND)
+//                    .message(Message.ACCOUNT_NOT_FOUND)
+//                    .timestamp(new Date())
+//                    .build();
+//        }
+//        OrderList orderList = orderRepository.findByOrderId(request.getOrderId());
+//        if(orderList != null) {
+//            if(agencyInfoRepository.findByAccount_AccountId(orderList.getAgency().getAccountId()).equals(account.get().getAccountId())) {
+//                if(orderList.getOrderStatus().equals(OrderStatus.PENDING)) {
+//                    orderList.setOrderStatus(OrderStatus.SHIPPING);
+//                    OrderList savedOrder = orderRepository.save(orderList);
+//                    return ApiResponse.<OrderDTO>builder()
+//                            .status(ErrorCode.SUCCESS)
+//                            .message(Message.ORDER_IS_SHIPPING)
+//                            .data(convertOrderToDTO(savedOrder,savedOrder.getOrderDetails().stream().toList()))
+//                            .build();
+//                }
+//                return ApiResponse.<OrderDTO>builder()
+//                        .status(ErrorCode.BAD_REQUEST)
+//                        .message(Message.ORDER_IS_NOT_PENDING)
+//                        .timestamp(new Date())
+//                        .build();
+//            }
+//            return ApiResponse.<OrderDTO>builder()
+//                    .status(ErrorCode.UNAUTHORIZED)
+//                    .message(Message.AGENCY_NOT_ALLOWED)
+//                    .timestamp(new Date())
+//                    .build();
+//        }
+//        return ApiResponse.<OrderDTO>builder()
+//                .status(ErrorCode.NOT_FOUND)
+//                .message(Message.NOT_FOUND_ORDER)
+//                .timestamp(new Date())
+//                .build();
+//    }
+
     @Override
     public ApiResponse<OrderDTO> shipOrder(ShippingRequest request){
+        Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        if(account.isEmpty()) {
+            return ApiResponse.<OrderDTO>builder()
+                    .status(ErrorCode.NOT_FOUND)
+                    .message(Message.ACCOUNT_NOT_FOUND)
+                    .timestamp(new Date())
+                    .build();
+        }
+        Optional<AgencyInfo> agencyInfo = agencyInfoRepository.findByAccount(account.get());
+        if(agencyInfo.isEmpty() || !agencyInfo.get().getApprovalStatus().getStatusCode().equals(StatusCode.STATUS_APPROVED)) {
+            return ApiResponse.<OrderDTO>builder()
+                    .status(ErrorCode.FORBIDDEN)
+                    .message(Message.ACCOUNT_IS_NOT_AGENCY)
+                    .timestamp(new Date())
+                    .build();
+        }
         OrderList orderList = orderRepository.findByOrderId(request.getOrderId());
         if(orderList != null) {
-            if(agencyInfoRepository.findByAccount_AccountId(orderList.getAgency().getAccountId()).get().getApplicationId().equals(request.getAgencyId())) {
-                if(orderList.getOrderStatus().equals(OrderStatus.PENDING)) {
-                    orderList.setOrderStatus(OrderStatus.SHIPPING);
-                    OrderList savedOrder = orderRepository.save(orderList);
-                    return ApiResponse.<OrderDTO>builder()
-                            .status(ErrorCode.SUCCESS)
-                            .message(Message.ORDER_IS_SHIPPING)
-                            .data(convertOrderToDTO(savedOrder,savedOrder.getOrderDetails().stream().toList()))
-                            .build();
-                }
+            if(!isAgencyOrders(orderList, account.get())){
                 return ApiResponse.<OrderDTO>builder()
-                        .status(ErrorCode.BAD_REQUEST)
-                        .message(Message.ORDER_IS_NOT_PENDING)
+                        .status(ErrorCode.FORBIDDEN)
+                        .message(Message.AGENCY_NOT_ALLOWED)
                         .timestamp(new Date())
                         .build();
             }
+            if(orderList.getOrderStatus().equals(OrderStatus.PENDING)) {
+                orderList.setOrderStatus(OrderStatus.SHIPPING);
+                OrderList savedOrder = orderRepository.save(orderList);
+                return ApiResponse.<OrderDTO>builder()
+                        .status(ErrorCode.SUCCESS)
+                        .message(Message.ORDER_IS_SHIPPING)
+                        .data(convertOrderToDTO(savedOrder,savedOrder.getOrderDetails().stream().toList()))
+                        .build();
+            }
             return ApiResponse.<OrderDTO>builder()
-                    .status(ErrorCode.UNAUTHORIZED)
-                    .message(Message.AGENCY_NOT_ALLOWED)
+                    .status(ErrorCode.BAD_REQUEST)
+                    .message(Message.ORDER_IS_NOT_PENDING)
                     .timestamp(new Date())
                     .build();
         }
@@ -736,32 +807,48 @@ public class AgencyServiceImpl implements AgencyService {
                 .timestamp(new Date())
                 .build();
     }
+
     @Override
     public ApiResponse<OrderDTO> completeOrder(CompleteOrderRequest request){
+        Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        if(account.isEmpty()) {
+            return ApiResponse.<OrderDTO>builder()
+                    .status(ErrorCode.NOT_FOUND)
+                    .message(Message.ACCOUNT_NOT_FOUND)
+                    .timestamp(new Date())
+                    .build();
+        }
+        Optional<AgencyInfo> agencyInfo = agencyInfoRepository.findByAccount(account.get());
+        if(agencyInfo.isEmpty() || !agencyInfo.get().getApprovalStatus().getStatusCode().equals(StatusCode.STATUS_APPROVED)) {
+            return ApiResponse.<OrderDTO>builder()
+                    .status(ErrorCode.FORBIDDEN)
+                    .message(Message.ACCOUNT_IS_NOT_AGENCY)
+                    .timestamp(new Date())
+                    .build();
+        }
         OrderList orderList = orderRepository.findByOrderId(request.getOrderId());
         if(orderList != null) {
-            AgencyInfo agencyInfo = agencyInfoRepository.findByAccount_AccountId(orderList.getAgency().getAccountId()).get();
-            if(agencyInfo.getApplicationId().equals(request.getAgencyId())) {
-                if(orderList.getOrderStatus().equals(OrderStatus.DELIVERED)) {
-                    orderList.setOrderStatus(OrderStatus.COMPLETED);
-                    orderList.setUpdatedBy(agencyInfo.getShopName());
-                    orderList.setUpdatedDate(LocalDateTime.now());
-                    OrderList savedOrder = orderRepository.save(orderList);
-                    return ApiResponse.<OrderDTO>builder()
-                            .status(ErrorCode.SUCCESS)
-                            .message(Message.ORDER_IS_COMPLETED)
-                            .data(convertOrderToDTO(savedOrder,savedOrder.getOrderDetails().stream().toList()))
-                            .build();
-                }
+            if(!isAgencyOrders(orderList, account.get())){
                 return ApiResponse.<OrderDTO>builder()
-                        .status(ErrorCode.BAD_REQUEST)
-                        .message(Message.ORDER_IS_NOT_DELIVERED)
+                        .status(ErrorCode.FORBIDDEN)
+                        .message(Message.AGENCY_NOT_ALLOWED)
                         .timestamp(new Date())
                         .build();
             }
+            if(orderList.getOrderStatus().equals(OrderStatus.DELIVERED)) {
+                orderList.setOrderStatus(OrderStatus.COMPLETED);
+                orderList.setUpdatedBy(agencyInfo.get().getShopName());
+                orderList.setUpdatedDate(LocalDateTime.now());
+                OrderList savedOrder = orderRepository.save(orderList);
+                return ApiResponse.<OrderDTO>builder()
+                        .status(ErrorCode.SUCCESS)
+                        .message(Message.ORDER_IS_COMPLETED)
+                        .data(convertOrderToDTO(savedOrder,savedOrder.getOrderDetails().stream().toList()))
+                        .build();
+            }
             return ApiResponse.<OrderDTO>builder()
-                    .status(ErrorCode.UNAUTHORIZED)
-                    .message(Message.AGENCY_NOT_ALLOWED)
+                    .status(ErrorCode.BAD_REQUEST)
+                    .message(Message.ORDER_IS_NOT_DELIVERED)
                     .timestamp(new Date())
                     .build();
         }
@@ -801,37 +888,51 @@ public class AgencyServiceImpl implements AgencyService {
 
     @Override
     public ApiResponse<OrderDTO> cancelOrder(AgencyCancelOrderRequest request){
-        Optional<AgencyInfo> agencyInfo = agencyInfoRepository.findByApplicationId(request.getAgencyId());
-        if(agencyInfo.isPresent()) {
-            OrderList orderList = orderRepository.findByOrderId(request.getOrderId());
-            if(orderList == null) {
-                return ApiResponse.<OrderDTO>builder()
-                        .status(ErrorCode.NOT_FOUND)
-                        .message(Message.NOT_FOUND_ORDER)
-                        .timestamp(new java.util.Date())
-                        .build();
-            }
-            if(!orderList.getOrderStatus().equals(OrderStatus.PENDING)) {
-                return ApiResponse.<OrderDTO>builder()
-                        .status(ErrorCode.BAD_REQUEST)
-                        .message(Message.ORDER_IS_NOT_PENDING)
-                        .timestamp(new java.util.Date())
-                        .build();
-            }
-
-            orderList.setOrderStatus(OrderStatus.CANCELLED);
-            orderRepository.save(orderList);
-
+        Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        if(account.isEmpty()) {
             return ApiResponse.<OrderDTO>builder()
-                    .status(ErrorCode.SUCCESS)
-                    .message(Message.ORDER_CANCELLED_BY_AGENCY)
-                    .data(convertOrderToDTO(orderList, (List<OrderDetail>) orderList.getOrderDetails()))
+                    .status(ErrorCode.NOT_FOUND)
+                    .message(Message.ACCOUNT_NOT_FOUND)
+                    .timestamp(new Date())
+                    .build();
+        }
+        Optional<AgencyInfo> agencyInfo = agencyInfoRepository.findByAccount(account.get());
+        if(agencyInfo.isEmpty() || !agencyInfo.get().getApprovalStatus().getStatusCode().equals(StatusCode.STATUS_APPROVED)) {
+            return ApiResponse.<OrderDTO>builder()
+                    .status(ErrorCode.FORBIDDEN)
+                    .message(Message.ACCOUNT_IS_NOT_AGENCY)
+                    .timestamp(new Date())
+                    .build();
+        }
+        OrderList orderList = orderRepository.findByOrderId(request.getOrderId());
+        if(orderList == null) {
+            return ApiResponse.<OrderDTO>builder()
+                    .status(ErrorCode.NOT_FOUND)
+                    .message(Message.NOT_FOUND_ORDER)
                     .timestamp(new java.util.Date())
                     .build();
         }
+        if(!isAgencyOrders(orderList, account.get())){
+            return ApiResponse.<OrderDTO>builder()
+                    .status(ErrorCode.FORBIDDEN)
+                    .message(Message.AGENCY_NOT_ALLOWED)
+                    .timestamp(new Date())
+                    .build();
+        }
+        if(!orderList.getOrderStatus().equals(OrderStatus.PENDING)) {
+            return ApiResponse.<OrderDTO>builder()
+                    .status(ErrorCode.BAD_REQUEST)
+                    .message(Message.ORDER_IS_NOT_PENDING)
+                    .timestamp(new java.util.Date())
+                    .build();
+        }
+
+        orderList.setOrderStatus(OrderStatus.CANCELLED);
+        orderRepository.save(orderList);
         return ApiResponse.<OrderDTO>builder()
-                .status(ErrorCode.NOT_FOUND)
-                .message(Message.AGENCY_NOT_FOUND)
+                .status(ErrorCode.SUCCESS)
+                .message(Message.ORDER_CANCELLED_BY_AGENCY)
+                .data(convertOrderToDTO(orderList, orderDetailRepository.findAllByOrderList_OrderId(orderList.getOrderId())))
                 .timestamp(new java.util.Date())
                 .build();
     }
@@ -973,6 +1074,10 @@ public class AgencyServiceImpl implements AgencyService {
 //                .items(items)
 //                .build();
 //    }
+
+    private boolean isAgencyOrders(OrderList orderList, Account agency) {
+        return orderList.getAgency().getAccountId().equals(agency.getAccountId());
+    }
 
     public OrderDetailDTO convertOrderDetailToDTO(OrderDetail orderDetail) {
         ProductVariant productVariant = orderDetail.getProductVariant();

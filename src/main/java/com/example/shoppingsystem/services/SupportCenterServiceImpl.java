@@ -128,7 +128,7 @@ public class SupportCenterServiceImpl implements SupportCenterService {
                         .build();
             }
             return ApiResponse.<List<SupportArticleDTO>>builder()
-                    .status(ErrorCode.CONFLICT)
+                    .status(ErrorCode.UNPROCESSABLE_ENTITY)
                     .message(Message.HIDE_ARTICLE_FAILURE)
                     .timestamp(new java.util.Date())
                     .build();

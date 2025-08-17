@@ -10,5 +10,6 @@ public class ErrorCode {
     public static final int UNPROCESSABLE_ENTITY = 422; //Mã lỗi request không thể xử lý
     public static final int TOO_MANY_REQUEST = 429; //Too Many Requests
     public static final int ACCOUNT_ALREADY_EXISTS = 409;
+    public static final int CONFLICT = 33;
 
 }
