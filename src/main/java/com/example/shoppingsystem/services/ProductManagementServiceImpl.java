@@ -132,6 +132,7 @@ public class ProductManagementServiceImpl implements ProductManagementService {
 
         ApprovalStatus approvedStatus = approvalStatusRepository.findApprovalStatusByStatusCode(StatusCode.STATUS_APPROVED);
         product.setApprovalStatus(approvedStatus);
+        product.setIsSale(true);
         productRepository.save(product);
 
         notificationService.sendProductNotification(product.getAgencyInfo().getAccount(), product.getProductName(),

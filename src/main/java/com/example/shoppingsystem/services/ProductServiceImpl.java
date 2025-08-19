@@ -140,6 +140,8 @@ public class ProductServiceImpl implements ProductService {
             product.ifPresent(productList::add);
         }
         List<ProductBasicDTO> productBasicDTOS = productList.stream()
+                .filter(p -> p.getApprovalStatus() != null &&
+                        StatusCode.STATUS_APPROVED.equals(p.getApprovalStatus().getStatusCode()) && p.getIsSale() == true)
                 .map(this::convertToProductBasicDTO).collect(Collectors.toList());
         return ApiResponse.<List>builder()
                 .status(ErrorCode.SUCCESS)
@@ -156,14 +158,14 @@ public class ProductServiceImpl implements ProductService {
         // Lấy 3 sản phẩm bán chạy nhất
         List<Product> bestSellers = productRepository.findTop3ByOrderBySoldAmountDesc().stream()
                 .filter(p -> p.getApprovalStatus() != null &&
-                        StatusCode.STATUS_APPROVED.equals(p.getApprovalStatus().getStatusCode()))
+                        StatusCode.STATUS_APPROVED.equals(p.getApprovalStatus().getStatusCode()) && p.getIsSale() == true)
                 .toList();
         relatedProducts.addAll(bestSellers);
 
         // Lấy 3 sản phẩm mới nhất
         List<Product> latestProducts = productRepository.findTop3ByOrderByProductIdDesc().stream()
                 .filter(p -> p.getApprovalStatus() != null &&
-                        StatusCode.STATUS_APPROVED.equals(p.getApprovalStatus().getStatusCode()))
+                        StatusCode.STATUS_APPROVED.equals(p.getApprovalStatus().getStatusCode()) && p.getIsSale() == true)
                 .toList();
 
         relatedProducts.addAll(latestProducts);
@@ -204,9 +206,8 @@ public class ProductServiceImpl implements ProductService {
 
         List<Product> approvedProducts = products.stream()
                 .filter(p -> p.getApprovalStatus() != null &&
-                        StatusCode.STATUS_APPROVED.equals(p.getApprovalStatus().getStatusCode()))
+                        StatusCode.STATUS_APPROVED.equals(p.getApprovalStatus().getStatusCode()) && p.getIsSale() == true)
                 .toList();
-
 
         if (approvedProducts.isEmpty()) {
             return ApiResponse.<List<ProductBasicDTO>>builder()
@@ -235,7 +236,7 @@ public class ProductServiceImpl implements ProductService {
             List<Product> allProducts = productRepository.findAll();
             List<Product> approvedProducts = allProducts.stream()
                     .filter(p -> p.getApprovalStatus() != null &&
-                            StatusCode.STATUS_APPROVED.equals(p.getApprovalStatus().getStatusCode()))
+                            StatusCode.STATUS_APPROVED.equals(p.getApprovalStatus().getStatusCode()) && p.getIsSale() == true)
                     .toList();
 
             List<ProductBasicDTO> productBasicDTOs = approvedProducts.stream()
@@ -390,13 +391,13 @@ public class ProductServiceImpl implements ProductService {
 
     private Stream<ProductBasicDTO> getProductBasicDTOsByCategory(Category category) {
         List<Product> productsInCategory = productRepository.findByCategory_CategoryIdAndApprovalStatus_StatusCode(category.getCategoryId(), StatusCode.STATUS_APPROVED);
-        return productsInCategory.stream()
+        return productsInCategory.stream().filter(p ->  p.getIsSale() == true)
                 .map(this::convertToProductBasicDTO);
     }
 
     private Stream<ProductBasicDTO> getProductBasicDTOsByAgency(AgencyInfo agencyInfo) {
         List<Product> productInsAgency = productRepository.findAllByAgencyInfoAndApprovalStatus_StatusCode(agencyInfo, StatusCode.STATUS_APPROVED);
-        return productInsAgency.stream()
+        return productInsAgency.stream().filter(p ->  p.getIsSale() == true)
                 .map(this::convertToProductBasicDTO);
     }
 
