@@ -115,7 +115,7 @@ public class SampleDataGenerator {
             System.out.println("✓ Đã tạo " + accountCoupons.size() + " account coupons");
 
             // 16. Tạo Orders
-            List<OrderList> orders = createOrders(accounts);
+            List<OrderList> orders = createOrders(accounts, agencyInfos);
             System.out.println("✓ Đã tạo " + orders.size() + " orders");
 
             // 17. Tạo Order Details
@@ -196,7 +196,7 @@ public class SampleDataGenerator {
         System.out.println("Tạo roles...");
 
         // Kiểm tra xem đã có ADMIN role chưa
-        Optional<Role> adminRole = Optional.ofNullable(roleRepository.findByRoleCode("ADMIN"));
+        Optional<Role> adminRole = Optional.ofNullable(roleRepository.findByRoleCode("admin"));
         if (adminRole.isPresent()) {
             System.out.println("Roles đã tồn tại, lấy từ database");
             return roleRepository.findAll();
@@ -346,7 +346,7 @@ public class SampleDataGenerator {
         List<Account> accounts = new ArrayList<>();
 
         // Lấy roles
-        Role adminRole = roles.stream().filter(r -> r.getRoleCode().equals("ADMIN")).findFirst().orElse(roles.get(0));
+        Role adminRole = roles.stream().filter(r -> r.getRoleCode().equals("admin")).findFirst().orElse(roles.get(0));
         Role customerRole = roles.stream().filter(r -> r.getRoleCode().equals("customer")).findFirst().orElse(roles.get(1));
         Role agencyRole = roles.stream().filter(r -> r.getRoleCode().equals("agency")).findFirst().orElse(roles.get(2));
 
@@ -379,7 +379,7 @@ public class SampleDataGenerator {
                 .username(username)
                 .email(username + "@example.com")
                 .phone("09" + String.format("%8d", random.nextInt(100000000)))
-                .password(passwordEncoder.encode("password123"))
+                .password(passwordEncoder.encode("Password123@"))
                 .fullname(firstName + " " + lastName)
                 .birthdate(faker.date().birthday(18, 65))
                 .gender(random.nextBoolean() ? "Nam" : "Nữ")
@@ -742,13 +742,10 @@ public class SampleDataGenerator {
         return accountCouponRepository.saveAll(accountCoupons);
     }
 
-    private List<OrderList> createOrders(List<Account> accounts) {
+    private List<OrderList> createOrders(List<Account> accounts, List<AgencyInfo> agencies) {
         List<OrderList> orders = new ArrayList<>();
         List<Account> customers = accounts.stream()
                 .filter(account -> "customer".equals(account.getRole().getRoleCode()))
-                .toList();
-        List<Account> agencies = accounts.stream()
-                .filter(account -> "agency".equals(account.getRole().getRoleCode()))
                 .toList();
 
         if (customers.isEmpty() || agencies.isEmpty()) {
@@ -758,21 +755,20 @@ public class SampleDataGenerator {
 
         for (int i = 0; i < 1500; i++) {
             Account customer = customers.get(random.nextInt(customers.size()));
-            Account agency = agencies.get(random.nextInt(agencies.size()));
+            AgencyInfo agencyInfo = agencies.get(random.nextInt(agencies.size()));
 
             orders.add(OrderList.builder()
                     .account(customer)
-                    .agency(agency)
+                    .agency(agencyInfo) // ✅ Truyền AgencyInfo object
                     .orderDate(LocalDateTime.now().minusDays(random.nextInt(365)))
-                    .totalPrice(BigDecimal.ZERO) // Sẽ được tính lại trong createOrderDetails
+                    .totalPrice(BigDecimal.ZERO)
                     .orderStatus(OrderStatus.values()[random.nextInt(OrderStatus.values().length)])
                     .addressDetail(faker.address().fullAddress())
                     .build());
         }
 
         return orderRepository.saveAll(orders);
-    }
-    private List<OrderDetail> createOrderDetails(List<OrderList> orders, List<Product> products, List<ProductVariant> productVariants) {
+    } List<OrderDetail> createOrderDetails(List<OrderList> orders, List<Product> products, List<ProductVariant> productVariants) {
         List<OrderDetail> orderDetails = new ArrayList<>();
 
         for (OrderList order : orders) {
@@ -857,90 +853,104 @@ public class SampleDataGenerator {
     // Method để tạo dữ liệu theo batch để tránh lỗi memory
     @Transactional
     public void generateBigSampleData() {
-        System.out.println("=== TẠO DỮ LIỆU MẪU LỚNHỌN (10K+ RECORDS) ===");
+        System.out.println("=== TẠO DỮ LIỆU MẪU LỚN (10K+ RECORDS) ===");
 
         try {
+            // Xóa dữ liệu cũ trước (nếu có)
             clearExistingData();
 
-            // Tạo dữ liệu cơ bản trước
+            // 1. Tạo Roles
             List<Role> roles = createRoles();
-            List<ApprovalStatus> approvalStatuses = createApprovalStatuses();
-            List<ParentCategory> parentCategories = createParentCategories();
-            List<Category> categories = createCategoriesBig(parentCategories, 200); // 200 categories
+            System.out.println("✓ Đã tạo " + roles.size() + " roles");
 
-            // Tạo accounts theo batch
+            // 2. Tạo Approval Status
+            List<ApprovalStatus> approvalStatuses = createApprovalStatuses();
+            System.out.println("✓ Đã tạo " + approvalStatuses.size() + " approval statuses");
+
+            // 3. Tạo Parent Categories
+            List<ParentCategory> parentCategories = createParentCategories();
+            System.out.println("✓ Đã tạo " + parentCategories.size() + " parent categories");
+
+            // 4. Tạo Categories
+            List<Category> categories = createCategoriesBig(parentCategories);
+            System.out.println("✓ Đã tạo " + categories.size() + " categories");
+
+            // 5. Tạo Accounts (theo batch)
             List<Account> allAccounts = new ArrayList<>();
             for (int batch = 0; batch < 10; batch++) {
                 List<Account> batchAccounts = createAccountsBatch(roles, approvalStatuses, batch, 100);
                 allAccounts.addAll(batchAccounts);
                 System.out.println("✓ Batch " + (batch + 1) + ": Đã tạo " + batchAccounts.size() + " accounts");
             }
+            System.out.println("✓ Tổng cộng đã tạo " + allAccounts.size() + " accounts");
 
-            // Tạo membership cho customers
+            // 6. Tạo Memberships
             List<Membership> memberships = createMemberships(allAccounts);
             System.out.println("✓ Đã tạo " + memberships.size() + " memberships");
 
-            // Tạo agency info cho agencies
+            // 7. Tạo Agency Info
             List<AgencyInfo> agencyInfos = createAgencyInfos(allAccounts, approvalStatuses);
             System.out.println("✓ Đã tạo " + agencyInfos.size() + " agency infos");
 
-            // Tạo addresses
+            // 8. Tạo Addresses
             List<Address> addresses = createAddressesBig(allAccounts);
             System.out.println("✓ Đã tạo " + addresses.size() + " addresses");
 
-            // Tạo products theo batch
+            // 9. Tạo Products (theo batch)
             List<Product> allProducts = new ArrayList<>();
-            List<Account> agencies = allAccounts.stream()
-                    .filter(account -> "agency".equals(account.getRole().getRoleCode()))
-                    .toList();
-
             for (int batch = 0; batch < 20; batch++) {
-                List<Product> batchProducts = createProductsBatch(categories, agencies, approvalStatuses, batch, 100);
+                List<Product> batchProducts = createProductsBatch(categories, agencyInfos, approvalStatuses, batch, 100);
                 allProducts.addAll(batchProducts);
                 System.out.println("✓ Batch " + (batch + 1) + ": Đã tạo " + batchProducts.size() + " products");
             }
+            System.out.println("✓ Tổng cộng đã tạo " + allProducts.size() + " products");
 
-            // Tạo product variants
+            // 10. Tạo Product Variants
             List<ProductVariant> productVariants = createProductVariantsBig(allProducts);
             System.out.println("✓ Đã tạo " + productVariants.size() + " product variants");
 
-            // Tạo multimedia
+            // 11. Tạo Multimedia
             List<Multimedia> multimedias = createMultimediaBig(allAccounts, allProducts, productVariants, categories);
             System.out.println("✓ Đã tạo " + multimedias.size() + " multimedia");
 
-            // Tạo carts
+            // 12. Tạo Carts
             List<Cart> carts = createCarts(allAccounts);
             System.out.println("✓ Đã tạo " + carts.size() + " carts");
 
-            // Tạo cart items
+            // 13. Tạo Cart Items
             List<CartItem> cartItems = createCartItemsBig(carts, allProducts, productVariants);
             System.out.println("✓ Đã tạo " + cartItems.size() + " cart items");
 
-            // Tạo coupons
+            // 14. Tạo Coupons
             List<Coupon> coupons = createCouponsBig(categories);
             System.out.println("✓ Đã tạo " + coupons.size() + " coupons");
 
-            // Tạo account coupons
+            // 15. Tạo Account Coupons
             List<AccountCoupon> accountCoupons = createAccountCouponsBig(allAccounts, coupons);
             System.out.println("✓ Đã tạo " + accountCoupons.size() + " account coupons");
 
-            // Tạo orders
-            List<OrderList> orders = createOrdersBig(allAccounts);
-            System.out.println("✓ Đã tạo " + orders.size() + " orders");
+            // 16. Tạo Orders (theo batch)
+            List<OrderList> allOrders = new ArrayList<>();
+            for (int batch = 0; batch < 4; batch++) {
+                List<OrderList> batchOrders = createOrders(allAccounts, agencyInfos);
+                allOrders.addAll(batchOrders);
+                System.out.println("✓ Batch " + (batch + 1) + ": Đã tạo " + batchOrders.size() + " orders");
+            }
+            System.out.println("✓ Tổng cộng đã tạo " + allOrders.size() + " orders");
 
-            // Tạo order details
-            List<OrderDetail> orderDetails = createOrderDetailsBig(orders, allProducts, productVariants);
+            // 17. Tạo Order Details
+            List<OrderDetail> orderDetails = createOrderDetailsBig(allOrders, allProducts, productVariants);
             System.out.println("✓ Đã tạo " + orderDetails.size() + " order details");
 
-            // Tạo coupon order lists
-            List<CouponOrderList> couponOrderLists = createCouponOrderListsBig(coupons, orders);
+            // 18. Tạo Coupon Order Lists
+            List<CouponOrderList> couponOrderLists = createCouponOrderListsBig(coupons, allOrders);
             System.out.println("✓ Đã tạo " + couponOrderLists.size() + " coupon order lists");
 
-            // Tạo feedbacks
+            // 19. Tạo Feedbacks
             List<Feedback> feedbacks = createFeedbacksBig(allAccounts, allProducts);
             System.out.println("✓ Đã tạo " + feedbacks.size() + " feedbacks");
 
-            // Tính tổng cuối cùng
+            // Tính tổng số records
             long total = roleRepository.count() + approvalStatusRepository.count() +
                     parentCategoryRepository.count() + categoryRepository.count() +
                     accountRepository.count() + membershipRepository.count() +
@@ -963,9 +973,9 @@ public class SampleDataGenerator {
     }
 
     // Helper methods cho việc tạo dữ liệu lớn
-    private List<Category> createCategoriesBig(List<ParentCategory> parentCategories, int count) {
-        // Sử dụng logic tương tự như createCategories() ở trên
-        return createCategories(parentCategories); // Tái sử dụng logic
+    private List<Category> createCategoriesBig(List<ParentCategory> parentCategories) {
+        // Tái sử dụng logic từ createCategories() nhưng có thể tăng số lượng
+        return createCategories(parentCategories);
     }
 
     private List<Account> createAccountsBatch(List<Role> roles, List<ApprovalStatus> approvalStatuses, int batchIndex, int batchSize) {
@@ -1009,7 +1019,7 @@ public class SampleDataGenerator {
         return savedAddresses;
     }
 
-    private List<Product> createProductsBatch(List<Category> categories, List<Account> agencies,
+    private List<Product> createProductsBatch(List<Category> categories, List<AgencyInfo> agencies,
                                               List<ApprovalStatus> approvalStatuses, int batchIndex, int batchSize) {
         List<Product> products = new ArrayList<>();
 
@@ -1034,13 +1044,13 @@ public class SampleDataGenerator {
         for (int i = 0; i < batchSize; i++) {
             int globalIndex = batchIndex * batchSize + i;
             Category category = categories.get(random.nextInt(categories.size()));
-            Account selectedAgencyAccount = agencies.get(random.nextInt(agencies.size()));
+            AgencyInfo selectedAgencyAccount = agencies.get(random.nextInt(agencies.size()));
 
             // Tìm AgencyInfo tương ứng với Account đã chọn
-            AgencyInfo selectedAgencyInfo = agencyInfoMap.get(selectedAgencyAccount.getAccountId());
+            AgencyInfo selectedAgencyInfo = agencyInfoMap.get(selectedAgencyAccount.getApplicationId());
 
             if (selectedAgencyInfo == null) {
-                System.out.println("⚠️  Không tìm thấy AgencyInfo cho Account ID: " + selectedAgencyAccount.getAccountId());
+                System.out.println("⚠️  Không tìm thấy AgencyInfo cho Account ID: " + selectedAgencyAccount.getApplicationId());
                 continue; // Bỏ qua product này
             }
 
@@ -1197,14 +1207,14 @@ public class SampleDataGenerator {
         return accountCouponRepository.saveAll(accountCoupons);
     }
 
-    private List<OrderList> createOrdersBig(List<Account> accounts) {
+    private List<OrderList> createOrdersBig(List<Account> accounts, List<AgencyInfo> agencies) {
         List<OrderList> orders = new ArrayList<>();
         List<Account> customers = accounts.stream()
                 .filter(account -> "customer".equals(account.getRole().getRoleCode()))
                 .toList();
-        List<Account> agencies = accounts.stream()
-                .filter(account -> "agency".equals(account.getRole().getRoleCode()))
-                .toList();
+//        List<Account> agencies = accounts.stream()
+//                .filter(account -> "agency".equals(account.getRole().getRoleCode()))
+//                .toList();
 
         if (customers.isEmpty() || agencies.isEmpty()) {
             return orders;
@@ -1212,7 +1222,7 @@ public class SampleDataGenerator {
 
         for (int i = 0; i < 2000; i++) {
             Account customer = customers.get(random.nextInt(customers.size()));
-            Account agency = agencies.get(random.nextInt(agencies.size()));
+            AgencyInfo agency = agencies.get(random.nextInt(agencies.size()));
 
             orders.add(OrderList.builder()
                     .account(customer)
