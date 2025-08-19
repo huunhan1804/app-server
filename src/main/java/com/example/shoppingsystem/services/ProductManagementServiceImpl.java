@@ -191,13 +191,13 @@ public class ProductManagementServiceImpl implements ProductManagementService {
     public void warnAgency(Long productId, String warningMessage) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
-
+        product.setIsSale(false);
+        productRepository.save(product);
         // Gửi cảnh báo đến Agency
         notificationService.sendProductNotification(product.getAgencyInfo().getAccount(), product.getProductName(),
                 "Cảnh báo vi phạm",
                 "Cảnh báo về sản phẩm '" + product.getProductName() + "': " + warningMessage +
-                        ". Vui lòng tuân thủ các quy định của hệ thống để tránh bị khóa tài khoản.");
-
+                        ". Vui lòng tuân thủ các quy định của hệ thống để tránh bị khóa tài khoản.") ;
     }
 
     @Override
