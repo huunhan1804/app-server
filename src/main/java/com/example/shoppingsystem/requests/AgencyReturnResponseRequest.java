@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CompleteOrderRequest {
+public class AgencyReturnResponseRequest {
     private Long orderId;
+    private String reason;
 }

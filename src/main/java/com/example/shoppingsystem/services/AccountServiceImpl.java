@@ -96,15 +96,6 @@ public class AccountServiceImpl implements AccountService {
         return createAccount(username, "", phone, password, fullname, Regex.URL_IMAGE_DEFAULT);
     }
 
-//    @Override
-//    public AgencyInfo registerAgency(String shopName, String shopAddress, String shopEmail, String shopPhone, String taxCode, String idCardNumber, String frontIdCardImageUrl, String backIdCardImageUrl, String professionalCertUrl, String businessLicenseUrl){
-//        if(agencyInfoRepository.findByIdCardNumber(idCardNumber).isPresent()){
-//            logger.error(String.format(LogMessage.LOG_AGENCY_EXIST_ID_NUMBER, idCardNumber));
-//            return null;
-//        }
-//        return regiesterAgencyInfo(shopName, shopAddress, shopEmail, shopPhone, taxCode, idCardNumber, frontIdCardImageUrl, backIdCardImageUrl, professionalCertUrl, businessLicenseUrl);
-//    }
-
     @Override
     public ApiResponse<AgencyInfoDTO> registerAgency(AgencyRegisterRequest request) {
         Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());

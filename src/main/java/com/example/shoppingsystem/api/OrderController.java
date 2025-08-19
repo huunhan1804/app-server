@@ -35,6 +35,14 @@ public class OrderController {
         return ResponseEntity.status(apiResponse.getStatus()).body(apiResponse);
     }
 
+    @PostMapping("/add-all")
+    public ResponseEntity<ApiResponse<List<OrderDTO>>> addOrders(
+            @RequestBody OrderRequest request
+    ) {
+        ApiResponse<List<OrderDTO>> apiResponse = orderService.createOrders(request);
+        return ResponseEntity.status(apiResponse.getStatus()).body(apiResponse);
+    }
+
     @Operation(
             summary = "Ordered",
             description = "Get Ordered."

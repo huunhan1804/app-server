@@ -22,7 +22,7 @@ public interface AgencyService {
     ApiResponse<OrderDTO> confirmOrder(ConfirmOrderRequest request);
     ApiResponse<OrderDTO> cancelOrder(AgencyCancelOrderRequest request);
     ApiResponse<String> getOrderStatus(Long order_id);
-    ApiResponse<List<OrderDTO>> getListOfOrdersByStatus(ListOrderByStatusRequest request);
+    ApiResponse<List<OrderDTO>> getListOfOrdersByStatus(String status);
     //    ApiResponse<OrderDTO> sendOrderToShipping(Long orderId);
 //    ApiResponse<OrderDTO> trackShippingStatus(String trackingCode);
 //    ApiResponse<ProductInfoDTO> disableSellingProduct(Long product_id);
@@ -30,4 +30,5 @@ public interface AgencyService {
     ApiResponse<ProductFullDTO> getFullInfoProduct(long productId);
     ApiResponse<ProductInfoDTO> toggleProductSaleStatus(Long productId);
     ApiResponse<ShopInfoDTO> getShopInfo();
+    ApiResponse<OrderDTO> respondToReturnRequest(AgencyReturnResponseRequest request);
 }

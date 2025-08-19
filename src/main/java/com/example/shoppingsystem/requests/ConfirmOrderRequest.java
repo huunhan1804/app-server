@@ -10,6 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ConfirmOrderRequest {
-    private Long agencyId;
     private Long orderId;
 }

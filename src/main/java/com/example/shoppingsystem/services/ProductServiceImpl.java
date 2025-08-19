@@ -154,11 +154,18 @@ public class ProductServiceImpl implements ProductService {
         List<Product> relatedProducts = new ArrayList<>();
 
         // Lấy 3 sản phẩm bán chạy nhất
-        List<Product> bestSellers = productRepository.findTop3ByOrderBySoldAmountDesc();
+        List<Product> bestSellers = productRepository.findTop3ByOrderBySoldAmountDesc().stream()
+                .filter(p -> p.getApprovalStatus() != null &&
+                        StatusCode.STATUS_APPROVED.equals(p.getApprovalStatus().getStatusCode()))
+                .toList();
         relatedProducts.addAll(bestSellers);
 
         // Lấy 3 sản phẩm mới nhất
-        List<Product> latestProducts = productRepository.findTop3ByOrderByProductIdDesc();
+        List<Product> latestProducts = productRepository.findTop3ByOrderByProductIdDesc().stream()
+                .filter(p -> p.getApprovalStatus() != null &&
+                        StatusCode.STATUS_APPROVED.equals(p.getApprovalStatus().getStatusCode()))
+                .toList();
+
         relatedProducts.addAll(latestProducts);
 
         // Lấy 4 sản phẩm ngẫu nhiên từ category ngẫu nhiên
@@ -167,8 +174,9 @@ public class ProductServiceImpl implements ProductService {
             Category randomCategory = categories.get(random.nextInt(categories.size()));
             List<Product> randomProducts = productRepository.findByCategory_CategoryId(randomCategory.getCategoryId())
                     .stream()
+                    .filter(p -> p.getApprovalStatus() != null && StatusCode.STATUS_APPROVED.equals(p.getApprovalStatus().getStatusCode()))
                     .limit(4)
-                    .collect(Collectors.toList());
+                    .toList();
             relatedProducts.addAll(randomProducts);
         }
 
@@ -176,7 +184,7 @@ public class ProductServiceImpl implements ProductService {
         List<Product> uniqueProducts = relatedProducts.stream()
                 .distinct()
                 .limit(10)
-                .collect(Collectors.toList());
+                .toList();
 
         List<ProductBasicDTO> productBasicDTOS = uniqueProducts.stream()
                 .map(this::convertToProductBasicDTO)
@@ -194,7 +202,13 @@ public class ProductServiceImpl implements ProductService {
     public ApiResponse<List<ProductBasicDTO>> searchProductsByKeyword(String keyword) {
         List<Product> products = productRepository.findByProductNameContainingIgnoreCase(keyword);
 
-        if (products.isEmpty()) {
+        List<Product> approvedProducts = products.stream()
+                .filter(p -> p.getApprovalStatus() != null &&
+                        StatusCode.STATUS_APPROVED.equals(p.getApprovalStatus().getStatusCode()))
+                .toList();
+
+
+        if (approvedProducts.isEmpty()) {
             return ApiResponse.<List<ProductBasicDTO>>builder()
                     .status(ErrorCode.NOT_FOUND)
                     .message(Message.NOT_FOUND)
@@ -203,7 +217,7 @@ public class ProductServiceImpl implements ProductService {
                     .build();
         }
 
-        List<ProductBasicDTO> productBasicDTOs = products.stream()
+        List<ProductBasicDTO> productBasicDTOs = approvedProducts.stream()
                 .map(this::convertToProductBasicDTO)
                 .collect(Collectors.toList());
 
@@ -219,7 +233,12 @@ public class ProductServiceImpl implements ProductService {
     public ApiResponse<List> getListProductByCategory(Long categoryId) {
         if (categoryId == 0) {
             List<Product> allProducts = productRepository.findAll();
-            List<ProductBasicDTO> productBasicDTOs = allProducts.stream()
+            List<Product> approvedProducts = allProducts.stream()
+                    .filter(p -> p.getApprovalStatus() != null &&
+                            StatusCode.STATUS_APPROVED.equals(p.getApprovalStatus().getStatusCode()))
+                    .toList();
+
+            List<ProductBasicDTO> productBasicDTOs = approvedProducts.stream()
                     .map(this::convertToProductBasicDTO)
                     .collect(Collectors.toList());
 

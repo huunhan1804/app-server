@@ -18,4 +18,5 @@ public class OrderDTO {
     private String order_status;
     private String totalBill;
     private List<OrderDetailDTO> order_detail;
+    private String returnReason;
 }

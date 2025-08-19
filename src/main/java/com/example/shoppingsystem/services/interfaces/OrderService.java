@@ -14,6 +14,7 @@ public interface OrderService {
     ApiResponse<List<OrderDTO>> getAllOrder();
     ApiResponse<OrderDTO> getOrderInformation(Long orderId);
     ApiResponse<OrderDTO> createOrder(OrderRequest orderRequest);
+    ApiResponse<List<OrderDTO>> createOrders(OrderRequest orderRequest);
     ApiResponse<List<OrderDetailDTO>> getOrderDetailCheckout(CheckoutRequest request);
     ApiResponse<List<OrderDTO>> cancelOrder(long orderId);
     ApiResponse<List<OrderDTO>> receiveOrder(long orderId);

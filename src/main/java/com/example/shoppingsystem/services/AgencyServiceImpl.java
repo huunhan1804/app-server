@@ -58,6 +58,7 @@ public class AgencyServiceImpl implements AgencyService {
         this.agencyInfoRepository = agencyInfoRepository;
     }
 
+    @Transactional
     @Override
     public ApiResponse<ProductFullDTO> createProduct(AddNewProductRequest request){
         Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -139,6 +140,7 @@ public class AgencyServiceImpl implements AgencyService {
                 .build();
     }
 
+    @Transactional
     @Override
     public ApiResponse<ProductFullDTO> updateProduct(UpdateProductRequest request){
         Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -245,6 +247,8 @@ public class AgencyServiceImpl implements AgencyService {
                 .timestamp(new Date())
                 .build();
     }
+
+    @Transactional
     @Override
     public ApiResponse<Void> deleteProduct(Long product_id){
         Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -583,6 +587,14 @@ public class AgencyServiceImpl implements AgencyService {
                         .build();
             }
             List<OrderList> orderLists = orderRepository.findAllByAgency_AccountId(account.get().getAccountId());
+            if(orderLists.isEmpty()) {
+                return ApiResponse.<List<OrderDTO>>builder()
+                        .status(ErrorCode.NOT_FOUND)
+                        .message(Message.NOT_FOUND_ORDER)
+                        .timestamp(new java.util.Date())
+                        .build();
+            }
+
             orderLists.sort(Comparator.comparing(OrderList::getOrderDate).reversed());
             List<OrderDTO> orderDTOs = new ArrayList<>();
             for (OrderList orderList : orderLists) {
@@ -641,7 +653,7 @@ public class AgencyServiceImpl implements AgencyService {
                         .build();
             }
 
-            orderList.setOrderStatus(OrderStatus.CONFIRMED);
+            orderList.setOrderStatus(OrderStatus.SHIPPING);
             orderRepository.save(orderList);
             List<OrderDetail> orderDetails = orderDetailRepository.findAllByOrderList_OrderId(orderList.getOrderId());
             return ApiResponse.<OrderDTO>builder()
@@ -678,7 +690,7 @@ public class AgencyServiceImpl implements AgencyService {
     }
 
     @Override
-    public ApiResponse<List<OrderDTO>> getListOfOrdersByStatus(ListOrderByStatusRequest request){
+    public ApiResponse<List<OrderDTO>> getListOfOrdersByStatus(String status){ // THAY ĐỔI: tham số là String
         Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         if(account.isPresent()) {
             Optional<AgencyInfo> agencyInfo = agencyInfoRepository.findByAccount(account.get());
@@ -692,14 +704,16 @@ public class AgencyServiceImpl implements AgencyService {
             List<OrderList> orderLists = orderRepository.findByAgency_AccountId(account.get().getAccountId());
             if(orderLists.isEmpty()) {
                 return ApiResponse.<List<OrderDTO>>builder()
-                        .status(ErrorCode.NOT_FOUND)
-                        .message(Message.NOT_FOUND_ORDER)
+                        .status(ErrorCode.SUCCESS) // Trả về thành công với danh sách rỗng
+                        .message(Message.FETCHING_ORDER_SUCCESS)
+                        .data(new ArrayList<>())
                         .timestamp(new java.util.Date())
                         .build();
             }
             List<OrderDTO> orderDTOS = new ArrayList<>();
             for(OrderList orderList : orderLists) {
-                if(orderList.getOrderStatus().equals(OrderStatus.valueOf(request.getStatus()))) {
+                // THAY ĐỔI: So sánh với `status` từ tham số
+                if(orderList.getOrderStatus().equals(OrderStatus.valueOf(status))) {
                     OrderDTO orderDTO = convertOrderToDTO(orderList, orderDetailRepository.findAllByOrderList_OrderId(orderList.getOrderId()));
                     orderDTOS.add(orderDTO);
                 }
@@ -717,47 +731,6 @@ public class AgencyServiceImpl implements AgencyService {
                 .timestamp(new java.util.Date())
                 .build();
     }
-
-//    @Override
-//    public ApiResponse<OrderDTO> shipOrders(ShippingRequest request){
-//        Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
-//        if(account.isEmpty()) {
-//            return ApiResponse.<OrderDTO>builder()
-//                    .status(ErrorCode.NOT_FOUND)
-//                    .message(Message.ACCOUNT_NOT_FOUND)
-//                    .timestamp(new Date())
-//                    .build();
-//        }
-//        OrderList orderList = orderRepository.findByOrderId(request.getOrderId());
-//        if(orderList != null) {
-//            if(agencyInfoRepository.findByAccount_AccountId(orderList.getAgency().getAccountId()).equals(account.get().getAccountId())) {
-//                if(orderList.getOrderStatus().equals(OrderStatus.PENDING)) {
-//                    orderList.setOrderStatus(OrderStatus.SHIPPING);
-//                    OrderList savedOrder = orderRepository.save(orderList);
-//                    return ApiResponse.<OrderDTO>builder()
-//                            .status(ErrorCode.SUCCESS)
-//                            .message(Message.ORDER_IS_SHIPPING)
-//                            .data(convertOrderToDTO(savedOrder,savedOrder.getOrderDetails().stream().toList()))
-//                            .build();
-//                }
-//                return ApiResponse.<OrderDTO>builder()
-//                        .status(ErrorCode.BAD_REQUEST)
-//                        .message(Message.ORDER_IS_NOT_PENDING)
-//                        .timestamp(new Date())
-//                        .build();
-//            }
-//            return ApiResponse.<OrderDTO>builder()
-//                    .status(ErrorCode.UNAUTHORIZED)
-//                    .message(Message.AGENCY_NOT_ALLOWED)
-//                    .timestamp(new Date())
-//                    .build();
-//        }
-//        return ApiResponse.<OrderDTO>builder()
-//                .status(ErrorCode.NOT_FOUND)
-//                .message(Message.NOT_FOUND_ORDER)
-//                .timestamp(new Date())
-//                .build();
-//    }
 
     @Override
     public ApiResponse<OrderDTO> shipOrder(ShippingRequest request){
@@ -835,8 +808,8 @@ public class AgencyServiceImpl implements AgencyService {
                         .timestamp(new Date())
                         .build();
             }
-            if(orderList.getOrderStatus().equals(OrderStatus.DELIVERED)) {
-                orderList.setOrderStatus(OrderStatus.COMPLETED);
+            if(orderList.getOrderStatus().equals(OrderStatus.SHIPPING)) {
+                orderList.setOrderStatus(OrderStatus.DELIVERED);
                 orderList.setUpdatedBy(agencyInfo.get().getShopName());
                 orderList.setUpdatedDate(LocalDateTime.now());
                 OrderList savedOrder = orderRepository.save(orderList);
@@ -1042,39 +1015,6 @@ public class AgencyServiceImpl implements AgencyService {
     }
 
 
-//    private ShippingRequest createShippingRequest(OrderList orderList){
-//        List<OrderDetail> orderDetails = (List<OrderDetail>) orderList.getOrderDetails();
-//        OrderDTO orderDTO = convertOrderToDTO(orderList, orderDetails);
-//        List<ShippingItem> items = orderList.getOrderDetails().stream().map(item-> ShippingItem.builder()
-//                .name(item.getProduct().getProductName())
-//                .quantity(item.getQuantity())
-//                .price(item.getPrice())
-//                .build()).collect(Collectors.toList()).reversed();
-//
-//        return null;
-//    }
-
-//    public ShippingRequest convertToShippingRequest(OrderDTO orderDTO) {
-//        AddressInfoDTO address = orderDTO.getAddress_info();
-//
-//        List<ShippingItem> items = orderDTO.getOrder_detail().stream().map(detail -> {
-//            ShippingItem item = new ShippingItem();
-//            item.setName(detail.getProductInfoDTO().getProduct_name());
-//            item.setQuantity(detail.getQuantity());
-//            item.setPrice(new BigDecimal(detail.getPrice()));
-//            return item;
-//        }).collect(Collectors.toList());
-//
-//        return ShippingRequest.builder()
-//                .order_code("ORDER-" + orderDTO.getOrder_id())
-//                .receiver_name(address.getFullname())
-//                .receiver_phone(address.getPhone())
-//                .receiver_address(address.getAddress_detail())
-//                .total_amount(new BigDecimal(orderDTO.getTotalBill()))
-//                .items(items)
-//                .build();
-//    }
-
     private boolean isAgencyOrders(OrderList orderList, Account agency) {
         return orderList.getAgency().getAccountId().equals(agency.getAccountId());
     }
@@ -1109,6 +1049,7 @@ public class AgencyServiceImpl implements AgencyService {
                 .order_status(String.valueOf(orderList.getOrderStatus()))
                 .totalBill(Regex.formatPriceToVND(orderList.getTotalPrice()))
                 .order_detail(orderDetailDTOS)
+                .returnReason(orderList.getReturnReason())
                 .build();
     }
 
@@ -1118,4 +1059,63 @@ public class AgencyServiceImpl implements AgencyService {
         }
         return BigDecimal.valueOf(listPrice);
     }
+    // *** THÊM HÀM MỚI NÀY ***
+    @Override
+    public ApiResponse<OrderDTO> respondToReturnRequest(AgencyReturnResponseRequest request) {
+        Optional<Account> accountOpt = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        if (accountOpt.isEmpty()) {
+            return ApiResponse.<OrderDTO>builder()
+                    .status(ErrorCode.FORBIDDEN).message(Message.ACCOUNT_NOT_FOUND).build();
+        }
+
+        Optional<OrderList> orderOpt = orderRepository.findById(request.getOrderId());
+        if (orderOpt.isEmpty()) {
+            return ApiResponse.<OrderDTO>builder()
+                    .status(ErrorCode.NOT_FOUND).message(Message.NOT_FOUND_ORDER).build();
+        }
+
+        OrderList order = orderOpt.get();
+
+        // Kiểm tra xem Agency này có quyền trên đơn hàng này không
+        if (!isAgencyOrders(order, accountOpt.get())) {
+            return ApiResponse.<OrderDTO>builder()
+                    .status(ErrorCode.FORBIDDEN).message(Message.AGENCY_NOT_ALLOWED).build();
+        }
+
+        // Kiểm tra trạng thái đơn hàng phải là RETURNED
+        if (!order.getOrderStatus().equals(OrderStatus.RETURNED)) {
+            return ApiResponse.<OrderDTO>builder()
+                    .status(ErrorCode.BAD_REQUEST)
+                    .message("Order is not in RETURNED state.")
+                    .build();
+        }
+
+        // Cập nhật lại lý do theo yêu cầu
+        order.setReturnReason(request.getReason());
+        order.setUpdatedBy(accountOpt.get().getUsername());
+        order.setUpdatedDate(LocalDateTime.now());
+        OrderList savedOrder = orderRepository.save(order);
+
+        // Trả về thông tin đơn hàng đã được cập nhật
+        return getFullOrderInformation(savedOrder.getOrderId());
+    }
+
+    // Tạo một hàm helper để lấy đầy đủ thông tin chi tiết đơn hàng
+    private ApiResponse<OrderDTO> getFullOrderInformation(Long orderId) {
+        Optional<OrderList> orderListOpt = orderRepository.findById(orderId);
+        if (orderListOpt.isEmpty()) {
+            return ApiResponse.<OrderDTO>builder()
+                    .status(ErrorCode.NOT_FOUND).message(Message.NOT_FOUND_ORDER).build();
+        }
+        OrderList orderList = orderListOpt.get();
+        List<OrderDetail> orderDetails = orderDetailRepository.findAllByOrderList_OrderId(orderList.getOrderId());
+        OrderDTO orderDTO = convertOrderToDTO(orderList, orderDetails);
+
+        return ApiResponse.<OrderDTO>builder()
+                .status(ErrorCode.SUCCESS)
+                .message("Successfully updated return reason.")
+                .data(orderDTO)
+                .build();
+    }
+
 }

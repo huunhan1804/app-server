@@ -56,6 +56,16 @@ public class Regex {
     }
 
     public static AddressInfoDTO parseShippingInfo(String shippingInfo) {
+        if (shippingInfo == null || shippingInfo.trim().isEmpty()) {
+            AddressInfoDTO emptyInfo = new AddressInfoDTO();
+            emptyInfo.setFullname("N/A");
+            emptyInfo.setPhone("N/A");
+            emptyInfo.setAddress_detail("Không có thông tin địa chỉ");
+            emptyInfo.setAddress_id(0L);
+            emptyInfo.set_default(false);
+            return emptyInfo;
+        }
+
         AddressInfoDTO addressInfoDTO = new AddressInfoDTO();
         String[] lines = shippingInfo.split("\n");
         for (String line : lines) {
@@ -71,7 +81,4 @@ public class Regex {
         addressInfoDTO.set_default(false);
         return addressInfoDTO;
     }
-
-
-
 }

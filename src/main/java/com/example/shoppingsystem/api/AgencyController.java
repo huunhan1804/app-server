@@ -72,7 +72,7 @@ public class AgencyController {
     }
 
     @Operation(summary = "Toggle product sale status", description = "Toggle product sale status")
-    @PostMapping("/products/{productId}/toggle-sale-status")
+    @PutMapping("/products/{productId}/toggle-sale-status")
     public ResponseEntity<ApiResponse<ProductInfoDTO>> toggleSellingProduct(
             @PathVariable Long productId
     ) {
@@ -81,7 +81,7 @@ public class AgencyController {
     }
 
     @Operation(summary = "Get list of order", description = "Get list of order")
-    @PostMapping("/order")
+    @GetMapping("/order")
     public ResponseEntity<ApiResponse<List<OrderDTO>>> getOrders(){
         ApiResponse<List<OrderDTO>> response = agencyService.getOrders();
         return ResponseEntity.status(response.getStatus()).body(response);
@@ -106,11 +106,12 @@ public class AgencyController {
     }
 
     @Operation(summary = "Get list of order by status", description = "Get list of order by status")
-    @PostMapping("/order/all-order-by-status")
+    @GetMapping("/order/all-order-by-status") // GIỮ NGUYÊN
     public ResponseEntity<ApiResponse<List<OrderDTO>>> getListOrderByStatus(
-            @RequestBody ListOrderByStatusRequest request
-    ){
-        ApiResponse<List<OrderDTO>> response = agencyService.getListOfOrdersByStatus(request);
+            @Parameter(description = "Order status (PENDING, SHIPPING, DELIVERED, ...)")
+            @RequestParam("status") String status
+    ) {
+        ApiResponse<List<OrderDTO>> response = agencyService.getListOfOrdersByStatus(status);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
@@ -141,20 +142,31 @@ public class AgencyController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @Operation(summary = "Return order", description = "Return order")
-    @PostMapping("/order/return/{order_id}")
-    public ResponseEntity<ApiResponse<OrderDTO>> confirmReturnOrder(
-            @PathVariable Long order_id
-    ){
-        ApiResponse<OrderDTO> response = agencyService.confirmReturnOrder(order_id);
+//    @Operation(summary = "Return order", description = "Return order")
+//    @PatchMapping("/order/return/{order_id}")
+//    public ResponseEntity<ApiResponse<OrderDTO>> confirmReturnOrder(
+//            @PathVariable Long order_id
+//    ){
+//        ApiResponse<OrderDTO> response = agencyService.confirmReturnOrder(order_id);
+//        return ResponseEntity.status(response.getStatus()).body(response);
+//    }
+
+    @Operation(summary = "Agency responds to a return request", description = "Agency accepts or rejects a return request by updating the reason.")
+    @PostMapping("/order/respond-to-return")
+    public ResponseEntity<ApiResponse<OrderDTO>> respondToReturn(
+            @RequestBody AgencyReturnResponseRequest request
+    ) {
+        ApiResponse<OrderDTO> response = agencyService.respondToReturnRequest(request);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @Operation(summary = "Get Agency information", description = "Get agency information")
-    @PostMapping("/info")
+    @GetMapping("/info")
     public ResponseEntity<ApiResponse<AgencyInfoDTO>> getAgencyInfo(){
         ApiResponse<AgencyInfoDTO> response = agencyService.getAgencyInfo();
         return ResponseEntity.status(response.getStatus()).body(response);
     }
+
+
 
 }

@@ -14,7 +14,5 @@ import java.util.List;
 @NoArgsConstructor
 public class ShippingRequest {
     private Long orderId;
-    private Long agencyId;
-
 }
 
