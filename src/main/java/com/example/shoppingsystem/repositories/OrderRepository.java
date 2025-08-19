@@ -16,7 +16,7 @@ import java.util.List;
 @Repository
 public interface OrderRepository extends JpaRepository<OrderList, Long> {
     List<OrderList> findAllByAccount_AccountId(Long accountId);
-    List<OrderList> findAllByAgency_AccountId(Long accountId);
+    List<OrderList> findAllByAgency_ApplicationId(Long agencyId);
 
     @Query("SELECT o FROM OrderList o WHERE o.orderDate BETWEEN :startDate AND :endDate ORDER BY o.orderDate DESC")
     List<OrderList> findOrdersInDateRange(
@@ -37,7 +37,6 @@ public interface OrderRepository extends JpaRepository<OrderList, Long> {
 
     OrderList findByOrderId(Long orderId);
     List<OrderList> findByOrderStatus(OrderStatus status);
-    List<OrderList> findByAgency_AccountId(Long agencyId);
     @Query("SELECT COALESCE(SUM(o.totalPrice), 0) FROM OrderList o")
     BigDecimal sumAllRevenue();
     @Query("""

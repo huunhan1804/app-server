@@ -113,7 +113,7 @@ public class OrderServiceImpl implements OrderService {
 
             Optional<AgencyInfo> agencyInfo = agencyInfoRepository.findByApplicationId(productRepository.findByProductId(orderRequest.getOrder_items().get(0).getProductId()).getAgencyInfo().getApplicationId());
             assert agencyInfo.orElse(null) != null;
-            orderList.setAgency(agencyInfo.orElse(null).getAccount());
+            orderList.setAgency(agencyInfo.orElse(null));
             OrderList savedOrder = orderRepository.save(orderList);
 
             for (OrderDetailRequest orderDetailRequest : orderRequest.getOrder_items()) {
@@ -180,14 +180,13 @@ public class OrderServiceImpl implements OrderService {
 
             Optional<AgencyInfo> agencyInfo = agencyInfoRepository.findById(agencyId);
             if (agencyInfo.isEmpty()) {continue;}
-            Account agencyAccount = agencyInfo.get().getAccount();
 
             OrderList orderList = new OrderList();
             orderList.setOrderDate(LocalDateTime.now());
             orderList.setAddressDetail(orderRequest.getAddress_detail());
             orderList.setOrderStatus(OrderStatus.PENDING);
             orderList.setAccount(customerAccount);
-            orderList.setAgency(agencyAccount);
+            orderList.setAgency(agencyInfo.orElse(null));
 
             BigDecimal totalPrice = items.stream()
                     .map(i -> Regex.parseVNDToBigDecimal(i.getSubtotal()))

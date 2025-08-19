@@ -586,7 +586,7 @@ public class AgencyServiceImpl implements AgencyService {
                         .timestamp(new java.util.Date())
                         .build();
             }
-            List<OrderList> orderLists = orderRepository.findAllByAgency_AccountId(account.get().getAccountId());
+            List<OrderList> orderLists = orderRepository.findAllByAgency_ApplicationId(agencyInfoOpt.get().getApplicationId());
             if(orderLists.isEmpty()) {
                 return ApiResponse.<List<OrderDTO>>builder()
                         .status(ErrorCode.NOT_FOUND)
@@ -701,7 +701,7 @@ public class AgencyServiceImpl implements AgencyService {
                         .timestamp(new java.util.Date())
                         .build();
             }
-            List<OrderList> orderLists = orderRepository.findByAgency_AccountId(account.get().getAccountId());
+            List<OrderList> orderLists = orderRepository.findAllByAgency_ApplicationId(agencyInfoRepository.findByAccount(account.get()).get().getApplicationId());
             if(orderLists.isEmpty()) {
                 return ApiResponse.<List<OrderDTO>>builder()
                         .status(ErrorCode.SUCCESS) // Trả về thành công với danh sách rỗng
@@ -1016,7 +1016,7 @@ public class AgencyServiceImpl implements AgencyService {
 
 
     private boolean isAgencyOrders(OrderList orderList, Account agency) {
-        return orderList.getAgency().getAccountId().equals(agency.getAccountId());
+        return orderList.getAgency().equals(agencyInfoRepository.findByAccount(agency).get());
     }
 
     public OrderDetailDTO convertOrderDetailToDTO(OrderDetail orderDetail) {
