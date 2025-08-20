@@ -52,7 +52,7 @@ public class AgencyController {
     }
 
     @Operation(summary = "Agency Update Product", description = "Agency Update Product")
-    @PostMapping("/products/{productId}")
+    @PutMapping("/products/{productId}")
     public ResponseEntity<ApiResponse<ProductFullDTO>> updateProduct(
             @Parameter(description = "Product ID") @PathVariable Long productId,
             @RequestBody UpdateProductRequest request
@@ -88,7 +88,7 @@ public class AgencyController {
     }
 
     @Operation(summary = "Confirm order", description = "Confirm order")
-    @PostMapping("/order/confirm")
+    @PutMapping("/order/confirm")
     public ResponseEntity<ApiResponse<OrderDTO>> confirmOrder(
             @RequestBody ConfirmOrderRequest request
     ){
@@ -97,7 +97,7 @@ public class AgencyController {
     }
 
     @Operation(summary = "Get order status", description = "Get order status")
-    @PostMapping("/order/status/{order_id}")
+    @GetMapping("/order/status/{order_id}")
     public ResponseEntity<ApiResponse<String>> getOrderStatus(
             @Parameter(description = "Order id") @PathVariable Long order_id
     ){
@@ -106,7 +106,7 @@ public class AgencyController {
     }
 
     @Operation(summary = "Get list of order by status", description = "Get list of order by status")
-    @GetMapping("/order/all-order-by-status") // GIỮ NGUYÊN
+    @GetMapping("/order/all-order-by-status")
     public ResponseEntity<ApiResponse<List<OrderDTO>>> getListOrderByStatus(
             @Parameter(description = "Order status (PENDING, SHIPPING, DELIVERED, ...)")
             @RequestParam("status") String status
@@ -116,7 +116,7 @@ public class AgencyController {
     }
 
     @Operation(summary = "Agency cancel order", description = "Agency cancel order")
-    @PostMapping("/order/cancel")
+    @PutMapping("/order/cancel")
     public ResponseEntity<ApiResponse<OrderDTO>> cancelOrder(
             @RequestBody AgencyCancelOrderRequest request
     ){
@@ -125,7 +125,7 @@ public class AgencyController {
     }
 
     @Operation(summary = "Complete order", description = "Complete order")
-    @PostMapping("/order/complete")
+    @PutMapping("/order/complete")
     public ResponseEntity<ApiResponse<OrderDTO>> completeOrder(
             @RequestBody CompleteOrderRequest request
     ){
@@ -134,7 +134,7 @@ public class AgencyController {
     }
 
     @Operation(summary = "Shipping order", description = "Shipping order")
-    @PostMapping("/order/shipping")
+    @PutMapping("/order/shipping")
     public ResponseEntity<ApiResponse<OrderDTO>> shipOrder(
             @RequestBody ShippingRequest request
     ){
