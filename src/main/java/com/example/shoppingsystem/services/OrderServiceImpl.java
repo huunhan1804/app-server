@@ -209,14 +209,6 @@ public class OrderServiceImpl implements OrderService {
                         ? variantEntity.getInventoryQuantity()
                         : productEntity.getInventoryQuantity();
 
-                if (item.getQuantity() > inventoryQuantity) {
-                    return ApiResponse.<List<OrderDTO>>builder()
-                            .status(ErrorCode.BAD_REQUEST)
-                            .message("Product '" + productEntity.getProductName() + "' is not enough inventory.")
-                            .timestamp(new Date())
-                            .build();
-                }
-
                 OrderDetail orderDetail = new OrderDetail();
                 orderDetail.setOrderList(savedOrder);
                 orderDetail.setProduct(productEntity);
@@ -498,7 +490,9 @@ public class OrderServiceImpl implements OrderService {
             newOrderDetails.add(newDetail);
         }
         orderDetailRepository.saveAll(newOrderDetails);
-        savedNewOrder.setOrderDetails(newOrderDetails);
+        for (OrderDetail detail : newOrderDetails) {
+            savedNewOrder.getOrderDetails().add(detail);
+        }
         orderRepository.save(savedNewOrder);
 
         return getOrderInformation(savedNewOrder.getOrderId());
