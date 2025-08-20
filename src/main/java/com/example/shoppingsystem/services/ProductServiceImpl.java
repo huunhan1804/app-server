@@ -6,6 +6,7 @@ import com.example.shoppingsystem.constants.Regex;
 import com.example.shoppingsystem.constants.StatusCode;
 import com.example.shoppingsystem.dtos.*;
 import com.example.shoppingsystem.entities.*;
+import com.example.shoppingsystem.enums.OrderStatus;
 import com.example.shoppingsystem.enums.Rating;
 import com.example.shoppingsystem.repositories.*;
 import com.example.shoppingsystem.requests.AddFeedbackRequest;
@@ -287,34 +288,59 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ApiResponse<FeedbackDTO> addFeedback(AddFeedbackRequest request) {
-        // Logic giả định lấy người dùng từ context bảo mật, bạn cần tùy chỉnh theo cách bạn quản lý Authentication
+        // Logic giả định lấy người dùng từ context bảo mật
         Account account = getLoggedInUser();
 
-        // 1. Kiểm tra sản phẩm có tồn tại không
-        Product product = productRepository.findById(request.getProductId())
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+        // Kiểm tra sản phẩm có tồn tại không
+        Optional<Product> productOptional = productRepository.findById(request.getProductId());
+        if(productOptional.isEmpty()){
+            return ApiResponse.<FeedbackDTO>builder()
+                    .status(ErrorCode.NOT_FOUND)
+                    .message(Message.PRODUCT_NOT_FOUND)
+                    .timestamp(new java.util.Date())
+                    .build();
+        }
 
-        // 2. Tạo entity Feedback mới
-        Feedback newFeedback = new Feedback();
-        newFeedback.setProduct(product);
-        newFeedback.setAccount(account);
-        newFeedback.setRating(Rating.fromValue(request.getRating())); // SỬ DỤNG ENUM RATING
-        newFeedback.setComment(request.getComment());
+        Product product = productOptional.get();
 
-        // 3. Lưu feedback vào database
-        Feedback savedFeedback = feedbackRepository.save(newFeedback);
+        boolean hasPurchased = orderDetailRepository.existsOrderDetailByProductAndOrderList_Account(product, account);
+        if (!hasPurchased) {
+            return ApiResponse.<FeedbackDTO>builder()
+                    .status(ErrorCode.FORBIDDEN)
+                    .message(Message.NOT_PURCHASED_PRODUCT_YET)
+                    .timestamp(new java.util.Date())
+                    .build();
+        }
+        boolean isDelivered = orderDetailRepository.existsByProductAndOrderList_AccountAndOrderList_OrderStatus(product, account, OrderStatus.DELIVERED);
+        boolean isCompleted= orderDetailRepository.existsByProductAndOrderList_AccountAndOrderList_OrderStatus(product, account, OrderStatus.COMPLETED);
+        if (isDelivered || isCompleted) {
+            //Tạo entity Feedback mới
+            Feedback newFeedback = new Feedback();
+            newFeedback.setProduct(product);
+            newFeedback.setAccount(account);
+            newFeedback.setRating(Rating.fromValue(request.getRating())); // SỬ DỤNG ENUM RATING
+            newFeedback.setComment(request.getComment());
+
+            // Lưu feedback vào database
+            Feedback savedFeedback = feedbackRepository.save(newFeedback);
 
 
-        // 5. Trả về response
-        FeedbackDTO feedbackDTO = new FeedbackDTO();
-        feedbackDTO.setUser_name(savedFeedback.getAccount().getFullname());
-        feedbackDTO.setRating(savedFeedback.getRating().getValue());
-        feedbackDTO.setComment(savedFeedback.getComment());
+            // Trả về response
+            FeedbackDTO feedbackDTO = new FeedbackDTO();
+            feedbackDTO.setUser_name(savedFeedback.getAccount().getFullname());
+            feedbackDTO.setRating(savedFeedback.getRating().getValue());
+            feedbackDTO.setComment(savedFeedback.getComment());
 
+            return ApiResponse.<FeedbackDTO>builder()
+                    .status(ErrorCode.SUCCESS)
+                    .message(Message.SUCCESS)
+                    .data(feedbackDTO)
+                    .timestamp(new java.util.Date())
+                    .build();
+        }
         return ApiResponse.<FeedbackDTO>builder()
-                .status(ErrorCode.SUCCESS)
-                .message(Message.SUCCESS)
-                .data(feedbackDTO)
+                .status(ErrorCode.FORBIDDEN)
+                .message(Message.ORDER_IS_NOT_DELIVERED)
                 .timestamp(new java.util.Date())
                 .build();
     }

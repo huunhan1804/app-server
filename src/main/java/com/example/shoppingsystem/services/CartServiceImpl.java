@@ -76,9 +76,9 @@ public class CartServiceImpl implements CartService {
     }
 
     private ApiResponse<AccountInfoDTO> processCartUpdate(Cart cart, Optional<Product> product, Optional<ProductVariant> productVariant, int quantity) {
-        int desiredQuantity = productVariant.isPresent() ? productVariant.get().getDesiredQuantity() : product.get().getDesiredQuantity();
+        int inventoryQuantity = productVariant.isPresent() ? productVariant.get().getInventoryQuantity() : product.get().getInventoryQuantity();
 
-        if (desiredQuantity != 0 && quantity <= desiredQuantity) {
+        if (inventoryQuantity != 0 && quantity <= inventoryQuantity) {
             Optional<CartItem> existingCartItem = findCartItemInCart(cart, product, productVariant);
 
             if (existingCartItem.isPresent()) {
@@ -87,7 +87,7 @@ public class CartServiceImpl implements CartService {
                 if (newQuantity <= 0) {
                     cartItemRepository.delete(cartItemToUpdate);
                 } else {
-                    if (newQuantity <= desiredQuantity) {
+                    if (newQuantity <= inventoryQuantity) {
                         cartItemToUpdate.setQuantity(newQuantity);
                         cartItemRepository.save(cartItemToUpdate);
                     } else {
@@ -154,9 +154,9 @@ public class CartServiceImpl implements CartService {
             return createErrorResponse(ErrorCode.NOT_FOUND, Message.PRODUCT_NOT_FOUND);
         }
 
-        int desiredQuantity = productVariant.isPresent() ? productVariant.get().getDesiredQuantity() : product.get().getDesiredQuantity();
+        int inventoryQuantity = productVariant.isPresent() ? productVariant.get().getInventoryQuantity() : product.get().getInventoryQuantity();
 
-        if (desiredQuantity == 0 || request.getQuantity() > desiredQuantity) {
+        if (inventoryQuantity == 0 || request.getQuantity() > inventoryQuantity) {
             return createErrorResponse(ErrorCode.BAD_REQUEST, Message.NOT_ENOUGH_QUANTITY);
         }
 
@@ -194,9 +194,9 @@ public class CartServiceImpl implements CartService {
             return createErrorResponse(ErrorCode.NOT_FOUND, Message.PRODUCT_NOT_FOUND);
         }
 
-        int desiredQuantity = productVariant.isPresent() ? productVariant.get().getDesiredQuantity() : product.get().getDesiredQuantity();
+        int inventoryQuantity = productVariant.isPresent() ? productVariant.get().getInventoryQuantity() : product.get().getInventoryQuantity();
 
-        if (desiredQuantity == 0) {
+        if (inventoryQuantity == 0) {
             return createErrorResponse(ErrorCode.BAD_REQUEST, Message.NOT_ENOUGH_QUANTITY);
         }
 

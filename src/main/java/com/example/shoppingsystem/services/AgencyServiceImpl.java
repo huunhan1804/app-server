@@ -77,7 +77,7 @@ public class AgencyServiceImpl implements AgencyService {
             if (category == null) {
                 return ApiResponse.<ProductFullDTO>builder()
                         .status(ErrorCode.BAD_REQUEST)
-                        .message("Category not found.")
+                        .message(Message.NOT_FOUND_CATEGORY)
                         .timestamp(new Date())
                         .build();
             }

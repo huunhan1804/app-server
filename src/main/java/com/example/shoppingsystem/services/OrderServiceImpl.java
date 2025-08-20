@@ -196,31 +196,45 @@ public class OrderServiceImpl implements OrderService {
             OrderList savedOrder = orderRepository.save(orderList);
 
             for (OrderDetailRequest item : items) {
+                Optional<Product> productOpt = productRepository.findById(item.getProductId());
+                Optional<ProductVariant> variantOpt = productVariantRepository.findById(item.getProductVariantId());
+
+                if (productOpt.isEmpty()) continue;
+
+                Product productEntity = productOpt.get();
+                ProductVariant variantEntity = variantOpt.orElse(null);
+
+                // check inventory
+                int inventoryQuantity = variantEntity != null
+                        ? variantEntity.getInventoryQuantity()
+                        : productEntity.getInventoryQuantity();
+
+                if (item.getQuantity() > inventoryQuantity) {
+                    return ApiResponse.<List<OrderDTO>>builder()
+                            .status(ErrorCode.BAD_REQUEST)
+                            .message("Product '" + productEntity.getProductName() + "' is not enough inventory.")
+                            .timestamp(new Date())
+                            .build();
+                }
+
                 OrderDetail orderDetail = new OrderDetail();
                 orderDetail.setOrderList(savedOrder);
-                Optional<Product> product = productRepository.findById(item.getProductId());
-                product.ifPresent(orderDetail::setProduct);
-                Optional<ProductVariant> productVariant = productVariantRepository.findById(item.getProductVariantId());
-                productVariant.ifPresent(orderDetail::setProductVariant);
-
+                orderDetail.setProduct(productEntity);
+                if (variantEntity != null) {
+                    orderDetail.setProductVariant(variantEntity);
+                }
                 orderDetail.setPrice(Regex.parseVNDToBigDecimal(item.getPrice()));
                 orderDetail.setQuantity(item.getQuantity());
                 orderDetail.setSubtotal(Regex.parseVNDToBigDecimal(item.getSubtotal()));
                 orderDetailRepository.save(orderDetail);
 
-                Optional<Cart> cartOpt = cartRepository.findByAccount_AccountId(customerAccount.getAccountId());
-                if (cartOpt.isPresent()) {
-                    Cart cart = cartOpt.get();
-                    Optional<Product> productOpt = productRepository.findById(item.getProductId());
-                    Optional<ProductVariant> variantOpt = productVariantRepository.findById(item.getProductVariantId());
-
-                    if (productOpt.isPresent() && variantOpt.isPresent()) {
-                        Optional<CartItem> cartItemOpt = cartItemRepository.findByCartAndProductAndProductVariantAndQuantity(
-                                cart, productOpt.get(), variantOpt.get(), item.getQuantity());
-                        cartItemOpt.ifPresent(cartItemRepository::delete);
-                        cart.setTotalItem(cart.getTotalItem() - 1);
-                        cartRepository.save(cart);
-                    }
+                // tru inventory
+                if (variantEntity != null) {
+                    variantEntity.setInventoryQuantity(inventoryQuantity - item.getQuantity());
+                    productVariantRepository.save(variantEntity);
+                } else {
+                    productEntity.setInventoryQuantity(inventoryQuantity - item.getQuantity());
+                    productRepository.save(productEntity);
                 }
             }
             orderDTOs.add(getOrderInformation(savedOrder.getOrderId()).getData());
@@ -416,7 +430,7 @@ public class OrderServiceImpl implements OrderService {
         if (!optionalOrderList.isPresent()) {
             return ApiResponse.<OrderDTO>builder()
                     .status(ErrorCode.NOT_FOUND)
-                    .message("Order not found")
+                    .message(Message.NOT_FOUND_ORDER)
                     .timestamp(new java.util.Date())
                     .build();
         }
@@ -428,7 +442,7 @@ public class OrderServiceImpl implements OrderService {
         return ApiResponse.<OrderDTO>builder()
                 .data(orderDTO)
                 .status(ErrorCode.SUCCESS)
-                .message("Successfully fetched order information")
+                .message(Message.FETCHING_ORDER_SUCCESS)
                 .timestamp(new java.util.Date())
                 .build();
     }
@@ -484,6 +498,8 @@ public class OrderServiceImpl implements OrderService {
             newOrderDetails.add(newDetail);
         }
         orderDetailRepository.saveAll(newOrderDetails);
+        savedNewOrder.setOrderDetails(newOrderDetails);
+        orderRepository.save(savedNewOrder);
 
         return getOrderInformation(savedNewOrder.getOrderId());
     }

@@ -1,6 +1,9 @@
 package com.example.shoppingsystem.repositories;
 
+import com.example.shoppingsystem.entities.Account;
 import com.example.shoppingsystem.entities.OrderDetail;
+import com.example.shoppingsystem.entities.Product;
+import com.example.shoppingsystem.enums.OrderStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -19,4 +22,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
     List<Object[]> findBestOrderProductsJPQL();
 
     List<OrderDetail> findAllByOrderList_OrderId(Long orderId);
+    boolean existsOrderDetailByProductAndOrderList_Account(Product product, Account orderListAccount);
+    boolean existsByProductAndOrderList_AccountAndOrderList_OrderStatus(Product product, Account orderListAccount, OrderStatus orderStatus);
+
 }
