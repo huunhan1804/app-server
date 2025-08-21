@@ -353,7 +353,7 @@ public class ProductServiceImpl implements ProductService {
         productInfoDTO.setProduct_price(Regex.formatPriceToVND(product.getSalePrice()));
         productInfoDTO.setRating(calculateAverageRating(product));
         productInfoDTO.setProduct_description(product.getProductDescription());
-        productInfoDTO.setQuantity_in_stock(product.getDesiredQuantity());
+        productInfoDTO.setQuantity_in_stock(product.getInventoryQuantity());
 
         List<String> mediaUrls = multimediaProduct.stream()
                 .map(Multimedia::getMultimediaUrl)
@@ -369,7 +369,7 @@ public class ProductServiceImpl implements ProductService {
                     productVariantDTO.setProduct_variant_image_url(findImageProductVariant(productVariant));
                     productVariantDTO.setOrigin_price(Regex.formatPriceToVND(productVariant.getListPrice()));
                     productVariantDTO.setSale_price(Regex.formatPriceToVND(productVariant.getSalePrice()));
-                    productVariantDTO.setQuantity_in_stock(productVariant.getDesiredQuantity());
+                    productVariantDTO.setQuantity_in_stock(productVariant.getInventoryQuantity());
                     return productVariantDTO;
                 })
                 .collect(Collectors.toList());
