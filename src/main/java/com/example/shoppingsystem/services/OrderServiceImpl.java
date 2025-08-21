@@ -203,31 +203,28 @@ public class OrderServiceImpl implements OrderService {
 
                 Product productEntity = productOpt.get();
                 ProductVariant variantEntity = variantOpt.orElse(null);
-
-                // check inventory
-                int inventoryQuantity = variantEntity != null
-                        ? variantEntity.getInventoryQuantity()
-                        : productEntity.getInventoryQuantity();
+                if (variantEntity == null) {
+                    throw new RuntimeException("Product variant: '" + Objects.requireNonNull(productVariantRepository.findById(item.getProductVariantId()).orElse(null)).getProductVariantName() + "' not found");
+                }
 
                 OrderDetail orderDetail = new OrderDetail();
                 orderDetail.setOrderList(savedOrder);
                 orderDetail.setProduct(productEntity);
-                if (variantEntity != null) {
-                    orderDetail.setProductVariant(variantEntity);
-                }
+                orderDetail.setProductVariant(variantEntity);
                 orderDetail.setPrice(Regex.parseVNDToBigDecimal(item.getPrice()));
                 orderDetail.setQuantity(item.getQuantity());
                 orderDetail.setSubtotal(Regex.parseVNDToBigDecimal(item.getSubtotal()));
                 orderDetailRepository.save(orderDetail);
 
-                // tru inventory
-                if (variantEntity != null) {
-                    variantEntity.setInventoryQuantity(inventoryQuantity - item.getQuantity());
-                    productVariantRepository.save(variantEntity);
-                } else {
-                    productEntity.setInventoryQuantity(inventoryQuantity - item.getQuantity());
-                    productRepository.save(productEntity);
-                }
+                int newVariantInventory = variantEntity.getInventoryQuantity() - item.getQuantity();
+                variantEntity.setInventoryQuantity(newVariantInventory);
+                productVariantRepository.save(variantEntity);
+
+                int newProductInventory = productEntity.getInventoryQuantity() - item.getQuantity();
+                productEntity.setInventoryQuantity(newProductInventory);
+                int currentSold = productEntity.getSoldAmount() != null ? productEntity.getSoldAmount() : 0;
+                productEntity.setSoldAmount(currentSold + item.getQuantity());
+                productRepository.save(productEntity);
             }
             orderDTOs.add(getOrderInformation(savedOrder.getOrderId()).getData());
         }
@@ -419,7 +416,7 @@ public class OrderServiceImpl implements OrderService {
     public ApiResponse<OrderDTO> getOrderInformation(Long orderId) {
         Optional<OrderList> optionalOrderList = orderRepository.findById(orderId);
 
-        if (!optionalOrderList.isPresent()) {
+        if (optionalOrderList.isEmpty()) {
             return ApiResponse.<OrderDTO>builder()
                     .status(ErrorCode.NOT_FOUND)
                     .message(Message.NOT_FOUND_ORDER)
@@ -439,6 +436,7 @@ public class OrderServiceImpl implements OrderService {
                 .build();
     }
 
+    @Transactional
     @Override
     public ApiResponse<OrderDTO> reorder(long orderId){
         Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -463,7 +461,7 @@ public class OrderServiceImpl implements OrderService {
         if (!oldOrder.getAccount().getAccountId().equals(account.get().getAccountId())) {
             return ApiResponse.<OrderDTO>builder()
                     .status(ErrorCode.FORBIDDEN)
-                    .message("Bạn không phải người mua đơn hàng này.")
+                    .message("You did not purchase this order.")
                     .timestamp(new java.util.Date())
                     .build();
         }
@@ -507,12 +505,13 @@ public class OrderServiceImpl implements OrderService {
             newDetails.add(newDetail);
 
             if (productVariant != null) {
-                productVariant.setInventoryQuantity(inventoryQuantity - quantity);
+                productVariant.setInventoryQuantity(productVariant.getInventoryQuantity() - quantity);
                 productVariantRepository.save(productVariant);
-            } else {
-                product.setInventoryQuantity(inventoryQuantity - quantity);
-                productRepository.save(product);
             }
+            product.setInventoryQuantity(product.getInventoryQuantity() - quantity);
+            int currentSold = product.getSoldAmount() != null ? product.getSoldAmount() : 0;
+            product.setSoldAmount(currentSold + quantity);
+            productRepository.save(product);
             totalPrice = totalPrice.add(newDetail.getSubtotal());
         }
 
