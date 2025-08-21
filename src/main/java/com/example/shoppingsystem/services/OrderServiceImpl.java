@@ -439,6 +439,7 @@ public class OrderServiceImpl implements OrderService {
                 .build();
     }
 
+    @Transactional
     @Override
     public ApiResponse<OrderDTO> reorder(long orderId){
         Optional<Account> account = accountRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
