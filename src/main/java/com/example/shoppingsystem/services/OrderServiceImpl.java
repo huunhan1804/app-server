@@ -478,8 +478,25 @@ public class OrderServiceImpl implements OrderService {
 
         OrderList savedNewOrder = orderRepository.save(newOrder);
 
-        Set<OrderDetail> newOrderDetails = new HashSet<>();
-        for (OrderDetail oldDetail : oldOrder.getOrderDetails()) {
+        List<OrderDetail> newDetails = new ArrayList<>();
+        List<OrderDetail> oldDetails = orderDetailRepository.findAllByOrderList_OrderId(oldOrder.getOrderId());
+        BigDecimal totalPrice = BigDecimal.ZERO;
+        for (OrderDetail oldDetail : oldDetails) {
+            Product product = oldDetail.getProduct();
+            ProductVariant productVariant = oldDetail.getProductVariant();
+            int quantity = oldDetail.getQuantity();
+
+            int inventoryQuantity = productVariant != null ? productVariant.getInventoryQuantity() : product.getInventoryQuantity();
+
+            if (quantity > inventoryQuantity) {
+                return ApiResponse.<OrderDTO>builder()
+                        .status(ErrorCode.BAD_REQUEST)
+                        .message("Product'" + product.getProductName() + "' is not enough inventory.")
+                        .timestamp(new Date())
+                        .build();
+
+            }
+
             OrderDetail newDetail = new OrderDetail();
             newDetail.setOrderList(savedNewOrder);
             newDetail.setProduct(oldDetail.getProduct());
@@ -487,12 +504,20 @@ public class OrderServiceImpl implements OrderService {
             newDetail.setQuantity(oldDetail.getQuantity());
             newDetail.setPrice(oldDetail.getPrice());
             newDetail.setSubtotal(oldDetail.getSubtotal());
-            newOrderDetails.add(newDetail);
+            newDetails.add(newDetail);
+
+            if (productVariant != null) {
+                productVariant.setInventoryQuantity(inventoryQuantity - quantity);
+                productVariantRepository.save(productVariant);
+            } else {
+                product.setInventoryQuantity(inventoryQuantity - quantity);
+                productRepository.save(product);
+            }
+            totalPrice = totalPrice.add(newDetail.getSubtotal());
         }
-        orderDetailRepository.saveAll(newOrderDetails);
-        for (OrderDetail detail : newOrderDetails) {
-            savedNewOrder.getOrderDetails().add(detail);
-        }
+
+        orderDetailRepository.saveAll(newDetails);
+        savedNewOrder.setTotalPrice(totalPrice);
         orderRepository.save(savedNewOrder);
 
         return getOrderInformation(savedNewOrder.getOrderId());
